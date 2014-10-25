@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/Physics2D">
+        <file>textures/wheel.bmp</file>
+        <file>textures/statsPanel.bmp</file>
+        <file>textures/ground.bmp</file>
+        <file>textures/face.bmp</file>
+        <file>textures/campagne.png</file>
+        <file>textures/ball1.bmp</file>
+    </qresource>
+</RCC>
