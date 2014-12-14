@@ -21,11 +21,8 @@ DemoChooserDialog::DemoChooserDialog(const set<shared_ptr<AbstractPlay>>& demos,
     connect(_ui->buttonBox, SIGNAL(accepted()), this, SLOT(Launch()));
     connect(_ui->buttonBox, SIGNAL(rejected()), this, SLOT(Quit()));
 
-    // TODO : Remove this horrible hard coded selection
-    _selectedDemo = *demos.begin();
-
     bool isFirst = true;
-    for(auto demo : demos)
+    for(const auto& demo : demos)
     {
         string playId = demo->id();
         QPushButton* playButton = new QPushButton(playId.c_str());
@@ -38,6 +35,12 @@ DemoChooserDialog::DemoChooserDialog(const set<shared_ptr<AbstractPlay>>& demos,
             _selectedDemo = demo;
             cout << _selectedDemo->id() << endl;
         });
+
+        if(demo == *demos.begin())
+        {
+            playButton->click();
+            playButton->setFocus();
+        }
     }
 }
 

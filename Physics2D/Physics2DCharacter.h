@@ -1,5 +1,5 @@
-#ifndef CHARACTER_H
-#define CHARACTER_H
+#ifndef PHYSICS2D_CHARACTER_H
+#define PHYSICS2D_CHARACTER_H
 
 #include <memory>
 
@@ -47,4 +47,4 @@ private:
     std::shared_ptr<prop2::TextHud> _ups;    
 };
 
-#endif // CHARACTER_H
+#endif // PHYSICS2D_CHARACTER_H

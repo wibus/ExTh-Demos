@@ -13,7 +13,7 @@ using namespace cellar;
 #include <PropTeam/AbstractPropTeam.h>
 #include <Costume/CircleCostume.h>
 #include <Costume/PolygonCostume.h>
-#include <Material/Material.h>
+#include <Hardware/Hardware.h>
 using namespace prop2;
 
 #include <Stage/AbstractStage.h>
@@ -28,7 +28,7 @@ Physics2DCharacter::Physics2DCharacter(AbstractStage &stage) :
 
 void Physics2DCharacter::enterStage()
 {
-    stage().propTeam().setGravity(Vec2r(0.0f, -98.0f));
+    stage().propTeam2D().setGravity(Vec2r(0.0f, -98.0f));
 
     if(!_background)
     {
@@ -38,7 +38,7 @@ void Physics2DCharacter::enterStage()
             Vec2r(stage().width(),  stage().height()),
             Vec2r(0.0,              stage().height())
         };
-        _background = stage().propTeam().createPolygon(4);
+        _background = stage().propTeam2D().createPolygon(4);
         _background->setBodyType(EBodyType::GRAPHIC);
         _background->setVertices(backgroundVertices);
         _background->costume()->setTextureName(":/Physics2D/textures/campagne.png");
@@ -64,7 +64,7 @@ void Physics2DCharacter::enterStage()
             Vec2r(800.0, 20.0),
             Vec2r(0.0,   20.0)
         };
-        _groundFloor = stage().propTeam().createPolygon(4);
+        _groundFloor = stage().propTeam2D().createPolygon(4);
         _groundFloor->setVertices(floorVertices);
         _groundFloor->setBodyType(EBodyType::KINEMATIC);
         _groundFloor->setCostume(groundFloorCostume);
@@ -89,13 +89,13 @@ void Physics2DCharacter::enterStage()
             Vec2r(20.0, 580.0),
             Vec2r(0.0,  580.0)
         };
-        _groundLeft = stage().propTeam().createPolygon(groundSides.size());
+        _groundLeft = stage().propTeam2D().createPolygon(groundSides.size());
         _groundLeft->setVertices(groundSides);
         _groundLeft->moveVertexAt(0, _groundFloor->outline()[3].begin());
         _groundLeft->setBodyType(EBodyType::KINEMATIC);
         _groundLeft->setCostume(groundSidesCostume);
 
-        _groundRight = stage().propTeam().createPolygon(groundSides.size());
+        _groundRight = stage().propTeam2D().createPolygon(groundSides.size());
         _groundRight->setVertices(groundSides);
         _groundRight->moveVertexAt(1, _groundFloor->outline()[2].begin());
         _groundRight->setBodyType(EBodyType::KINEMATIC);
@@ -116,13 +116,13 @@ void Physics2DCharacter::enterStage()
             rampVertices.push_back(Vec2r(x, y));
         }
         rampVertices.push_back(Vec2r(x, 0));
-        _ramp = stage().propTeam().createPolygon(rampVertices.size());
+        _ramp = stage().propTeam2D().createPolygon(rampVertices.size());
         _ramp->setVertices(rampVertices);
         _ramp->moveVertexAt(0, _groundRight->outline()[0].begin());
         _ramp->setBodyType(EBodyType::KINEMATIC);
     }
 
-    std::shared_ptr<Material> houseMaterial(new Material());
+    std::shared_ptr<Hardware> houseMaterial(new Hardware());
     houseMaterial->setBounciness(0.4);
     houseMaterial->setStaticFrictionCoefficient(0.4);
     houseMaterial->setDynamicFrictionCoefficient(0.3);
@@ -148,19 +148,19 @@ void Physics2DCharacter::enterStage()
             Vec2r(0.0,  120.0)
         };
 
-        _housePillarLeft = stage().propTeam().createPolygon(pillarVertices.size());
+        _housePillarLeft = stage().propTeam2D().createPolygon(pillarVertices.size());
         _housePillarLeft->setVertices(pillarVertices);
         _housePillarLeft->moveVertexAt(0, _groundFloor->outline()[3].begin() + Vec2r(160.0, 0.0));
         _housePillarLeft->setBodyType(EBodyType::DYNAMIC);
         _housePillarLeft->setCostume(pillarCostume);
-        _housePillarLeft->setMaterial(houseMaterial);
+        _housePillarLeft->setHardware(houseMaterial);
 
-        _housePillarRight = stage().propTeam().createPolygon(pillarVertices.size());
+        _housePillarRight = stage().propTeam2D().createPolygon(pillarVertices.size());
         _housePillarRight->setVertices(pillarVertices);
         _housePillarRight->moveVertexAt(0, _groundFloor->outline()[3].begin() + Vec2r(260.0, 0.0));
         _housePillarRight->setBodyType(EBodyType::DYNAMIC);
         _housePillarRight->setCostume(pillarCostume);
-        _housePillarRight->setMaterial(houseMaterial);
+        _housePillarRight->setHardware(houseMaterial);
     }
 
     if(!_houseRoof)
@@ -180,13 +180,13 @@ void Physics2DCharacter::enterStage()
             Vec2r(0.0, 0.1),
         };
 
-        _houseRoof = stage().propTeam().createPolygon(houseRoofVertices.size());
+        _houseRoof = stage().propTeam2D().createPolygon(houseRoofVertices.size());
         _houseRoof->setVertices(houseRoofVertices);
         _houseRoof->moveBy(Vec2r(225, 140));
         _houseRoof->setBodyType(EBodyType::DYNAMIC);
         _houseRoof->costume()->setTextureName(":/Physics2D/textures/ball1.bmp");
         _houseRoof->costume()->setVerticesTexCoords(houseRoofTexCoords);
-        _houseRoof->setMaterial(houseMaterial);
+        _houseRoof->setHardware(houseMaterial);
     }
 
     if(!_gear)
@@ -215,17 +215,17 @@ void Physics2DCharacter::enterStage()
             gearColors.push_back(Vec4r(0.3, 0.3, 0.3+0.7*(perc-0.5)*(perc-0.5)));
         }
 
-        _gear = stage().propTeam().createPolygon(gearVertices.size());
+        _gear = stage().propTeam2D().createPolygon(gearVertices.size());
         _gear->setVertices(gearVertices);
         _gear->moveBy(_ramp->outline()[0].begin() + Vec2r(-outerRadius, 600.0));
         _gear->setBodyType(EBodyType::DYNAMIC);
-        _gear->material()->setBounciness(0.6);
+        _gear->hardware()->setBounciness(0.6);
         _gear->costume()->setVerticesColors(gearColors);
     }
 
     if(!_ball)
     {
-        _ball = stage().propTeam().createCircle();
+        _ball = stage().propTeam2D().createCircle();
         _ball->setRadius(30);
         _ball->setCenter(_ramp->outline()[0].begin() + Vec2r(-_ball->radius()-600, 400.0));
         _ball->setBodyType(EBodyType::DYNAMIC);
@@ -237,7 +237,7 @@ void Physics2DCharacter::enterStage()
 
 
 
-    _statsPanel = stage().propTeam().createImageHud();
+    _statsPanel = stage().propTeam2D().createImageHud();
     _statsPanel->setSize(Vec2r(110, 48));
     _statsPanel->setHandlePosition(Vec2r(10, -_statsPanel->height() - 10));
     _statsPanel->setHorizontalAnchor(EHorizontalAnchor::LEFT);
@@ -246,14 +246,14 @@ void Physics2DCharacter::enterStage()
     _statsPanel->setTexOrigin(Vec2r(0.0, 0.0));
     _statsPanel->setTexExtents(Vec2r(1.0, 1.0));
 
-    _fps = stage().propTeam().createTextHud();
+    _fps = stage().propTeam2D().createTextHud();
     _fps->setText("FPS: ");
     _fps->setHandlePosition(Vec2r(18.0, -30.0));
     _fps->setHorizontalAnchor(EHorizontalAnchor::LEFT);
     _fps->setVerticalAnchor(EVerticalAnchor::TOP);
     _fps->setHeight(15);
 
-    _ups = stage().propTeam().createTextHud();
+    _ups = stage().propTeam2D().createTextHud();
     _ups->setText("UPS: ");
     _ups->setHandlePosition(Vec2r(18.0, -50.0));
     _ups->setHorizontalAnchor(EHorizontalAnchor::LEFT);
@@ -274,17 +274,17 @@ void Physics2DCharacter::draw(const StageTime &time)
 
 void Physics2DCharacter::exitStage()
 {
-    stage().propTeam().deletePolygon(_background);
-    stage().propTeam().deletePolygon(_groundFloor);
-    stage().propTeam().deletePolygon(_groundLeft);
-    stage().propTeam().deletePolygon(_groundRight);
-    stage().propTeam().deletePolygon(_ramp);
-    stage().propTeam().deletePolygon(_housePillarLeft);
-    stage().propTeam().deletePolygon(_housePillarRight);
-    stage().propTeam().deletePolygon(_houseRoof);
-    stage().propTeam().deletePolygon(_gear);
-    stage().propTeam().deleteCircle(_ball);
-    stage().propTeam().deleteImageHud(_statsPanel);
-    stage().propTeam().deleteTextHud(_fps);
-    stage().propTeam().deleteTextHud(_ups);    
+    stage().propTeam2D().deletePolygon(_background);
+    stage().propTeam2D().deletePolygon(_groundFloor);
+    stage().propTeam2D().deletePolygon(_groundLeft);
+    stage().propTeam2D().deletePolygon(_groundRight);
+    stage().propTeam2D().deletePolygon(_ramp);
+    stage().propTeam2D().deletePolygon(_housePillarLeft);
+    stage().propTeam2D().deletePolygon(_housePillarRight);
+    stage().propTeam2D().deletePolygon(_houseRoof);
+    stage().propTeam2D().deletePolygon(_gear);
+    stage().propTeam2D().deleteCircle(_ball);
+    stage().propTeam2D().deleteImageHud(_statsPanel);
+    stage().propTeam2D().deleteTextHud(_fps);
+    stage().propTeam2D().deleteTextHud(_ups);
 }

@@ -17,5 +17,6 @@ void Physics2DPlay::loadExternalRessources()
 void Physics2DPlay::setUpPersistentCharacters()
 {
     addPersistentCharacter(
-        shared_ptr<scaena::AbstractCharacter>(new Physics2DCharacter( stage() )));
+        shared_ptr<scaena::AbstractCharacter>(
+            new Physics2DCharacter( stage() )));
 }

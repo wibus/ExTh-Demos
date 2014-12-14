@@ -7,6 +7,7 @@
 #include <ScaenaApplication/GlMainWindow.h>
 
 #include "DemoChooserDialog/DemoChooserDialog.h"
+#include "CpuRaytracing/CpuRaytracingPlay.h"
 #include "Physics2D/Physics2DPlay.h"
 
 using namespace std;
@@ -16,10 +17,7 @@ int main(int argc, char* argv[])
 {
     // Install available demos
     set<shared_ptr<AbstractPlay>> demos;
-    demos.insert(shared_ptr<AbstractPlay>(new Physics2DPlay()));
-
-    // Fake plays
-    demos.insert(shared_ptr<AbstractPlay>(new Physics2DPlay()));
+    demos.insert(shared_ptr<AbstractPlay>(new CpuRaytracingPlay()));
     demos.insert(shared_ptr<AbstractPlay>(new Physics2DPlay()));
 
     // Init application
@@ -52,8 +50,8 @@ int main(int argc, char* argv[])
     window.show();
 
     stage->setDrawSynch( false );
-    stage->setUpdateInterval( 1 );
-    stage->setDrawInterval( 16 );
+    stage->setUpdateInterval( 0 );
+    stage->setDrawInterval( 0 );
 
     return app.execute();
 }

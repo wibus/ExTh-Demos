@@ -1,5 +1,5 @@
-#ifndef PLAY_H
-#define PLAY_H
+#ifndef PHYSICS2D_PLAY_H
+#define PHYSICS2D_PLAY_H
 
 #include <Play/SingleActPlay.h>
 
@@ -13,4 +13,4 @@ public:
     virtual void setUpPersistentCharacters();
 };
 
-#endif // PLAY_H
+#endif // PHYSICS2D_PLAY_H
