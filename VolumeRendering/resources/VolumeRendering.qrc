@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/VolumeRendering">
+        <file>shaders/render.vert</file>
+        <file>shaders/render.frag.oldIntegral</file>
+        <file>shaders/render.frag</file>
+        <file>shaders/env.vert</file>
+        <file>shaders/env.frag</file>
+        <file>textures/sea_z+.png</file>
+        <file>textures/sea_z-.png</file>
+        <file>textures/sea_y+.png</file>
+        <file>textures/sea_y-.png</file>
+        <file>textures/sea_x+.png</file>
+        <file>textures/sea_x-.png</file>
+    </qresource>
+</RCC>

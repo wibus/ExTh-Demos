@@ -1,24 +1,33 @@
 #include <set>
 #include <string>
+#include <iostream>
 
 #include <QApplication>
 
+#include <CellarWorkbench/Misc/Log.h>
+
 #include <ScaenaApplication/Application.h>
 #include <ScaenaApplication/GlMainWindow.h>
+#include <Scaena/Play/TrivialPlay.h>
 
 #include "DemoChooserDialog/DemoChooserDialog.h"
 #include "CpuRaytracing/CpuRaytracingPlay.h"
 #include "Physics2D/Physics2DPlay.h"
+#include "VolumeRendering/VolumeRenderingPlay.h"
 
 using namespace std;
+using namespace cellar;
 using namespace scaena;
 
 int main(int argc, char* argv[])
 {
+    getLog().setOuput(cout);
+
     // Install available demos
     set<shared_ptr<AbstractPlay>> demos;
     demos.insert(shared_ptr<AbstractPlay>(new CpuRaytracingPlay()));
     demos.insert(shared_ptr<AbstractPlay>(new Physics2DPlay()));
+    demos.insert(shared_ptr<AbstractPlay>(new VolumeRenderingPlay()));
 
     // Init application
     Application& app = getApplication();

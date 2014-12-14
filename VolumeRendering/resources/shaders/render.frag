@@ -1,0 +1,93 @@
+#version 130
+
+uniform sampler3D OpticalSampler;
+uniform sampler3D MaterialSampler;
+uniform samplerCube EnvironmentSampler;
+uniform vec3 LightPos;
+uniform vec3 LightColor;
+uniform float LightShine;
+uniform float LightAmbient;
+uniform bool ComputeShadow;
+
+uniform float ds;
+
+in vec3 pos;
+in vec3 eye;
+
+out vec4 Fragment;
+
+
+float cubeProjection(vec3 pos, vec3 dir)
+{
+    vec3 P = step(0, dir);
+    vec3 T = (P - pos) / dir;
+    return min(min(T.x, T.y), T.z);
+}
+
+void main()
+{
+    vec3 eyeDir = normalize(eye);
+    vec3 rayDir = -eyeDir;
+    float rayLength = cubeProjection(pos, rayDir);
+
+    vec3 dr = ds * rayDir;
+    int nbSteps = int(rayLength / ds);
+
+    vec3 fragPos = pos;
+    vec3 colorAccum = vec3(0.0);
+    float alphaAccum = 1.0;
+
+    for(int i=0; i<nbSteps; ++i)
+    {
+        vec4 material = texture(OpticalSampler, fragPos);
+        float alpha = material.a;
+        if(alpha != 0.0)
+        {
+            vec3 normal = -texture(MaterialSampler, fragPos).xyz;
+
+            vec3 lightToFrag = normalize(fragPos - LightPos);
+            vec3 lightReflection = reflect(lightToFrag, normal);
+
+            vec3 fragToLight = -lightToFrag;
+            float lightAlphaAccum = 0.0;
+
+            if(ComputeShadow)
+            {
+                vec3 dl = ds * fragToLight;
+
+                vec3 lightFragPos = fragPos;
+                float lightLength = cubeProjection(lightFragPos, fragToLight);
+
+                int lightNbSteps = int(lightLength / ds);
+                for(int j=0; j<lightNbSteps; ++j)
+                {
+                    lightFragPos += dl;
+                    vec4 lightFragMat = texture(OpticalSampler, lightFragPos);
+                    lightAlphaAccum += (1.0-lightAlphaAccum) * lightFragMat.a;
+                }
+            }
+
+            float translucient = (1.0 - lightAlphaAccum);
+
+            float directness = dot(fragToLight, normal);
+            float intensity = translucient * max(0.0, directness);
+            float shininess  = step(0.0, directness) * max(0.0, dot(lightReflection, eyeDir));
+
+            float diffuse = mix(LightAmbient, 1.0, intensity);
+            float specular = translucient * pow(shininess, LightShine);
+            vec3 color = diffuse*material.rgb + specular*LightColor;
+
+            colorAccum += alphaAccum*alpha*color;
+            alphaAccum *= (1.0 - alpha);
+
+            if(alphaAccum == 0.0)
+                break;
+        }
+
+        fragPos += dr;
+    }
+
+    vec3 background = textureCube(EnvironmentSampler, rayDir).xyz;
+    colorAccum += alphaAccum * background;
+    Fragment = vec4(colorAccum, 1.0);
+}
