@@ -1,7 +1,7 @@
 #ifndef CPURAYTRACING_PLAY_H
 #define CPURAYTRACING_PLAY_H
 
-#include <Play/SingleActPlay.h>
+#include <Scaena/Play/SingleActPlay.h>
 
 
 class CpuRaytracingPlay : public scaena::SingleActPlay

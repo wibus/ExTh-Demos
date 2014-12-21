@@ -1,7 +1,7 @@
 #ifndef VOLUME_RENDERING_PLAY_H
 #define VOLUME_RENDERING_PLAY_H
 
-#include <Play/SingleActPlay.h>
+#include <Scaena/Play/SingleActPlay.h>
 
 
 class VolumeRenderingPlay : public scaena::SingleActPlay

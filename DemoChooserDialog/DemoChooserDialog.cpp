@@ -2,14 +2,14 @@
 #include "ui_DemoChooserDialog.h"
 
 #include <iostream>
+using namespace std;
 
 #include <QString>
 #include <QPushButton>
 
-#include <Play/AbstractPlay.h>
-
-using namespace std;
+#include <Scaena/Play/AbstractPlay.h>
 using namespace scaena;
+
 
 DemoChooserDialog::DemoChooserDialog(const set<shared_ptr<AbstractPlay>>& demos, QWidget *parent) :
     QDialog(parent),

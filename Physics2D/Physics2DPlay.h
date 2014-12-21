@@ -1,7 +1,7 @@
 #ifndef PHYSICS2D_PLAY_H
 #define PHYSICS2D_PLAY_H
 
-#include <Play/SingleActPlay.h>
+#include <Scaena/Play/SingleActPlay.h>
 
 
 class Physics2DPlay : public scaena::SingleActPlay

@@ -1,7 +1,7 @@
 #ifndef VOLUME_RENDERING_LIGHTS
 #define VOLUME_RENDERING_LIGHTS
 
-#include <DataStructure/Vector.h>
+#include <CellarWorkbench/DataStructure/Vector.h>
 
 
 class Light

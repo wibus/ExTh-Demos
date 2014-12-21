@@ -3,12 +3,17 @@
 
 #include <memory>
 
-#include <Character/AbstractCharacter.h>
+#include <Scaena/Character/AbstractCharacter.h>
 
 
 namespace prop2
 {
     class TextHud;
+}
+
+namespace prop3
+{
+    class Prop;
 }
 
 class CpuRaytracingCharacter : public scaena::AbstractCharacter
@@ -24,6 +29,9 @@ public:
 private:
     std::shared_ptr<prop2::TextHud> _fps;
     std::shared_ptr<prop2::TextHud> _ups;
+    std::shared_ptr<prop3::Prop> _walls;
+    std::shared_ptr<prop3::Prop> _glassLens;
+    std::shared_ptr<prop3::Prop> _chromeBall;
 };
 
 #endif // CPURAYTRACING_CHARACTER_H

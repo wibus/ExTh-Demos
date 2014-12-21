@@ -1,7 +1,7 @@
 #include "Volumes.h"
 
-#include <Algorithm/Noise.h>
-#include <Misc/CellarUtils.h>
+#include <CellarWorkbench/Algorithm/Noise.h>
+#include <CellarWorkbench/Misc/CellarUtils.h>
 using namespace cellar;
 
 

@@ -3,21 +3,21 @@
 #include <iostream>
 using namespace std;
 
-#include <Misc/CellarUtils.h>
+#include <CellarWorkbench/Misc/CellarUtils.h>
 using namespace cellar;
 
-#include <Shape/Circle.h>
-#include <Shape/Polygon.h>
-#include <Hud/TextHud.h>
-#include <Hud/ImageHud.h>
-#include <PropTeam/AbstractPropTeam.h>
-#include <Costume/CircleCostume.h>
-#include <Costume/PolygonCostume.h>
-#include <Hardware/Hardware.h>
+#include <PropRoom2D/Shape/Circle.h>
+#include <PropRoom2D/Shape/Polygon.h>
+#include <PropRoom2D/Hud/TextHud.h>
+#include <PropRoom2D/Hud/ImageHud.h>
+#include <PropRoom2D/PropTeam/AbstractPropTeam.h>
+#include <PropRoom2D/Costume/CircleCostume.h>
+#include <PropRoom2D/Costume/PolygonCostume.h>
+#include <PropRoom2D/Hardware/Hardware.h>
 using namespace prop2;
 
-#include <Stage/AbstractStage.h>
-#include <Stage/Event/StageTime.h>
+#include <Scaena/Stage/AbstractStage.h>
+#include <Scaena/Stage/Event/StageTime.h>
 using namespace scaena;
 
 

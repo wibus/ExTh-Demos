@@ -1,14 +1,14 @@
 #ifndef VOLUME_RENDERING_VISUALIZER_H
 #define VOLUME_RENDERING_VISUALIZER_H
 
-#include <DataStructure/Matrix.h>
+#include <MediaWorkbench/GL/GlProgram.h>
+#include <MediaWorkbench/GL/GlVao.h>
 
-#include <GL/GlProgram.h>
-#include <GL/GlVao.h>
+#include <CellarWorkbench/DataStructure/Matrix.h>
 
-#include <Hud/TextHud.h>
+#include <PropRoom2D/Hud/TextHud.h>
 
-#include <Character/AbstractCharacter.h>
+#include <Scaena/Character/AbstractCharacter.h>
 
 #include "Volumes.h"
 #include "Lights.h"

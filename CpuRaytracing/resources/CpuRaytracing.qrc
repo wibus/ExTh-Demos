@@ -1,1 +1,5 @@
-<RCC/>
+<RCC>
+    <qresource prefix="/CpuRaytracing">
+        <file>Fusion_Albums.png</file>
+    </qresource>
+</RCC>

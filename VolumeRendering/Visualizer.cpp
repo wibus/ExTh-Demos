@@ -2,22 +2,21 @@
 
 #include <cmath>
 
-#include <Misc/CellarUtils.h>
-#include <Algorithm/Noise.h>
-
-#include <Image/Image.h>
-#include <Image/ImageBank.h>
-
-#include <Hud/TextHud.h>
-#include <PropTeam/AbstractPropTeam.h>
-
-#include <Stage/AbstractStage.h>
-#include <Stage/Event/StageTime.h>
-#include <Stage/Event/MouseEvent.h>
-#include <Stage/Event/SynchronousMouse.h>
-
+#include <CellarWorkbench/Misc/CellarUtils.h>
+#include <CellarWorkbench/Algorithm/Noise.h>
 using namespace cellar;
+
+#include <MediaWorkbench/Image/Image.h>
+#include <MediaWorkbench/Image/ImageBank.h>
 using namespace media;
+
+#include <PropRoom2D/Hud/TextHud.h>
+#include <PropRoom2D/PropTeam/AbstractPropTeam.h>
+
+#include <Scaena/Stage/AbstractStage.h>
+#include <Scaena/Stage/Event/StageTime.h>
+#include <Scaena/Stage/Event/MouseEvent.h>
+#include <Scaena/Stage/Event/SynchronousMouse.h>
 using namespace scaena;
 
 

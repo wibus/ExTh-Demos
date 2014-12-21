@@ -3,8 +3,6 @@
 
 #include <memory>
 
-#include <Character/AbstractCharacter.h>
-
 namespace prop2
 {
     class Circle;
@@ -12,6 +10,9 @@ namespace prop2
     class TextHud;
     class ImageHud;
 }
+
+#include <Scaena/Character/AbstractCharacter.h>
+
 
 
 class Physics2DCharacter : public scaena::AbstractCharacter

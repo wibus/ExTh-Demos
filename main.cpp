@@ -6,8 +6,8 @@
 
 #include <CellarWorkbench/Misc/Log.h>
 
-#include <ScaenaApplication/Application.h>
-#include <ScaenaApplication/GlMainWindow.h>
+#include <Scaena/ScaenaApplication/Application.h>
+#include <Scaena/ScaenaApplication/GlMainWindow.h>
 #include <Scaena/Play/TrivialPlay.h>
 
 #include "DemoChooserDialog/DemoChooserDialog.h"
@@ -23,15 +23,16 @@ int main(int argc, char* argv[])
 {
     getLog().setOuput(cout);
 
+    // Init application
+    Application& app = getApplication();
+    app.init(argc, argv);
+
+    /*
     // Install available demos
     set<shared_ptr<AbstractPlay>> demos;
     demos.insert(shared_ptr<AbstractPlay>(new CpuRaytracingPlay()));
     demos.insert(shared_ptr<AbstractPlay>(new Physics2DPlay()));
     demos.insert(shared_ptr<AbstractPlay>(new VolumeRenderingPlay()));
-
-    // Init application
-    Application& app = getApplication();
-    app.init(argc, argv);
 
     // Launch demo chooser dialog
     DemoChooserDialog dialog(demos);
@@ -43,9 +44,10 @@ int main(int argc, char* argv[])
         // or user did not want to launch a demo
         return 0;
     }
+    */
 
     // Retreive and setup selected demo
-    app.setPlay(dialog.selectedDemo());
+    app.setPlay(std::shared_ptr<AbstractPlay>(new CpuRaytracingPlay()));
 
     // Instantiate OpenGL stage
     QGLStage* stage = new QGLStage();
@@ -54,7 +56,7 @@ int main(int argc, char* argv[])
 
     // Create and setup default
     GlMainWindow window(stage);
-    window.setGlWindowSpace(800, 600);
+    window.setGlWindowSpace(850, 500);
     window.centerOnScreen();
     window.show();
 

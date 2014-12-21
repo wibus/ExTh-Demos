@@ -2,7 +2,8 @@
 #define VOLUME_RENDERING_VOLUMES_H
 
 #include <vector>
-#include <DataStructure/Vector.h>
+
+#include <CellarWorkbench/DataStructure/Vector.h>
 
 
 class IVolume
