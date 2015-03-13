@@ -20,7 +20,7 @@ class DemoChooserDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit DemoChooserDialog(const std::set<std::shared_ptr<scaena::AbstractPlay>>& demos,QWidget *parent = 0);
+    explicit DemoChooserDialog(const std::vector<std::shared_ptr<scaena::AbstractPlay>>& demos,QWidget *parent = 0);
     virtual ~DemoChooserDialog();
 
     bool userQuit();

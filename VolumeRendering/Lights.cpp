@@ -1,7 +1,7 @@
 #include "Lights.h"
 
-Light::Light(const cellar::Vec3f& position,
-             const cellar::Vec3f& color,
+Light::Light(const glm::vec3& position,
+             const glm::vec3& color,
              float shininess,
              float ambientContribution,
              bool isCastingShadows) :

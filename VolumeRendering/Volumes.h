@@ -3,14 +3,14 @@
 
 #include <vector>
 
-#include <CellarWorkbench/DataStructure/Vector.h>
+#include <GLM/glm.hpp>
 
 
 class IVolume
 {
 public:
-    virtual cellar::Vec4f opticalAt(float x, float y, float z, float ds) = 0;
-    virtual cellar::Vec4f materialAt(float x, float y, float z, float ds);
+    virtual glm::vec4 opticalAt(float x, float y, float z, float ds) = 0;
+    virtual glm::vec4 materialAt(float x, float y, float z, float ds);
 
 protected:
     virtual void clamp(float& x, float& y, float& z);
@@ -21,20 +21,20 @@ class Shell : public IVolume
 {
 public:
     Shell();
-    virtual cellar::Vec4f opticalAt(float x, float y, float z, float ds) override;
-    virtual cellar::Vec4f materialAt(float x, float y, float z, float ds) override;
+    virtual glm::vec4 opticalAt(float x, float y, float z, float ds) override;
+    virtual glm::vec4 materialAt(float x, float y, float z, float ds) override;
 
 protected:
     virtual float densityAt(float x, float y, float z, float ds) override;
 
 private:
-    cellar::Vec4f _center;
+    glm::vec3 _center;
 };
 
 class Boil : public IVolume
 {
 public:
-    virtual cellar::Vec4f opticalAt(float x, float y, float z, float ds) override;
+    virtual glm::vec4 opticalAt(float x, float y, float z, float ds) override;
 
 protected:
     virtual float densityAt(float x, float y, float z, float ds) override;
@@ -43,7 +43,7 @@ protected:
 class SinNoise : public IVolume
 {
 public:
-    virtual cellar::Vec4f opticalAt(float x, float y, float z, float ds) override;
+    virtual glm::vec4 opticalAt(float x, float y, float z, float ds) override;
 
 protected:
     virtual float densityAt(float x, float y, float z, float ds) override;
@@ -52,7 +52,7 @@ protected:
 class BallFloor : public IVolume
 {
 public:
-    virtual cellar::Vec4f opticalAt(float x, float y, float z, float ds) override;
+    virtual glm::vec4 opticalAt(float x, float y, float z, float ds) override;
 
 protected:
     virtual float densityAt(float x, float y, float z, float ds) override;

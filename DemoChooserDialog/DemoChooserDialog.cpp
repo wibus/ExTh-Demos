@@ -11,7 +11,9 @@ using namespace std;
 using namespace scaena;
 
 
-DemoChooserDialog::DemoChooserDialog(const set<shared_ptr<AbstractPlay>>& demos, QWidget *parent) :
+DemoChooserDialog::DemoChooserDialog(
+        const std::vector<std::shared_ptr<AbstractPlay> >& demos,
+        QWidget *parent) :
     QDialog(parent),
     _ui(new Ui::DemoChooserDialog),
     _userQuit(true),

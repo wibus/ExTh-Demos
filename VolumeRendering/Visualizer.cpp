@@ -2,6 +2,8 @@
 
 #include <cmath>
 
+#include <GLM/gtc/matrix_transform.hpp>
+
 #include <CellarWorkbench/Misc/CellarUtils.h>
 #include <CellarWorkbench/Algorithm/Noise.h>
 using namespace cellar;
@@ -23,10 +25,10 @@ using namespace scaena;
 Visualizer::Visualizer(scaena::AbstractStage& stage) :
     AbstractCharacter(stage, "Visualizer"),
     _fps(stage.propTeam2D().createTextHud()),
-    _envRenderer(),
+    _skyBoxRenderer(),
     _dataRenderer(),
     _dataBox(),
-    _envBox(),
+    _skyBox(),
     _backgroundColor(0.0, 0.0, 0.0),
     _dataSize(128, 128, 128),
     _projection(),
@@ -37,8 +39,8 @@ Visualizer::Visualizer(scaena::AbstractStage& stage) :
     _sinNoise(),
     _ballFloor(),
     _volume(_boil),
-    _light(Vec3f(PI/4.0f, 0.5f, 3.0f), // Light Position
-           Vec3f(1.0, 1.0, 0.0),       // Light Color
+    _light(glm::vec3(PI/4.0f, 0.5f, 3.0f), // Light Position
+           glm::vec3(1.0, 1.0, 0.0),       // Light Color
            100.0f,                     // Shininess
            0.1f,                       // Ambient Contribution
            false),                     // Compute shadows
@@ -55,20 +57,21 @@ Visualizer::~Visualizer()
 
 void Visualizer::enterStage()
 {
-    glClearColor(_backgroundColor.x(),
-                 _backgroundColor.y(),
-                 _backgroundColor.z(),
+    glClearColor(_backgroundColor.x,
+                 _backgroundColor.y,
+                 _backgroundColor.z,
                  0.0);
 
     initVolumes();
     initCubeMap();
 
-    GlVbo3Df dataBoxVertices = getBoxVertices(Vec3f(0, 0, 0), Vec3f(1, 1, 1));
+    GlVbo3Df dataBoxVertices = getBoxVertices(glm::vec3(0, 0, 0), glm::vec3(1, 1, 1));
+    dataBoxVertices.target =
     _dataBox.createBuffer("position", dataBoxVertices);
 
-    GlVbo3Df envBoxVertices = getBoxVertices(Vec3f(-1.0f, -1.0f, -1.0f)*0.2f,
-                                             Vec3f( 1.0f,  1.0f,  1.0f)*0.2f);
-    _envBox.createBuffer("position", envBoxVertices);
+    GlVbo3Df envBoxVertices = getBoxVertices(glm::vec3(-1.0f, -1.0f, -1.0f)*0.2f,
+                                             glm::vec3( 1.0f,  1.0f,  1.0f)*0.2f);
+    _skyBox.createBuffer("position", envBoxVertices);
 
 
     GlInputsOutputs dataRendererInOut;
@@ -87,91 +90,99 @@ void Visualizer::enterStage()
     _dataRenderer.setFloat("LightShine",   _light.shininess);
     _dataRenderer.setFloat("LightAmbient", _light.ambientContribution);
     _dataRenderer.setInt("ComputeShadow",  _light.isCastingShadows);
-    _dataRenderer.setFloat("ds", 1.0f / _dataSize.x());
+    _dataRenderer.setFloat("ds", 1.0f / _dataSize.x);
     _dataRenderer.popProgram();
 
     GlInputsOutputs envRendererInOut;
     envRendererInOut.setInput(envBoxVertices.attribLocation, "position");
     envRendererInOut.setOutput(0, "Fragment");
-    _envRenderer.setInAndOutLocations(envRendererInOut);
-    _envRenderer.addShader(GL_VERTEX_SHADER,   ":/VolumeRendering/shaders/env.vert");
-    _envRenderer.addShader(GL_FRAGMENT_SHADER, ":/VolumeRendering/shaders/env.frag");
-    _envRenderer.link();
-    _envRenderer.pushProgram();
-    _envRenderer.setInt("EnvironmentSampler", 2);
-    _envRenderer.popProgram();
+    _skyBoxRenderer.setInAndOutLocations(envRendererInOut);
+    _skyBoxRenderer.addShader(GL_VERTEX_SHADER,   ":/VolumeRendering/shaders/env.vert");
+    _skyBoxRenderer.addShader(GL_FRAGMENT_SHADER, ":/VolumeRendering/shaders/env.frag");
+    _skyBoxRenderer.link();
+    _skyBoxRenderer.pushProgram();
+    _skyBoxRenderer.setInt("EnvironmentSampler", 2);
+    _skyBoxRenderer.popProgram();
 
 
-    _projection = perspective(1.0f, stage().width()/(float)stage().height(), 0.1f, 10.0f);
+
+    _projection = glm::perspectiveFov(
+        1.0f,
+        (float) stage().width(),
+        (float) stage().height(),
+        0.1f, 10.0f);
+
     updateMatrices();
     updateLightPos();
 }
 
-media::GlVbo3Df Visualizer::getBoxVertices(const Vec3f& from, const Vec3f& to)
+media::GlVbo3Df Visualizer::getBoxVertices(const glm::vec3& from, const glm::vec3& to)
 {
     GlVbo3Df boxVertices;
     boxVertices.attribLocation = 0;
-    boxVertices.dataArray.push_back(Vec3f(from.x(), from.y(),   from.z()));
-    boxVertices.dataArray.push_back(Vec3f(to.x(),   from.y(),   from.z()));
-    boxVertices.dataArray.push_back(Vec3f(to.x(),   from.y(),   to.z()));
-    boxVertices.dataArray.push_back(Vec3f(to.x(),   from.y(),   to.z()));
-    boxVertices.dataArray.push_back(Vec3f(from.x(), from.y(),   to.z()));
-    boxVertices.dataArray.push_back(Vec3f(from.x(), from.y(),   from.z()));
 
-    boxVertices.dataArray.push_back(Vec3f(to.x(),   from.y(),   from.z()));
-    boxVertices.dataArray.push_back(Vec3f(to.x(),   to.y(),     from.z()));
-    boxVertices.dataArray.push_back(Vec3f(to.x(),   to.y(),     to.z()));
-    boxVertices.dataArray.push_back(Vec3f(to.x(),   to.y(),     to.z()));
-    boxVertices.dataArray.push_back(Vec3f(to.x(),   from.y(),   to.z()));
-    boxVertices.dataArray.push_back(Vec3f(to.x(),   from.y(),   from.z()));
+    boxVertices.dataArray.push_back(glm::vec3(from.x, from.y,   from.z));
+    boxVertices.dataArray.push_back(glm::vec3(to.x,   from.y,   from.z));
+    boxVertices.dataArray.push_back(glm::vec3(to.x,   from.y,   to.z));
+    boxVertices.dataArray.push_back(glm::vec3(to.x,   from.y,   to.z));
+    boxVertices.dataArray.push_back(glm::vec3(from.x, from.y,   to.z));
+    boxVertices.dataArray.push_back(glm::vec3(from.x, from.y,   from.z));
 
-    boxVertices.dataArray.push_back(Vec3f(to.x(),   to.y(),     from.z()));
-    boxVertices.dataArray.push_back(Vec3f(from.x(), to.y(),     from.z()));
-    boxVertices.dataArray.push_back(Vec3f(from.x(), to.y(),     to.z()));
-    boxVertices.dataArray.push_back(Vec3f(from.x(), to.y(),     to.z()));
-    boxVertices.dataArray.push_back(Vec3f(to.x(),   to.y(),     to.z()));
-    boxVertices.dataArray.push_back(Vec3f(to.x(),   to.y(),     from.z()));
+    boxVertices.dataArray.push_back(glm::vec3(to.x,   from.y,   from.z));
+    boxVertices.dataArray.push_back(glm::vec3(to.x,   to.y,     from.z));
+    boxVertices.dataArray.push_back(glm::vec3(to.x,   to.y,     to.z));
+    boxVertices.dataArray.push_back(glm::vec3(to.x,   to.y,     to.z));
+    boxVertices.dataArray.push_back(glm::vec3(to.x,   from.y,   to.z));
+    boxVertices.dataArray.push_back(glm::vec3(to.x,   from.y,   from.z));
 
-    boxVertices.dataArray.push_back(Vec3f(from.x(), to.y(),     from.z()));
-    boxVertices.dataArray.push_back(Vec3f(from.x(), from.y(),   from.z()));
-    boxVertices.dataArray.push_back(Vec3f(from.x(), from.y(),   to.z()));
-    boxVertices.dataArray.push_back(Vec3f(from.x(), from.y(),   to.z()));
-    boxVertices.dataArray.push_back(Vec3f(from.x(), to.y(),     to.z()));
-    boxVertices.dataArray.push_back(Vec3f(from.x(), to.y(),     from.z()));
+    boxVertices.dataArray.push_back(glm::vec3(to.x,   to.y,     from.z));
+    boxVertices.dataArray.push_back(glm::vec3(from.x, to.y,     from.z));
+    boxVertices.dataArray.push_back(glm::vec3(from.x, to.y,     to.z));
+    boxVertices.dataArray.push_back(glm::vec3(from.x, to.y,     to.z));
+    boxVertices.dataArray.push_back(glm::vec3(to.x,   to.y,     to.z));
+    boxVertices.dataArray.push_back(glm::vec3(to.x,   to.y,     from.z));
 
-    boxVertices.dataArray.push_back(Vec3f(from.x(), from.y(),   from.z()));
-    boxVertices.dataArray.push_back(Vec3f(from.x(), to.y(),     from.z()));
-    boxVertices.dataArray.push_back(Vec3f(to.x(),   to.y(),     from.z()));
-    boxVertices.dataArray.push_back(Vec3f(to.x(),   to.y(),     from.z()));
-    boxVertices.dataArray.push_back(Vec3f(to.x(),   from.y(),   from.z()));
-    boxVertices.dataArray.push_back(Vec3f(from.x(), from.y(),   from.z()));
+    boxVertices.dataArray.push_back(glm::vec3(from.x, to.y,     from.z));
+    boxVertices.dataArray.push_back(glm::vec3(from.x, from.y,   from.z));
+    boxVertices.dataArray.push_back(glm::vec3(from.x, from.y,   to.z));
+    boxVertices.dataArray.push_back(glm::vec3(from.x, from.y,   to.z));
+    boxVertices.dataArray.push_back(glm::vec3(from.x, to.y,     to.z));
+    boxVertices.dataArray.push_back(glm::vec3(from.x, to.y,     from.z));
 
-    boxVertices.dataArray.push_back(Vec3f(from.x(), from.y(),   to.z()));
-    boxVertices.dataArray.push_back(Vec3f(to.x(),   from.y(),   to.z()));
-    boxVertices.dataArray.push_back(Vec3f(to.x(),   to.y(),     to.z()));
-    boxVertices.dataArray.push_back(Vec3f(to.x(),   to.y(),     to.z()));
-    boxVertices.dataArray.push_back(Vec3f(from.x(), to.y(),     to.z()));
-    boxVertices.dataArray.push_back(Vec3f(from.x(), from.y(),   to.z()));
+    boxVertices.dataArray.push_back(glm::vec3(from.x, from.y,   from.z));
+    boxVertices.dataArray.push_back(glm::vec3(from.x, to.y,     from.z));
+    boxVertices.dataArray.push_back(glm::vec3(to.x,   to.y,     from.z));
+    boxVertices.dataArray.push_back(glm::vec3(to.x,   to.y,     from.z));
+    boxVertices.dataArray.push_back(glm::vec3(to.x,   from.y,   from.z));
+    boxVertices.dataArray.push_back(glm::vec3(from.x, from.y,   from.z));
+
+    boxVertices.dataArray.push_back(glm::vec3(from.x, from.y,   to.z));
+    boxVertices.dataArray.push_back(glm::vec3(to.x,   from.y,   to.z));
+    boxVertices.dataArray.push_back(glm::vec3(to.x,   to.y,     to.z));
+    boxVertices.dataArray.push_back(glm::vec3(to.x,   to.y,     to.z));
+    boxVertices.dataArray.push_back(glm::vec3(from.x, to.y,     to.z));
+    boxVertices.dataArray.push_back(glm::vec3(from.x, from.y,   to.z));
+
     return boxVertices;
 }
 
 void Visualizer::initVolumes()
 {
-    int nbVoxels = _dataSize.x() * _dataSize.y() * _dataSize.z();
-    float ds = 1.0f / _dataSize.x();
+    int nbVoxels = _dataSize.x * _dataSize.y * _dataSize.z;
+    float ds = 1.0f / _dataSize.x;
 
-    std::vector<cellar::Vec4f> optValues(nbVoxels);
-    std::vector<cellar::Vec4f> matValues(nbVoxels);
+    std::vector<glm::vec4> optValues(nbVoxels);
+    std::vector<glm::vec4> matValues(nbVoxels);
     int idx = 0;
-    for(int k=0; k<_dataSize.z(); ++k)
+    for(int k=0; k<_dataSize.z; ++k)
     {
-        for(int j=0; j<_dataSize.y(); ++j)
+        for(int j=0; j<_dataSize.y; ++j)
         {
-            for(int i=0; i<_dataSize.x(); ++i)
+            for(int i=0; i<_dataSize.x; ++i)
             {
-                float x = i / (float) _dataSize.x();
-                float y = j / (float) _dataSize.y();
-                float z = k / (float) _dataSize.z();
+                float x = i / (float) _dataSize.x;
+                float y = j / (float) _dataSize.y;
+                float z = k / (float) _dataSize.z;
 
                 optValues[idx] = _volume.opticalAt(x, y, z, ds);
                 matValues[idx] = _volume.materialAt(x, y, z, ds);
@@ -187,9 +198,9 @@ void Visualizer::initVolumes()
         GL_TEXTURE_3D,
         0,
         GL_RGBA32F,
-        _dataSize.x(),
-        _dataSize.y(),
-        _dataSize.z(),
+        _dataSize.x,
+        _dataSize.y,
+        _dataSize.z,
         0,
         GL_RGBA,
         GL_FLOAT,
@@ -207,9 +218,9 @@ void Visualizer::initVolumes()
         GL_TEXTURE_3D,
         0,
         GL_RGBA32F,
-        _dataSize.x(),
-        _dataSize.y(),
-        _dataSize.z(),
+        _dataSize.x,
+        _dataSize.y,
+        _dataSize.z,
         0,
         GL_RGBA,
         GL_FLOAT,
@@ -242,8 +253,8 @@ void Visualizer::initCubeMap()
         GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
     };
 
-    glGenTextures(1, &_envTex);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, _envTex);
+    glGenTextures(1, &_skyBoxTex);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, _skyBoxTex);
 
     for(int i=0; i<NB_IMAGES; ++i)
     {
@@ -280,7 +291,7 @@ void Visualizer::draw(const StageTime &time)
     glEnable(GL_TEXTURE_CUBE_MAP);
 
     glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, _envTex);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, _skyBoxTex);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_3D, _matTex);
     glActiveTexture(GL_TEXTURE0);
@@ -289,17 +300,17 @@ void Visualizer::draw(const StageTime &time)
     glEnable(GL_CULL_FACE);
 
 
-    _envRenderer.pushProgram();
-    _envBox.bind();
+    _skyBoxRenderer.pushProgram();
+    _skyBox.bind();
     glDisable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
     glFrontFace(GL_CW);
     glDrawArrays(GL_TRIANGLES, 0, 36);
     glFrontFace(GL_CCW);
-    glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
-    _envBox.unbind();
-    _envRenderer.popProgram();
+    glEnable(GL_DEPTH_TEST);
+    _skyBox.unbind();
+    _skyBoxRenderer.popProgram();
 
     _dataRenderer.pushProgram();
     _dataBox.bind();
@@ -339,21 +350,21 @@ bool Visualizer::mouseReleaseEvent(const MouseEvent& event)
 
 bool Visualizer::mouseMoveEvent(const MouseEvent&)
 {
-    Vec3i displacement(stage().synchronousMouse().xDisplacement(),
-                       stage().synchronousMouse().yDisplacement());
+    glm::ivec2 displacement(stage().synchronousMouse().xDisplacement(),
+                            stage().synchronousMouse().yDisplacement());
 
     const double speed = 1 / 75.0;
 
     if(_moveLight)
     {
-        _light.position.setX( modulate(_light.position.x() - displacement.x() * speed, -PI, PI) );
-        _light.position.setY( clamp(_light.position.y() + displacement.y() * speed, -1.5, 1.5) );
+        _light.position.x = modulate(_light.position.x - displacement.x * speed, -PI, PI);
+        _light.position.y = clamp(_light.position.y + displacement.y * speed, -1.5, 1.5);
         updateLightPos();
     }
     else if(_moveCamera)
     {
-        _eye.setX( modulate(_eye.x() - displacement.x() * speed, -PI, PI) );
-        _eye.setY( clamp(_eye.y() + displacement.y() * speed, -1.5, 1.5) );
+        _eye.x = modulate(_eye.x - displacement.x * speed, -PI, PI);
+        _eye.y = clamp(_eye.y + displacement.y * speed, -1.5, 1.5);
         updateMatrices();
     }
 
@@ -363,29 +374,32 @@ bool Visualizer::mouseMoveEvent(const MouseEvent&)
 
 void Visualizer::updateMatrices()
 {
-    Vec3f from = rotate(0.0f, 0.0f, 1.0f, _eye.x()) *
-                 rotate(1.0f, 0.0f, 0.0f, _eye.y()) *
-                 Vec4f(0.0f, _eye.z(), 0.0f, 0.0f);
-    _view = lookAt(from, Vec3f(0, 0, 0), Vec3f(0, 0, 1));
-    Mat4f projectionView = _projection * _view;
+    glm::vec4 from4 = glm::rotate(glm::mat4(), _eye.x, glm::vec3(0.0f, 0.0f, 1.0f)) *
+                      glm::rotate(glm::mat4(), _eye.y, glm::vec3(1.0f, 0.0f, 0.0f)) *
+                      glm::vec4(0.0f, _eye.z, 0.0f, 1.0f);
+    glm::vec3 from = glm::vec3(from4);
+
+    _view = glm::lookAt(from, glm::vec3(0, 0, 0), glm::vec3(0, 0, 1));
+    glm::mat4 projectionView = _projection * _view;
 
     _dataRenderer.pushProgram();
     _dataRenderer.setMat4f("ProjectionViewMatrix", projectionView);
     _dataRenderer.setVec3f("EyePos", from);
     _dataRenderer.popProgram();
 
-    _envRenderer.pushProgram();
-    _envRenderer.setMat4f("ProjectionMatrix", _projection);
-    _envRenderer.setMat4f("ViewMatrix", _view);
-    _envRenderer.popProgram();
+    _skyBoxRenderer.pushProgram();
+    _skyBoxRenderer.setMat4f("ProjectionMatrix", _projection);
+    _skyBoxRenderer.setMat4f("ViewMatrix", _view);
+    _skyBoxRenderer.popProgram();
 }
 
 void Visualizer::updateLightPos()
 {
-    Vec3f pos = rotate(0.0f, 0.0f, 1.0f, _light.position.x()) *
-                rotate(1.0f, 0.0f, 0.0f, _light.position.y()) *
-                Vec4f(0.0f, _light.position.z(), 0.0f, 0.0f);
+    glm::vec4 pos = glm::rotate(glm::mat4(), _light.position.x, glm::vec3(0.0f, 0.0f, 1.0f)) *
+                    glm::rotate(glm::mat4(), _light.position.y, glm::vec3(1.0f, 0.0f, 0.0f)) *
+                    glm::vec4(0.0f, _light.position.z, 0.0f, 0.0f);
+
     _dataRenderer.pushProgram();
-    _dataRenderer.setVec3f("LightPos", pos);
+    _dataRenderer.setVec3f("LightPos", glm::vec3(pos));
     _dataRenderer.popProgram();
 }

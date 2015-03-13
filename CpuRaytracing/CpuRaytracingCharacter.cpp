@@ -31,7 +31,7 @@ void CpuRaytracingCharacter::enterStage()
 {
     _fps = stage().propTeam2D().createTextHud();
     _fps->setText("FPS: ");
-    _fps->setHandlePosition(Vec2r(18.0, -30.0));
+    _fps->setHandlePosition(glm::dvec2(18.0, -30.0));
     _fps->setHorizontalAnchor(EHorizontalAnchor::LEFT);
     _fps->setVerticalAnchor(EVerticalAnchor::TOP);
     _fps->setHeight(20);
@@ -39,7 +39,7 @@ void CpuRaytracingCharacter::enterStage()
 
     _ups = stage().propTeam2D().createTextHud();
     _ups->setText("UPS: ");
-    _ups->setHandlePosition(Vec2r(18.0, -50.0));
+    _ups->setHandlePosition(glm::dvec2(18.0, -50.0));
     _ups->setHorizontalAnchor(EHorizontalAnchor::LEFT);
     _ups->setVerticalAnchor(EVerticalAnchor::TOP);
     _ups->setHeight(20);

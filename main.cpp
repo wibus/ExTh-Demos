@@ -2,6 +2,8 @@
 #include <string>
 #include <iostream>
 
+#include <GLM/glm.hpp>
+
 #include <QApplication>
 
 #include <CellarWorkbench/Misc/Log.h>
@@ -27,12 +29,11 @@ int main(int argc, char* argv[])
     Application& app = getApplication();
     app.init(argc, argv);
 
-    /*
     // Install available demos
-    set<shared_ptr<AbstractPlay>> demos;
-    demos.insert(shared_ptr<AbstractPlay>(new CpuRaytracingPlay()));
-    demos.insert(shared_ptr<AbstractPlay>(new Physics2DPlay()));
-    demos.insert(shared_ptr<AbstractPlay>(new VolumeRenderingPlay()));
+    vector<shared_ptr<AbstractPlay>> demos;
+    demos.push_back(shared_ptr<AbstractPlay>(new CpuRaytracingPlay()));
+    demos.push_back(shared_ptr<AbstractPlay>(new Physics2DPlay()));
+    demos.push_back(shared_ptr<AbstractPlay>(new VolumeRenderingPlay()));
 
     // Launch demo chooser dialog
     DemoChooserDialog dialog(demos);
@@ -44,10 +45,9 @@ int main(int argc, char* argv[])
         // or user did not want to launch a demo
         return 0;
     }
-    */
 
     // Retreive and setup selected demo
-    app.setPlay(std::shared_ptr<AbstractPlay>(new CpuRaytracingPlay()));
+    app.setPlay(dialog.selectedDemo());
 
     // Instantiate OpenGL stage
     QGLStage* stage = new QGLStage();

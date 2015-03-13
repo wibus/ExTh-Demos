@@ -4,8 +4,6 @@
 #include <MediaWorkbench/GL/GlProgram.h>
 #include <MediaWorkbench/GL/GlVao.h>
 
-#include <CellarWorkbench/DataStructure/Matrix.h>
-
 #include <PropRoom2D/Hud/TextHud.h>
 
 #include <Scaena/Character/AbstractCharacter.h>
@@ -34,28 +32,28 @@ public:
     virtual void updateLightPos();
 
 protected:
-    virtual media::GlVbo3Df getBoxVertices(const cellar::Vec3f& from,
-                                           const cellar::Vec3f& to);
+    virtual media::GlVbo3Df getBoxVertices(const glm::vec3& from,
+                                           const glm::vec3& to);
     virtual void initVolumes();
     virtual void initCubeMap();
 
 private:
     std::shared_ptr<prop2::TextHud> _fps;
-    media::GlProgram _envRenderer;
+    media::GlProgram _skyBoxRenderer;
     media::GlProgram _dataRenderer;
     media::GlVao _dataBox;
-    media::GlVao _envBox;
+    media::GlVao _skyBox;
 
-    cellar::Vec3f _backgroundColor;
-    cellar::Vec3i _dataSize;
+    glm::vec3 _backgroundColor;
+    glm::ivec3 _dataSize;
     unsigned int _optTex;
     unsigned int _matTex;
-    unsigned int _envTex;
+    unsigned int _skyBoxTex;
 
-    cellar::Mat4f _projection;
-    cellar::Mat4f _view;
-    cellar::Vec3f _eye;
-    cellar::Vec3f _lgt;
+    glm::mat4 _projection;
+    glm::mat4 _view;
+    glm::vec3 _eye;
+    glm::vec3 _lgt;
 
     Shell _shell;
     Boil  _boil;
