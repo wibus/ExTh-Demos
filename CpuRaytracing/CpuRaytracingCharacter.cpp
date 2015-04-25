@@ -1,7 +1,12 @@
 #include "CpuRaytracingCharacter.h"
 
+#include <GLM/gtc/matrix_transform.hpp>
+
 #include <CellarWorkbench/Misc/CellarUtils.h>
 using namespace cellar;
+
+#include <MediaWorkbench/Camera/Camera.h>
+using namespace media;
 
 #include <PropRoom2D/PropTeam/AbstractPropTeam.h>
 #include <PropRoom2D/Hud/TextHud.h>
@@ -44,6 +49,22 @@ void CpuRaytracingCharacter::enterStage()
     _ups->setVerticalAnchor(EVerticalAnchor::TOP);
     _ups->setHeight(20);
     _ups->setIsVisible(false);
+
+    // Setup Camera
+    glm::dvec3 focusPos = glm::dvec3(-1.2, -1.2, 5.25);
+    glm::dvec3 camPos = focusPos + glm::dvec3(25, -40, 14) * 2.0;
+
+    glm::dvec3 upVec(0, 0, 1);
+    glm::dvec3 frontVec = glm::normalize(focusPos - camPos);
+    glm::dvec3 rightVec = glm::normalize(glm::cross(frontVec, upVec));
+
+    stage().camera().updateView(glm::lookAt(camPos, focusPos, upVec));
+    stage().camera().updateProjection(
+        glm::perspectiveFov(
+          glm::pi<double>() / 9.0,
+          (double) stage().width(),
+          (double) stage().height(),
+          1.0, 2.0));
 
 
     glm::dvec3 negLim(-20.0, -20.0, 0.0);
@@ -93,10 +114,10 @@ void CpuRaytracingCharacter::enterStage()
         (rearWall | roof | (pillarX & pillarY) | xPlane | (yPlane & zPlane));
 
     std::shared_ptr<Volume> chromeBallSphere(
-                new Sphere(glm::dvec3(5.0, -5.0, -8.0) + boxCenter, 2.0));
+                new Sphere(glm::dvec3(5.0, -5.0, 2), 2.0));
     std::shared_ptr<Volume> glassBallSphere =
-        std::shared_ptr<Volume>(new Sphere(glm::dvec3(5.0, 2.0, 4.0) + boxCenter, 4.0)) &
-        std::shared_ptr<Volume>(new Sphere(glm::dvec3(5.0, 8.0, 4.0) + boxCenter, 4.0));
+        std::shared_ptr<Volume>(new Sphere(glm::dvec3(15, 3, 2), 4.0)) &
+        std::shared_ptr<Volume>(new Sphere(glm::dvec3(15, -3, 2), 4.0));
 
     std::shared_ptr<prop3::Costume> wallsCostume(
                 new TexturedPaint(":/CpuRaytracing/Fusion_Albums.png",
