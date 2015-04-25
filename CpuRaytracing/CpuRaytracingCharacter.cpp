@@ -24,6 +24,7 @@ using namespace prop3;
 
 #include <Scaena/Stage/AbstractStage.h>
 #include <Scaena/Stage/Event/StageTime.h>
+#include <Scaena/Stage/Event/KeyboardEvent.h>
 using namespace scaena;
 
 
@@ -52,13 +53,17 @@ void CpuRaytracingCharacter::enterStage()
 
     // Setup Camera
     glm::dvec3 focusPos = glm::dvec3(-1.2, -1.2, 5.25);
-    glm::dvec3 camPos = focusPos + glm::dvec3(25, -40, 14) * 2.0;
+    _camPos = focusPos + glm::dvec3(25, -40, 14) * 2.0;
 
-    glm::dvec3 upVec(0, 0, 1);
-    glm::dvec3 frontVec = glm::normalize(focusPos - camPos);
-    glm::dvec3 rightVec = glm::normalize(glm::cross(frontVec, upVec));
+    _upVec = glm::dvec3(0, 0, 1);
+    _frontVec = glm::normalize(focusPos - _camPos);
+    _rightVec = glm::normalize(glm::cross(_frontVec, _upVec));
 
-    stage().camera().updateView(glm::lookAt(camPos, focusPos, upVec));
+    stage().camera().updateView(
+        glm::lookAt(
+          _camPos,
+          _camPos+_frontVec,
+          _upVec));
     stage().camera().updateProjection(
         glm::perspectiveFov(
           glm::pi<double>() / 9.0,
@@ -154,4 +159,31 @@ void CpuRaytracingCharacter::exitStage()
 {
     stage().propTeam2D().deleteTextHud(_fps);
     stage().propTeam2D().deleteTextHud(_ups);
+}
+
+bool CpuRaytracingCharacter::keyPressEvent(const KeyboardEvent& event)
+{
+    bool moved = false;
+
+    switch(event.getAscii())
+    {
+    case 'W': _camPos += _frontVec; moved = true; break;
+    case 'S': _camPos -= _frontVec; moved = true; break;
+    case 'D': _camPos += _rightVec; moved = true; break;
+    case 'A': _camPos -= _rightVec; moved = true; break;
+    }
+
+    if(moved)
+    {
+        stage().camera().updateView(
+            glm::lookAt(
+              _camPos,
+              _camPos+_frontVec,
+              _upVec));
+    }
+}
+
+bool CpuRaytracingCharacter::keyReleaseEvent(const KeyboardEvent& event)
+{
+
 }
