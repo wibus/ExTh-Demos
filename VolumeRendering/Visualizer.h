@@ -1,8 +1,8 @@
 #ifndef VOLUME_RENDERING_VISUALIZER_H
 #define VOLUME_RENDERING_VISUALIZER_H
 
-#include <MediaWorkbench/GL/GlProgram.h>
-#include <MediaWorkbench/GL/GlVao.h>
+#include <CellarWorkbench/GL/GlProgram.h>
+#include <CellarWorkbench/GL/GlVao.h>
 
 #include <PropRoom2D/Hud/TextHud.h>
 
@@ -32,17 +32,17 @@ public:
     virtual void updateLightPos();
 
 protected:
-    virtual media::GlVbo3Df getBoxVertices(const glm::vec3& from,
+    virtual cellar::GlVbo3Df getBoxVertices(const glm::vec3& from,
                                            const glm::vec3& to);
     virtual void initVolumes();
     virtual void initCubeMap();
 
 private:
     std::shared_ptr<prop2::TextHud> _fps;
-    media::GlProgram _skyBoxRenderer;
-    media::GlProgram _dataRenderer;
-    media::GlVao _dataBox;
-    media::GlVao _skyBox;
+    cellar::GlProgram _skyBoxRenderer;
+    cellar::GlProgram _dataRenderer;
+    cellar::GlVao _dataBox;
+    cellar::GlVao _skyBox;
 
     glm::vec3 _backgroundColor;
     glm::ivec3 _dataSize;

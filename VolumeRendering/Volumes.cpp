@@ -1,15 +1,15 @@
 #include "Volumes.h"
 
-#include <CellarWorkbench/Algorithm/Noise.h>
-#include <CellarWorkbench/Misc/CellarUtils.h>
+#include <CellarWorkbench/Misc/SimplexNoise.h>
+
 using namespace cellar;
 
 
 void IVolume::clamp(float& x, float& y, float& z)
 {
-    x = cellar::clamp(x, 0.0f, 1.0f);
-    y = cellar::clamp(y, 0.0f, 1.0f);
-    z = cellar::clamp(z, 0.0f, 1.0f);
+    x = glm::clamp(x, 0.0f, 1.0f);
+    y = glm::clamp(y, 0.0f, 1.0f);
+    z = glm::clamp(z, 0.0f, 1.0f);
 }
 
 glm::vec4 IVolume::materialAt(float x, float y, float z, float ds)
@@ -33,7 +33,7 @@ Shell::Shell() :
 
 glm::vec4 Shell::opticalAt(float x, float y, float z, float ds)
 {
-    clamp(x, y, z);
+    glm::clamp(x, y, z);
     return glm::vec4(x,
                  (y-0.5f)*(y-0.5),
                  z*z,
@@ -42,7 +42,7 @@ glm::vec4 Shell::opticalAt(float x, float y, float z, float ds)
 
 glm::vec4 Shell::materialAt(float x, float y, float z, float ds)
 {
-    clamp(x, y, z);
+    glm::clamp(x, y, z);
     glm::vec3 distance = _center - glm::vec3(x, y, z);
     return glm::vec4(glm::normalize(distance),
                  densityAt(x, y, z, ds));
@@ -50,14 +50,14 @@ glm::vec4 Shell::materialAt(float x, float y, float z, float ds)
 
 float Shell::densityAt(float x, float y, float z, float ds)
 {
-    clamp(x, y, z);
+    glm::clamp(x, y, z);
     float w = 0.03f;
     glm::vec3 pos(x, y, z);
     glm::vec3 center(0.5f, 0.5f, 0.5f);
     glm::vec3 distance = pos - center;
     float dist = distance.length();
-    float d1 = absolute(dist - 0.45f);
-    float d2 = absolute(dist - w);
+    float d1 = glm::abs(dist - 0.45f);
+    float d2 = glm::abs(dist - w);
 
     float a = (d1>w ? d2>w ? 0.01f : 0.2f : 0.1f);
 
@@ -68,25 +68,25 @@ float Shell::densityAt(float x, float y, float z, float ds)
 // Boil
 glm::vec4 Boil::opticalAt(float x, float y, float z, float ds)
 {
-    clamp(x, y, z);
+    glm::clamp(x, y, z);
 
     glm::vec3 pos(x, y, z);
     glm::vec3 center(0.5f, 0.5f, 0.5f);
     float d = glm::length(pos - center);
 
-    return glm::vec4(x, maxVal(0.0f, 1.0f-d*d), z*z, densityAt(x, y, z, ds));
+    return glm::vec4(x, glm::max(0.0f, 1.0f-d*d), z*z, densityAt(x, y, z, ds));
 }
 
 float Boil::densityAt(float x, float y, float z, float ds)
 {
-    clamp(x, y, z);
+    glm::clamp(x, y, z);
     glm::vec3 pos(x, y, z);
     glm::vec3 center(0.5f, 0.5f, 0.5f);
     float d = glm::length(pos - center);
 
     float f = 4.0f;
     float n = SimplexNoise::noise3d(x*f, y*f, z*f);
-    float a = cellar::clamp(n - d*7.0f + 3.0f, 0.0f, 1.0f);
+    float a = glm::clamp(n - d*7.0f + 3.0f, 0.0f, 1.0f);
     return a;
 }
 
@@ -97,19 +97,19 @@ glm::vec4 SinNoise::opticalAt(float x, float y, float z, float ds)
     glm::vec3 pos(x, y, z);
     glm::vec3 center(0.5f, 0.5f, 0.5f);
     float d = glm::length(pos - center);
-    return glm::vec4(x, maxVal(0.0f, 1.0f-d*d), z*z, densityAt(x, y, z, ds));
+    return glm::vec4(x, glm::max(0.0f, 1.0f-d*d), z*z, densityAt(x, y, z, ds));
 }
 
 float SinNoise::densityAt(float x, float y, float z, float ds)
 {
-    clamp(x, y, z);
+    glm::clamp(x, y, z);
     glm::vec3 pos(x, y, z);
     glm::vec3 center(0.5f, 0.5f, 0.5f);
     float d = glm::length(pos - center);
 
     float f = 1.0f;
     float n = SimplexNoise::noise3d(x*f, y*f, z*f);
-    float a = absolute(sin(1.0f/n)) * 0.1; // What!!!
+    float a = glm::abs(sin(1.0f/n)) * 0.1; // What!!!
     return a;
 }
 
@@ -122,7 +122,7 @@ glm::vec4 BallFloor::opticalAt(float x, float y, float z, float ds)
 
 float BallFloor::densityAt(float x, float y, float z, float ds)
 {
-    clamp(x, y, z);
+    glm::clamp(x, y, z);
     float a = 0.0;
 
     if(z > 0.2)
@@ -132,7 +132,7 @@ float BallFloor::densityAt(float x, float y, float z, float ds)
         float d = glm::length(pos - center);
         float r = 0.15;
         float o = (r - d)/r;
-        a = maxVal(o*o * sign(o), 0.0f);
+        a = glm::max(o*o * glm::sign(o), 0.0f);
     }
     else
     {

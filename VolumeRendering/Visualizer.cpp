@@ -4,13 +4,11 @@
 
 #include <GLM/gtc/matrix_transform.hpp>
 
-#include <CellarWorkbench/Misc/CellarUtils.h>
-#include <CellarWorkbench/Algorithm/Noise.h>
-using namespace cellar;
+#include <CellarWorkbench/Image/Image.h>
+#include <CellarWorkbench/Image/ImageBank.h>
+#include <CellarWorkbench/Misc/StringUtils.h>
 
-#include <MediaWorkbench/Image/Image.h>
-#include <MediaWorkbench/Image/ImageBank.h>
-using namespace media;
+#include <CellarWorkbench/Misc/SimplexNoise.h>
 
 #include <PropRoom2D/Hud/TextHud.h>
 #include <PropRoom2D/PropTeam/AbstractPropTeam.h>
@@ -19,6 +17,8 @@ using namespace media;
 #include <Scaena/Stage/Event/StageTime.h>
 #include <Scaena/Stage/Event/MouseEvent.h>
 #include <Scaena/Stage/Event/SynchronousMouse.h>
+
+using namespace cellar;
 using namespace scaena;
 
 
@@ -39,7 +39,7 @@ Visualizer::Visualizer(scaena::AbstractStage& stage) :
     _sinNoise(),
     _ballFloor(),
     _volume(_boil),
-    _light(glm::vec3(PI/4.0f, 0.5f, 3.0f), // Light Position
+    _light(glm::vec3(glm::pi<float>()/4.0f, 0.5f, 3.0f), // Light Position
            glm::vec3(1.0, 1.0, 0.0),       // Light Color
            100.0f,                     // Shininess
            0.1f,                       // Ambient Contribution
@@ -116,7 +116,7 @@ void Visualizer::enterStage()
     updateLightPos();
 }
 
-media::GlVbo3Df Visualizer::getBoxVertices(const glm::vec3& from, const glm::vec3& to)
+cellar::GlVbo3Df Visualizer::getBoxVertices(const glm::vec3& from, const glm::vec3& to)
 {
     GlVbo3Df boxVertices;
     boxVertices.attribLocation = 0;
@@ -357,14 +357,14 @@ bool Visualizer::mouseMoveEvent(const MouseEvent&)
 
     if(_moveLight)
     {
-        _light.position.x = modulate(_light.position.x - displacement.x * speed, -PI, PI);
-        _light.position.y = clamp(_light.position.y + displacement.y * speed, -1.5, 1.5);
+        _light.position.x = glm::mod(_light.position.x - displacement.x * speed, 2*glm::pi<double>());
+        _light.position.y = glm::clamp(_light.position.y + displacement.y * speed, -1.5, 1.5);
         updateLightPos();
     }
     else if(_moveCamera)
     {
-        _eye.x = modulate(_eye.x - displacement.x * speed, -PI, PI);
-        _eye.y = clamp(_eye.y + displacement.y * speed, -1.5, 1.5);
+        _eye.x = glm::mod(_eye.x - displacement.x * speed, 2*glm::pi<double>());
+        _eye.y = glm::clamp(_eye.y + displacement.y * speed, -1.5, 1.5);
         updateMatrices();
     }
 

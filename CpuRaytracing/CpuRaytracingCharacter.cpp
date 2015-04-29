@@ -2,15 +2,11 @@
 
 #include <GLM/gtc/matrix_transform.hpp>
 
-#include <CellarWorkbench/Misc/CellarUtils.h>
-using namespace cellar;
-
-#include <MediaWorkbench/Camera/Camera.h>
-using namespace media;
+#include <CellarWorkbench/Camera/Camera.h>
+#include <CellarWorkbench/Misc/StringUtils.h>
 
 #include <PropRoom2D/PropTeam/AbstractPropTeam.h>
 #include <PropRoom2D/Hud/TextHud.h>
-using namespace prop2;
 
 #include <PropRoom3D/Team/AbstractTeam.h>
 #include <PropRoom3D/Prop/Prop.h>
@@ -20,11 +16,13 @@ using namespace prop2;
 #include <PropRoom3D/Prop/Costume/Chrome.h>
 #include <PropRoom3D/Prop/Costume/FlatPaint.h>
 #include <PropRoom3D/Prop/Costume/TexturedPaint.h>
-using namespace prop3;
-
 #include <Scaena/Stage/AbstractStage.h>
 #include <Scaena/Stage/Event/StageTime.h>
 #include <Scaena/Stage/Event/KeyboardEvent.h>
+
+using namespace cellar;
+using namespace prop2;
+using namespace prop3;
 using namespace scaena;
 
 

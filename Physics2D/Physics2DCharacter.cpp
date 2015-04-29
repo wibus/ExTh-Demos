@@ -1,10 +1,10 @@
 #include "Physics2DCharacter.h"
 
 #include <iostream>
-using namespace std;
 
-#include <CellarWorkbench/Misc/CellarUtils.h>
-using namespace cellar;
+#include <GLM/gtc/constants.hpp>
+
+#include <CellarWorkbench/Misc/StringUtils.h>
 
 #include <PropRoom2D/Shape/Circle.h>
 #include <PropRoom2D/Shape/Polygon.h>
@@ -14,10 +14,13 @@ using namespace cellar;
 #include <PropRoom2D/Costume/CircleCostume.h>
 #include <PropRoom2D/Costume/PolygonCostume.h>
 #include <PropRoom2D/Hardware/Hardware.h>
-using namespace prop2;
 
 #include <Scaena/Stage/AbstractStage.h>
 #include <Scaena/Stage/Event/StageTime.h>
+
+using namespace std;
+using namespace cellar;
+using namespace prop2;
 using namespace scaena;
 
 
@@ -199,10 +202,10 @@ void Physics2DCharacter::enterStage()
         std::vector<glm::dvec4> gearColors;
         for(int i=0; i < nbTeeth; ++i)
         {
-            glm::dvec2 vec1(cos(2.0*PI*double(i)/nbTeeth),
-                       sin(2.0*PI*double(i)/nbTeeth));
-            glm::dvec2 vec2(cos(2.0*PI*double(i+0.5)/nbTeeth),
-                       sin(2.0*PI*double(i+0.5)/nbTeeth));
+            glm::dvec2 vec1(cos(2.0*glm::pi<double>()*double(i)/nbTeeth),
+                       sin(2.0*glm::pi<double>()*double(i)/nbTeeth));
+            glm::dvec2 vec2(cos(2.0*glm::pi<double>()*double(i+0.5)/nbTeeth),
+                       sin(2.0*glm::pi<double>()*double(i+0.5)/nbTeeth));
             gearVertices.push_back(vec1 * outerRadius);
             gearVertices.push_back(vec1 * innerRadius);
             gearVertices.push_back(vec2 * innerRadius);
