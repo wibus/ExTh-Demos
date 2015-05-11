@@ -16,6 +16,8 @@ SET(EXTH-DEMOS_CONFIG_FILES
     ${EXTH-DEMOS_SRC_DIR}/FileLists.cmake
     ${EXTH-DEMOS_SRC_DIR}/LibLists.cmake)
 
+INCLUDE(Fluid2D/FileLists.cmake)
+INCLUDE(Fractal/FileLists.cmake)
 INCLUDE(Physics2D/FileLists.cmake)
 INCLUDE(CpuRaytracing/FileLists.cmake)
 INCLUDE(VolumeRendering/FileLists.cmake)
@@ -26,6 +28,8 @@ SET(EXTH-DEMOS_SRC_FILES
     ${EXTH-DEMOS_FORMS}
     ${EXTH-DEMOS_FORM_INCLUDES}
     ${EXTH-DEMOS_CONFIG_FILES}
+    ${FLUID2D_SRC_FILES}
+    ${FRACTAL_SRC_FILES}
     ${PHYSICS2D_SRC_FILES}
     ${CPURAYTRACING_SRC_FILES}
     ${VOLUME_RENDERING_SRC_FILES})

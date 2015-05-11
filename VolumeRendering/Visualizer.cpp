@@ -10,21 +10,21 @@
 
 #include <CellarWorkbench/Misc/SimplexNoise.h>
 
-#include <PropRoom2D/Hud/TextHud.h>
-#include <PropRoom2D/PropTeam/AbstractPropTeam.h>
+#include <PropRoom2D/Prop/Hud/TextHud.h>
+#include <PropRoom2D/Team/AbstractTeam.h>
 
-#include <Scaena/Stage/AbstractStage.h>
-#include <Scaena/Stage/Event/StageTime.h>
-#include <Scaena/Stage/Event/MouseEvent.h>
-#include <Scaena/Stage/Event/SynchronousMouse.h>
+#include <Scaena/Play/Play.h>
+#include <Scaena/Play/View.h>
+#include <Scaena/StageManagement/Event/StageTime.h>
+#include <Scaena/StageManagement/Event/MouseEvent.h>
+#include <Scaena/StageManagement/Event/SynchronousMouse.h>
 
 using namespace cellar;
 using namespace scaena;
 
 
-Visualizer::Visualizer(scaena::AbstractStage& stage) :
-    AbstractCharacter(stage, "Visualizer"),
-    _fps(stage.propTeam2D().createTextHud()),
+Visualizer::Visualizer(Play& play) :
+    Character(play, "Visualizer"),
     _skyBoxRenderer(),
     _dataRenderer(),
     _dataBox(),
@@ -47,7 +47,6 @@ Visualizer::Visualizer(scaena::AbstractStage& stage) :
     _moveLight(false),
     _moveCamera(false)
 {
-    _fps->setHeight(20);
 }
 
 Visualizer::~Visualizer()
@@ -57,6 +56,9 @@ Visualizer::~Visualizer()
 
 void Visualizer::enterStage()
 {
+    _fps = play().propTeam2D()->createTextHud();
+    _fps->setHeight(20);
+
     glClearColor(_backgroundColor.x,
                  _backgroundColor.y,
                  _backgroundColor.z,
@@ -105,11 +107,11 @@ void Visualizer::enterStage()
     _skyBoxRenderer.popProgram();
 
 
-
+    glm::ivec2 viewport = play().view()->viewport();
     _projection = glm::perspectiveFov(
         1.0f,
-        (float) stage().width(),
-        (float) stage().height(),
+        (float) viewport.x,
+        (float) viewport.y,
         0.1f, 10.0f);
 
     updateMatrices();
@@ -282,7 +284,8 @@ void Visualizer::beginStep(const StageTime &time)
 {
 }
 
-void Visualizer::draw(const StageTime &time)
+void Visualizer::draw(const std::shared_ptr<scaena::View> &,
+                      const scaena::StageTime&time)
 {
     _fps->setText("FPS: " + toString(floor(time.framesPerSecond())));
 
@@ -350,8 +353,8 @@ bool Visualizer::mouseReleaseEvent(const MouseEvent& event)
 
 bool Visualizer::mouseMoveEvent(const MouseEvent&)
 {
-    glm::ivec2 displacement(stage().synchronousMouse().xDisplacement(),
-                            stage().synchronousMouse().yDisplacement());
+    glm::ivec2 displacement(play().synchronousMouse()->xDisplacement(),
+                            play().synchronousMouse()->yDisplacement());
 
     const double speed = 1 / 75.0;
 
@@ -368,7 +371,6 @@ bool Visualizer::mouseMoveEvent(const MouseEvent&)
         updateMatrices();
     }
 
-    draw(StageTime(0.0, 0.0, 1.0, true));
     return true;
 }
 

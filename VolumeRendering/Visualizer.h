@@ -4,29 +4,30 @@
 #include <CellarWorkbench/GL/GlProgram.h>
 #include <CellarWorkbench/GL/GlVao.h>
 
-#include <PropRoom2D/Hud/TextHud.h>
+#include <PropRoom2D/Prop/Hud/TextHud.h>
 
-#include <Scaena/Character/AbstractCharacter.h>
+#include <Scaena/Play/Character.h>
 
 #include "Volumes.h"
 #include "Lights.h"
 
 
 class Visualizer :
-        public scaena::AbstractCharacter
+        public scaena::Character
 {
 public:
-    Visualizer(scaena::AbstractStage& stage);
+    Visualizer(scaena::Play& play);
     virtual ~Visualizer();
 
-    virtual void enterStage();
-    virtual void beginStep(const scaena::StageTime &time);
-    virtual void draw(const scaena::StageTime &time);
-    virtual void exitStage();
+    virtual void enterStage() override;
+    virtual void beginStep(const scaena::StageTime &time) override;
+    virtual void draw(const std::shared_ptr<scaena::View> &view,
+                      const scaena::StageTime&time) override;
+    virtual void exitStage() override;
 
-    virtual bool mousePressEvent(const scaena::MouseEvent &event);
-    virtual bool mouseReleaseEvent(const scaena::MouseEvent &event);
-    virtual bool mouseMoveEvent(const scaena::MouseEvent &event);
+    virtual bool mousePressEvent(const scaena::MouseEvent &event) override;
+    virtual bool mouseReleaseEvent(const scaena::MouseEvent &event) override;
+    virtual bool mouseMoveEvent(const scaena::MouseEvent &event) override;
 
     virtual void updateMatrices();
     virtual void updateLightPos();

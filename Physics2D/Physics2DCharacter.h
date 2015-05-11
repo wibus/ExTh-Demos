@@ -3,6 +3,13 @@
 
 #include <memory>
 
+#include <Scaena/Play/Character.h>
+
+namespace cellar
+{
+    class CameraManBird;
+}
+
 namespace prop2
 {
     class Circle;
@@ -11,28 +18,26 @@ namespace prop2
     class ImageHud;
 }
 
-#include <Scaena/Character/AbstractCharacter.h>
 
-
-
-class Physics2DCharacter : public scaena::AbstractCharacter
+class Physics2DCharacter : public scaena::Character
 {
 public:
-    Physics2DCharacter(scaena::AbstractStage& stage);
+    Physics2DCharacter(scaena::Play& play);
 
-    virtual void enterStage();
-    virtual void beginStep(const scaena::StageTime &time);
-    virtual void draw(const scaena::StageTime &time);
-    virtual void exitStage();
+    virtual void enterStage() override;
+    virtual void beginStep(const scaena::StageTime &time) override;
+    virtual void draw(const std::shared_ptr<scaena::View> &view,
+                      const scaena::StageTime&time) override;
+    virtual void exitStage() override;
 
 
-private:    
+private:
+    std::shared_ptr<cellar::CameraManBird> _camMan;
+
     std::shared_ptr<prop2::Polygon> _background;
-
     std::shared_ptr<prop2::Polygon> _groundFloor;
     std::shared_ptr<prop2::Polygon> _groundLeft;
-    std::shared_ptr<prop2::Polygon> _groundRight;    
-
+    std::shared_ptr<prop2::Polygon> _groundRight;
     std::shared_ptr<prop2::Polygon> _ramp;
 
     std::shared_ptr<prop2::Polygon> _housePillarLeft;
@@ -40,7 +45,6 @@ private:
     std::shared_ptr<prop2::Polygon> _houseRoof;
 
     std::shared_ptr<prop2::Polygon> _gear;
-
     std::shared_ptr<prop2::Circle> _ball;
 
     std::shared_ptr<prop2::ImageHud> _statsPanel;

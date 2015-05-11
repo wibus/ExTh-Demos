@@ -2,14 +2,12 @@ SET(PHYSICS2D_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Physics2D)
 
 ## HEADERS ##
 SET(PHYSICS2D_HEADERS
-    ${PHYSICS2D_SRC_DIR}/Physics2DCharacter.h
-    ${PHYSICS2D_SRC_DIR}/Physics2DPlay.h)
+    ${PHYSICS2D_SRC_DIR}/Physics2DCharacter.h)
     
 
 ## SOURCES ##
 SET(PHYSICS2D_SOURCES
-    ${PHYSICS2D_SRC_DIR}/Physics2DCharacter.cpp
-    ${PHYSICS2D_SRC_DIR}/Physics2DPlay.cpp)
+    ${PHYSICS2D_SRC_DIR}/Physics2DCharacter.cpp)
 
 ## Resources ##
 QT5_ADD_RESOURCES(PHYSICS2D_RESOURCES

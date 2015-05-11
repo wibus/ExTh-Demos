@@ -1,0 +1,23 @@
+SET(FRACTAL_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Fractal)
+
+SET(FRACTAL_HEADERS
+    ${FRACTAL_SRC_DIR}/FractalCharacter.h)
+    
+SET(FRACTAL_SOURCES
+    ${FRACTAL_SRC_DIR}/FractalCharacter.cpp)
+
+SET(FRACTAL_SHADERS_SRC
+    ${FRACTAL_SRC_DIR}/resources/shaders/fractals.vert
+    ${FRACTAL_SRC_DIR}/resources/shaders/fractals.frag)
+
+SET(FRACTAL_RCC_FILES
+    ${FRACTAL_SRC_DIR}/resources/Fractal.qrc)
+QT5_ADD_RESOURCES(FRACTAL_RCC_SRCS
+    ${FRACTAL_RCC_FILES})
+
+SET(FRACTAL_SRC_FILES
+    ${FRACTAL_HEADERS}
+    ${FRACTAL_SOURCES}
+    ${FRACTAL_SHADERS_SRC}
+    ${FRACTAL_RCC_FILES}
+    ${FRACTAL_RCC_SRCS})

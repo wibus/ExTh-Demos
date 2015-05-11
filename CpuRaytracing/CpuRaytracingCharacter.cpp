@@ -5,10 +5,9 @@
 #include <CellarWorkbench/Camera/Camera.h>
 #include <CellarWorkbench/Misc/StringUtils.h>
 
-#include <PropRoom2D/PropTeam/AbstractPropTeam.h>
-#include <PropRoom2D/Hud/TextHud.h>
+#include <PropRoom2D/Prop/Hud/TextHud.h>
+#include <PropRoom2D/Team/AbstractTeam.h>
 
-#include <PropRoom3D/Team/AbstractTeam.h>
 #include <PropRoom3D/Prop/Prop.h>
 #include <PropRoom3D/Prop/Volume/Sphere.h>
 #include <PropRoom3D/Prop/Volume/Plane.h>
@@ -16,9 +15,12 @@
 #include <PropRoom3D/Prop/Costume/Chrome.h>
 #include <PropRoom3D/Prop/Costume/FlatPaint.h>
 #include <PropRoom3D/Prop/Costume/TexturedPaint.h>
-#include <Scaena/Stage/AbstractStage.h>
-#include <Scaena/Stage/Event/StageTime.h>
-#include <Scaena/Stage/Event/KeyboardEvent.h>
+#include <PropRoom3D/Team/AbstractTeam.h>
+
+#include <Scaena/Play/Play.h>
+#include <Scaena/Play/View.h>
+#include <Scaena/StageManagement/Event/StageTime.h>
+#include <Scaena/StageManagement/Event/SynchronousKeyboard.h>
 
 using namespace cellar;
 using namespace prop2;
@@ -26,14 +28,14 @@ using namespace prop3;
 using namespace scaena;
 
 
-CpuRaytracingCharacter::CpuRaytracingCharacter(AbstractStage &stage) :
-    AbstractCharacter(stage, "CPU Raytracing Character")
+CpuRaytracingCharacter::CpuRaytracingCharacter(Play& play) :
+    Character(play, "CPU Raytracing Character")
 {
 }
 
 void CpuRaytracingCharacter::enterStage()
 {
-    _fps = stage().propTeam2D().createTextHud();
+    _fps = play().propTeam2D()->createTextHud();
     _fps->setText("FPS: ");
     _fps->setHandlePosition(glm::dvec2(18.0, -30.0));
     _fps->setHorizontalAnchor(EHorizontalAnchor::LEFT);
@@ -41,7 +43,7 @@ void CpuRaytracingCharacter::enterStage()
     _fps->setHeight(20);
     _fps->setIsVisible(false);
 
-    _ups = stage().propTeam2D().createTextHud();
+    _ups = play().propTeam2D()->createTextHud();
     _ups->setText("UPS: ");
     _ups->setHandlePosition(glm::dvec2(18.0, -50.0));
     _ups->setHorizontalAnchor(EHorizontalAnchor::LEFT);
@@ -57,17 +59,10 @@ void CpuRaytracingCharacter::enterStage()
     _frontVec = glm::normalize(focusPos - _camPos);
     _rightVec = glm::normalize(glm::cross(_frontVec, _upVec));
 
-    stage().camera().updateView(
-        glm::lookAt(
-          _camPos,
-          _camPos+_frontVec,
-          _upVec));
-    stage().camera().updateProjection(
-        glm::perspectiveFov(
-          glm::pi<double>() / 9.0,
-          (double) stage().width(),
-          (double) stage().height(),
-          1.0, 2.0));
+    std::shared_ptr<Camera> camera = play().view()->camera3D();
+    camera->updateView(glm::lookAt(_camPos, _camPos+_frontVec, _upVec));
+    camera->registerObserver(*this);
+    camera->refresh();
 
 
     glm::dvec3 negLim(-20.0, -20.0, 0.0);
@@ -130,15 +125,15 @@ void CpuRaytracingCharacter::enterStage()
     std::shared_ptr<prop3::Costume> chromeBallCostume(
                 new Chrome(glm::dvec3(212, 175, 55) / 255.0));
 
-    _walls = stage().propTeam3D().createProp();
+    _walls = play().propTeam3D()->createProp();
     _walls->setVolume(socle | (box & crop));
     _walls->setCostume(wallsCostume);
 
-    _glassLens = stage().propTeam3D().createProp();
+    _glassLens = play().propTeam3D()->createProp();
     _glassLens->setVolume(glassBallSphere);
     _glassLens->setCostume(glassBallCostume);
 
-    _chromeBall = stage().propTeam3D().createProp();
+    _chromeBall = play().propTeam3D()->createProp();
     _chromeBall->setVolume(chromeBallSphere);
     _chromeBall->setCostume(chromeBallCostume);
 }
@@ -146,42 +141,61 @@ void CpuRaytracingCharacter::enterStage()
 void CpuRaytracingCharacter::beginStep(const StageTime &time)
 {
     _ups->setText("UPS: " + toString(floor(1.0 / time.elapsedTime())));
+
+    SynchronousKeyboard& keyboard = *play().synchronousKeyboard();
+
+    bool moved = false;
+    if(keyboard.isAsciiPressed('W'))
+    {
+        _camPos += _frontVec;
+        moved = true;
+    }
+    if(keyboard.isAsciiPressed('S'))
+    {
+        _camPos -= _frontVec;
+        moved = true;
+    }
+    if(keyboard.isAsciiPressed('D'))
+    {
+        _camPos += _rightVec;
+        moved = true;
+    }
+    if(keyboard.isAsciiPressed('A'))
+    {
+        _camPos -= _rightVec;
+        moved = true;
+    }
+
+    if(moved)
+    {
+        std::shared_ptr<Camera> camera = play().view()->camera3D();
+        camera->updateView(glm::lookAt(_camPos, _camPos+_frontVec, _upVec));
+    }
 }
 
-void CpuRaytracingCharacter::draw(const StageTime &time)
+void CpuRaytracingCharacter::draw(const std::shared_ptr<scaena::View> &,
+                                  const scaena::StageTime&time)
 {
     _fps->setText("FPS: " + toString(floor(1.0 / time.elapsedTime())));
 }
 
 void CpuRaytracingCharacter::exitStage()
 {
-    stage().propTeam2D().deleteTextHud(_fps);
-    stage().propTeam2D().deleteTextHud(_ups);
+    play().propTeam2D()->deleteTextHud(_fps);
+    play().propTeam2D()->deleteTextHud(_ups);
 }
 
-bool CpuRaytracingCharacter::keyPressEvent(const KeyboardEvent& event)
+void CpuRaytracingCharacter::notify(cellar::CameraMsg& msg)
 {
-    bool moved = false;
-
-    switch(event.getAscii())
+    if(msg.change == CameraMsg::EChange::VIEWPORT &&
+       msg.camera.viewport().x != 0 &&
+       msg.camera.viewport().y != 0)
     {
-    case 'W': _camPos += _frontVec; moved = true; break;
-    case 'S': _camPos -= _frontVec; moved = true; break;
-    case 'D': _camPos += _rightVec; moved = true; break;
-    case 'A': _camPos -= _rightVec; moved = true; break;
+        msg.camera.updateProjection(
+            glm::perspectiveFov(
+              glm::pi<double>() / 9.0,
+              (double) msg.camera.viewport().x,
+              (double) msg.camera.viewport().y,
+              1.0, 2.0));
     }
-
-    if(moved)
-    {
-        stage().camera().updateView(
-            glm::lookAt(
-              _camPos,
-              _camPos+_frontVec,
-              _upVec));
-    }
-}
-
-bool CpuRaytracingCharacter::keyReleaseEvent(const KeyboardEvent& event)
-{
-
 }

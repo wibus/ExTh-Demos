@@ -4,19 +4,22 @@
 
 #include <GLM/gtc/constants.hpp>
 
+#include <CellarWorkbench/Camera/CameraManBird.h>
 #include <CellarWorkbench/Misc/StringUtils.h>
 
-#include <PropRoom2D/Shape/Circle.h>
-#include <PropRoom2D/Shape/Polygon.h>
-#include <PropRoom2D/Hud/TextHud.h>
-#include <PropRoom2D/Hud/ImageHud.h>
-#include <PropRoom2D/PropTeam/AbstractPropTeam.h>
-#include <PropRoom2D/Costume/CircleCostume.h>
-#include <PropRoom2D/Costume/PolygonCostume.h>
-#include <PropRoom2D/Hardware/Hardware.h>
+#include <PropRoom2D/Prop/Costume/CircleCostume.h>
+#include <PropRoom2D/Prop/Costume/PolygonCostume.h>
+#include <PropRoom2D/Prop/Hardware/Hardware.h>
+#include <PropRoom2D/Prop/Hud/TextHud.h>
+#include <PropRoom2D/Prop/Hud/ImageHud.h>
+#include <PropRoom2D/Prop/Shape/Circle.h>
+#include <PropRoom2D/Prop/Shape/Polygon.h>
+#include <PropRoom2D/Team/AbstractTeam.h>
 
-#include <Scaena/Stage/AbstractStage.h>
-#include <Scaena/Stage/Event/StageTime.h>
+
+#include <Scaena/Play/Play.h>
+#include <Scaena/Play/View.h>
+#include <Scaena/StageManagement/Event/StageTime.h>
 
 using namespace std;
 using namespace cellar;
@@ -24,24 +27,26 @@ using namespace prop2;
 using namespace scaena;
 
 
-Physics2DCharacter::Physics2DCharacter(AbstractStage &stage) :
-    AbstractCharacter(stage, "Character")
+Physics2DCharacter::Physics2DCharacter(Play& play) :
+    Character(play, "Character")
 {
 }
 
 void Physics2DCharacter::enterStage()
 {
-    stage().propTeam2D().setGravity(glm::dvec2(0.0f, -98.0f));
+    _camMan.reset(new CameraManBird(play().view()->camera2D()));
+    play().propTeam2D()->setGravity(glm::dvec2(0.0f, -98.0f));
+    glm::ivec2 viewport = play().view()->viewport();
 
     if(!_background)
     {
         const vector<glm::dvec2> backgroundVertices = {
-            glm::dvec2(0.0,              0.0),
-            glm::dvec2(stage().width(),  0.0),
-            glm::dvec2(stage().width(),  stage().height()),
-            glm::dvec2(0.0,              stage().height())
+            glm::dvec2(0.0,         0.0),
+            glm::dvec2(viewport.x,  0.0),
+            glm::dvec2(viewport.x,  viewport.y),
+            glm::dvec2(0.0,         viewport.y)
         };
-        _background = stage().propTeam2D().createPolygon(4);
+        _background = play().propTeam2D()->createPolygon(4);
         _background->setBodyType(EBodyType::GRAPHIC);
         _background->setVertices(backgroundVertices);
         _background->costume()->setTextureName(":/Physics2D/textures/campagne.png");
@@ -67,7 +72,7 @@ void Physics2DCharacter::enterStage()
             glm::dvec2(800.0, 20.0),
             glm::dvec2(0.0,   20.0)
         };
-        _groundFloor = stage().propTeam2D().createPolygon(4);
+        _groundFloor = play().propTeam2D()->createPolygon(4);
         _groundFloor->setVertices(floorVertices);
         _groundFloor->setBodyType(EBodyType::KINEMATIC);
         _groundFloor->setCostume(groundFloorCostume);
@@ -92,13 +97,13 @@ void Physics2DCharacter::enterStage()
             glm::dvec2(20.0, 580.0),
             glm::dvec2(0.0,  580.0)
         };
-        _groundLeft = stage().propTeam2D().createPolygon(groundSides.size());
+        _groundLeft = play().propTeam2D()->createPolygon(groundSides.size());
         _groundLeft->setVertices(groundSides);
         _groundLeft->moveVertexAt(0, _groundFloor->outline()[3].begin());
         _groundLeft->setBodyType(EBodyType::KINEMATIC);
         _groundLeft->setCostume(groundSidesCostume);
 
-        _groundRight = stage().propTeam2D().createPolygon(groundSides.size());
+        _groundRight = play().propTeam2D()->createPolygon(groundSides.size());
         _groundRight->setVertices(groundSides);
         _groundRight->moveVertexAt(1, _groundFloor->outline()[2].begin());
         _groundRight->setBodyType(EBodyType::KINEMATIC);
@@ -119,7 +124,7 @@ void Physics2DCharacter::enterStage()
             rampVertices.push_back(glm::dvec2(x, y));
         }
         rampVertices.push_back(glm::dvec2(x, 0));
-        _ramp = stage().propTeam2D().createPolygon(rampVertices.size());
+        _ramp = play().propTeam2D()->createPolygon(rampVertices.size());
         _ramp->setVertices(rampVertices);
         _ramp->moveVertexAt(0, _groundRight->outline()[0].begin());
         _ramp->setBodyType(EBodyType::KINEMATIC);
@@ -151,14 +156,14 @@ void Physics2DCharacter::enterStage()
             glm::dvec2(0.0,  120.0)
         };
 
-        _housePillarLeft = stage().propTeam2D().createPolygon(pillarVertices.size());
+        _housePillarLeft = play().propTeam2D()->createPolygon(pillarVertices.size());
         _housePillarLeft->setVertices(pillarVertices);
         _housePillarLeft->moveVertexAt(0, _groundFloor->outline()[3].begin() + glm::dvec2(160.0, 0.0));
         _housePillarLeft->setBodyType(EBodyType::DYNAMIC);
         _housePillarLeft->setCostume(pillarCostume);
         _housePillarLeft->setHardware(houseMaterial);
 
-        _housePillarRight = stage().propTeam2D().createPolygon(pillarVertices.size());
+        _housePillarRight = play().propTeam2D()->createPolygon(pillarVertices.size());
         _housePillarRight->setVertices(pillarVertices);
         _housePillarRight->moveVertexAt(0, _groundFloor->outline()[3].begin() + glm::dvec2(260.0, 0.0));
         _housePillarRight->setBodyType(EBodyType::DYNAMIC);
@@ -183,7 +188,7 @@ void Physics2DCharacter::enterStage()
             glm::dvec2(0.0, 0.1),
         };
 
-        _houseRoof = stage().propTeam2D().createPolygon(houseRoofVertices.size());
+        _houseRoof = play().propTeam2D()->createPolygon(houseRoofVertices.size());
         _houseRoof->setVertices(houseRoofVertices);
         _houseRoof->moveBy(glm::dvec2(225, 140));
         _houseRoof->setBodyType(EBodyType::DYNAMIC);
@@ -218,7 +223,7 @@ void Physics2DCharacter::enterStage()
             gearColors.push_back(glm::dvec4(0.3, 0.3, 0.3+0.7*(perc-0.5)*(perc-0.5), 1.0));
         }
 
-        _gear = stage().propTeam2D().createPolygon(gearVertices.size());
+        _gear = play().propTeam2D()->createPolygon(gearVertices.size());
         _gear->setVertices(gearVertices);
         _gear->moveBy(_ramp->outline()[0].begin() + glm::dvec2(-outerRadius, 600.0));
         _gear->setBodyType(EBodyType::DYNAMIC);
@@ -228,7 +233,7 @@ void Physics2DCharacter::enterStage()
 
     if(!_ball)
     {
-        _ball = stage().propTeam2D().createCircle();
+        _ball = play().propTeam2D()->createCircle();
         _ball->setRadius(30);
         _ball->setCenter(_ramp->outline()[0].begin() + glm::dvec2(-_ball->radius()-600, 400.0));
         _ball->setBodyType(EBodyType::DYNAMIC);
@@ -240,7 +245,7 @@ void Physics2DCharacter::enterStage()
 
 
 
-    _statsPanel = stage().propTeam2D().createImageHud();
+    _statsPanel = play().propTeam2D()->createImageHud();
     _statsPanel->setSize(glm::dvec2(110, 48));
     _statsPanel->setHandlePosition(glm::dvec2(10, -_statsPanel->height() - 10));
     _statsPanel->setHorizontalAnchor(EHorizontalAnchor::LEFT);
@@ -249,14 +254,14 @@ void Physics2DCharacter::enterStage()
     _statsPanel->setTexOrigin(glm::dvec2(0.0, 0.0));
     _statsPanel->setTexExtents(glm::dvec2(1.0, 1.0));
 
-    _fps = stage().propTeam2D().createTextHud();
+    _fps = play().propTeam2D()->createTextHud();
     _fps->setText("FPS: ");
     _fps->setHandlePosition(glm::dvec2(18.0, -30.0));
     _fps->setHorizontalAnchor(EHorizontalAnchor::LEFT);
     _fps->setVerticalAnchor(EVerticalAnchor::TOP);
     _fps->setHeight(15);
 
-    _ups = stage().propTeam2D().createTextHud();
+    _ups = play().propTeam2D()->createTextHud();
     _ups->setText("UPS: ");
     _ups->setHandlePosition(glm::dvec2(18.0, -50.0));
     _ups->setHorizontalAnchor(EHorizontalAnchor::LEFT);
@@ -270,24 +275,25 @@ void Physics2DCharacter::beginStep(const StageTime &time)
     _ups->setText("UPS: " + toString(floor(1.0 / time.elapsedTime())));
 }
 
-void Physics2DCharacter::draw(const StageTime &time)
+void Physics2DCharacter::draw(const std::shared_ptr<scaena::View> &,
+                              const scaena::StageTime&time)
 {
     _fps->setText("FPS: " + toString(floor(1.0 / time.elapsedTime())));
 }
 
 void Physics2DCharacter::exitStage()
 {
-    stage().propTeam2D().deletePolygon(_background);
-    stage().propTeam2D().deletePolygon(_groundFloor);
-    stage().propTeam2D().deletePolygon(_groundLeft);
-    stage().propTeam2D().deletePolygon(_groundRight);
-    stage().propTeam2D().deletePolygon(_ramp);
-    stage().propTeam2D().deletePolygon(_housePillarLeft);
-    stage().propTeam2D().deletePolygon(_housePillarRight);
-    stage().propTeam2D().deletePolygon(_houseRoof);
-    stage().propTeam2D().deletePolygon(_gear);
-    stage().propTeam2D().deleteCircle(_ball);
-    stage().propTeam2D().deleteImageHud(_statsPanel);
-    stage().propTeam2D().deleteTextHud(_fps);
-    stage().propTeam2D().deleteTextHud(_ups);
+    play().propTeam2D()->deletePolygon(_background);
+    play().propTeam2D()->deletePolygon(_groundFloor);
+    play().propTeam2D()->deletePolygon(_groundLeft);
+    play().propTeam2D()->deletePolygon(_groundRight);
+    play().propTeam2D()->deletePolygon(_ramp);
+    play().propTeam2D()->deletePolygon(_housePillarLeft);
+    play().propTeam2D()->deletePolygon(_housePillarRight);
+    play().propTeam2D()->deletePolygon(_houseRoof);
+    play().propTeam2D()->deletePolygon(_gear);
+    play().propTeam2D()->deleteCircle(_ball);
+    play().propTeam2D()->deleteImageHud(_statsPanel);
+    play().propTeam2D()->deleteTextHud(_fps);
+    play().propTeam2D()->deleteTextHud(_ups);
 }

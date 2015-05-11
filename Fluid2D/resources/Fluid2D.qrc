@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/">
+        <file>textures/statsPanel.bmp</file>
+        <file>shaders/update.vert</file>
+        <file>shaders/jacobi.frag</file>
+        <file>shaders/heat.frag</file>
+        <file>shaders/gradSub.frag</file>
+        <file>shaders/frontier.frag</file>
+        <file>shaders/drawFluid.vert</file>
+        <file>shaders/drawFluid.frag</file>
+        <file>shaders/divergence.frag</file>
+        <file>shaders/advect.frag</file>
+    </qresource>
+</RCC>

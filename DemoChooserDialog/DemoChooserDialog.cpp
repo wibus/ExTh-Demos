@@ -7,17 +7,16 @@ using namespace std;
 #include <QString>
 #include <QPushButton>
 
-#include <Scaena/Play/AbstractPlay.h>
+#include <Scaena/Play/Play.h>
 using namespace scaena;
 
 
 DemoChooserDialog::DemoChooserDialog(
-        const std::vector<std::shared_ptr<AbstractPlay> >& demos,
+        const DemoVec& demos,
         QWidget *parent) :
     QDialog(parent),
     _ui(new Ui::DemoChooserDialog),
-    _userQuit(true),
-    _selectedDemo()
+    _userQuit(true)
 {
     _ui->setupUi(this);
     connect(_ui->buttonBox, SIGNAL(accepted()), this, SLOT(Launch()));
@@ -26,23 +25,23 @@ DemoChooserDialog::DemoChooserDialog(
     bool isFirst = true;
     for(const auto& demo : demos)
     {
-        string playId = demo->id();
-        QPushButton* playButton = new QPushButton(playId.c_str());
+        QPushButton* playButton = new QPushButton(demo.first.c_str());
         _ui->groupBox->layout()->addWidget(playButton);
         playButton->setCheckable(true);
         playButton->setChecked(isFirst);
-        isFirst = false;
 
-        connect(playButton, &QPushButton::clicked, [=]() {
+        connect(playButton, &QPushButton::clicked, [&]() {
             _selectedDemo = demo;
-            cout << _selectedDemo->id() << endl;
+            cout << _selectedDemo.first << endl;
         });
 
-        if(demo == *demos.begin())
+        if(isFirst)
         {
             playButton->click();
             playButton->setFocus();
         }
+
+        isFirst = false;
     }
 }
 
@@ -56,7 +55,7 @@ bool DemoChooserDialog::userQuit()
     return _userQuit;
 }
 
-std::shared_ptr<scaena::AbstractPlay> DemoChooserDialog::selectedDemo()
+Demo DemoChooserDialog::selectedDemo()
 {
     return _selectedDemo;
 }

@@ -1,0 +1,6 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file alias="fractals.vert">shaders/fractals.vert</file>
+    <file alias="fractals.frag">shaders/fractals.frag</file>
+</qresource>
+</RCC>
