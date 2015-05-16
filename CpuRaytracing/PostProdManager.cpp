@@ -108,7 +108,7 @@ void PostProdManager::useAdaptativeFilteringChecked(int state)
 {
     bool isChecked = state;
     _ui->adaptativeLayout->setEnabled(isChecked);
-    _unitBackend->enableAdaptativeFiltering(isChecked);
+    _unitBackend->activateAdaptativeFiltering(isChecked);
 }
 
 void PostProdManager::adaptativeFilteringFactorChanged(int factor)

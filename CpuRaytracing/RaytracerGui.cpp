@@ -13,7 +13,6 @@ RaytracerGui::RaytracerGui(const std::shared_ptr<Play>& play) :
     _ui->setupUi(this);
 
     _postProdManager.reset(new PostProdManager(_ui));
-
     _raytracedView.reset(new RaytracedView(_postProdManager));
     _ui->raytracedScrollView->setWidget(_raytracedView.get());
     connect(_ui->viewportSpinX,   static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
