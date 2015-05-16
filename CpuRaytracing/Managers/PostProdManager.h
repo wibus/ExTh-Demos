@@ -3,8 +3,6 @@
 
 #include <memory>
 
-#include <GLM/glm.hpp>
-
 #include <QTableWidget>
 
 namespace Ui

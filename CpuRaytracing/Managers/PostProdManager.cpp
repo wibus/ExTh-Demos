@@ -13,7 +13,7 @@
 
 #include <PropRoom3D/Team/ArtDirector/GlPostProdUnit.h>
 
-#include "RaytracerGui.h"
+#include "../RaytracerGui.h"
 #include "ui_RaytracerGui.h"
 
 using namespace prop3;

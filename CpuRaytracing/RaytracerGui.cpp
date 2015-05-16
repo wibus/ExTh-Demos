@@ -3,6 +3,10 @@
 
 #include <QSpinBox>
 
+#include "Managers/CameraManager.h"
+#include "Managers/PostProdManager.h"
+#include "RaytracedView.h"
+
 using namespace scaena;
 
 
@@ -12,16 +16,13 @@ RaytracerGui::RaytracerGui(const std::shared_ptr<Play>& play) :
 {
     _ui->setupUi(this);
 
+    _cameraManager.reset(new CameraManager(_ui));
     _postProdManager.reset(new PostProdManager(_ui));
-    _raytracedView.reset(new RaytracedView(_postProdManager));
-    _ui->raytracedScrollView->setWidget(_raytracedView.get());
-    connect(_ui->viewportSpinX,   static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-            _raytracedView.get(), &RaytracedView::setFixedWidth);
-    connect(_ui->viewportSpinY,   static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-            _raytracedView.get(), &RaytracedView::setFixedHeight);
-    _raytracedView->setFixedWidth(_ui->viewportSpinX->value());
-    _raytracedView->setFixedHeight(_ui->viewportSpinY->value());
+    _raytracedView.reset(new RaytracedView(
+         _cameraManager,
+         _postProdManager));
 
+    _cameraManager->setView(_raytracedView.get());
     _play->addView(_raytracedView);
 }
 

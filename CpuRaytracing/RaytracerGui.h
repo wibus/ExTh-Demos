@@ -5,13 +5,15 @@
 
 #include <Scaena/Play/Play.h>
 
-#include "PostProdManager.h"
-#include "RaytracedView.h"
-
 namespace Ui
 {
     class RaytracerGui;
 }
+
+class RaytracedView;
+class CameraManager;
+class PostProdManager;
+
 
 class RaytracerGui : public QMainWindow
 {
@@ -26,6 +28,7 @@ private:
     Ui::RaytracerGui* _ui;
     std::shared_ptr<scaena::Play> _play;
     std::shared_ptr<RaytracedView> _raytracedView;
+    std::shared_ptr<CameraManager> _cameraManager;
     std::shared_ptr<PostProdManager> _postProdManager;
 };
 

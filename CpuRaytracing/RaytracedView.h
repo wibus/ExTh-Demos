@@ -3,13 +3,16 @@
 
 #include <Scaena/ScaenaApplication/QGlWidgetView.h>
 
-#include "PostProdManager.h"
+class CameraManager;
+class PostProdManager;
 
 
 class RaytracedView : public scaena::QGlWidgetView
 {
 public:
-    RaytracedView(std::shared_ptr<PostProdManager> postProdManager);
+    RaytracedView(
+        const std::shared_ptr<CameraManager>& cameraManager,
+        const std::shared_ptr<PostProdManager>& postProdManager);
     virtual ~RaytracedView();
 
 
@@ -18,6 +21,7 @@ protected:
 
 
 private:
+    std::shared_ptr<CameraManager> _cameraManager;
     std::shared_ptr<PostProdManager> _postProdManager;
 };
 
