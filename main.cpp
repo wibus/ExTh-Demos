@@ -15,12 +15,11 @@
 #include <Scaena/Play/Act.h>
 #include <Scaena/Play/Play.h>
 #include <Scaena/ScaenaApplication/Application.h>
-#include <Scaena/ScaenaApplication/GlMainWindow.h>
 #include <Scaena/ScaenaApplication/QGlWidgetView.h>
 
 #include "DemoChooserDialog/DemoChooserDialog.h"
 #include "CpuRaytracing/CpuRaytracingCharacter.h"
-#include "CpuRaytracing/QPostProdManager.h"
+#include "CpuRaytracing/RaytracerGui.h"
 #include "Physics2D/Physics2DCharacter.h"
 #include "VolumeRendering/Visualizer.h"
 #include "Fractal/FractalCharacter.h"
@@ -31,129 +30,104 @@ using namespace cellar;
 using namespace prop3;
 using namespace scaena;
 
-std::shared_ptr<QMainWindow> mainWindow;
+std::shared_ptr<QWidget> view;
 
 std::shared_ptr<Play> buildCpuRaytracing()
 {
+    // Build the Play
     std::shared_ptr<Play> play(new Play("CPU Raytracing"));
-    std::shared_ptr<Character> character(new CpuRaytracingCharacter(*play));
-    std::shared_ptr<Act> act(new Act(*play, "Main Act"));
+    std::shared_ptr<Character> character(new CpuRaytracingCharacter());
+    std::shared_ptr<Act> act(new Act("Main Act"));
     act->addCharacter(character);
     play->appendAct(act);
 
-    // Create and setup default
-    QPostProdManager* postProdManager = new QPostProdManager();
-    postProdManager->setFixedSize(postProdManager->size());
-    std::shared_ptr<PostProdManager> postProdPtr(postProdManager);
-
-    QGlWidgetView* view = new QGlWidgetView("Main View");
-    std::shared_ptr<View> viewPtr(view);
-    view->setMinimumSize(64, 64);
-    view->setFixedSize(850, 500);
-
-    view->setPostProdManager(postProdPtr);
-    play->addView(viewPtr);
-
-    QVBoxLayout* viewlayout = new QVBoxLayout();
-    viewlayout->addStretch();
-    viewlayout->addWidget(view);
-    viewlayout->addStretch();
-
-    QWidget* centralWidget = new QWidget();
-    QHBoxLayout* layout = new QHBoxLayout();
-    centralWidget->setLayout(layout);
-    layout->addWidget(postProdManager);
-    layout->addStretch();
-    layout->addLayout(viewlayout);
-    layout->addStretch();
-
-    GlMainWindow* window = new GlMainWindow(play, centralWidget);
-    window->centerOnScreen();
+    // Build GUI
+    RaytracerGui* window = new RaytracerGui(play);
     window->show();
-
-    mainWindow.reset(window);
 
     return play;
 }
 
 std::shared_ptr<Play> buildVolumeRendering()
 {
+    // Build default view
+    QGlWidgetView* view = new QGlWidgetView("MainView");
+    std::shared_ptr<View> pView(view);
+    view->setGlWindowSpace(800, 600);
+    view->centerOnScreen();
+    view->show();
+
+    // Build the Play
     std::shared_ptr<Play> play(new Play("Volume Rendering"));
-    std::shared_ptr<Character> character(new Visualizer(*play));
-    std::shared_ptr<Act> act(new Act(*play, "Main Act"));
+    std::shared_ptr<Character> character(new Visualizer());
+    std::shared_ptr<Act> act(new Act("Main Act"));
     act->addCharacter(character);
     play->appendAct(act);
-
-    // Create and setup default
-    GlMainWindow* window = new GlMainWindow(play);
-    window->setGlWindowSpace(800, 600);
-    window->centerOnScreen();
-    window->show();
-
-    mainWindow.reset(window);
+    play->addView(pView);
 
     return play;
 }
 
 std::shared_ptr<Play> buildFluid2D()
 {
+    // Build default view
+    QGlWidgetView* view = new QGlWidgetView("MainView");
+    std::shared_ptr<View> pView(view);
+    view->setGlWindowSpace(
+        FluidCharacter::WIDTH  * FluidCharacter::POINT_SIZE,
+        FluidCharacter::HEIGHT * FluidCharacter::POINT_SIZE);
+    view->centerOnScreen();
+    view->show();
+
+    // Build the Play
     std::shared_ptr<Play> play(new Play("Fluid 2D"));
     play->setUpdateRate(Play::DEACTIVATE_AUTOMATIC_REFRESH);
     play->setDrawRate(Play::FASTEST_REFRESH_RATE_AVAILABLE);
-
-    std::shared_ptr<Character> character(new FluidCharacter(*play));
-    std::shared_ptr<Act> act(new Act(*play, "Main Act"));
+    std::shared_ptr<Character> character(new FluidCharacter());
+    std::shared_ptr<Act> act(new Act("Main Act"));
     act->addCharacter(character);
     play->appendAct(act);
-
-    // Create and setup default
-    GlMainWindow* window = new GlMainWindow(play);
-    window->setGlWindowSpace(
-        FluidCharacter::WIDTH  * FluidCharacter::POINT_SIZE,
-        FluidCharacter::HEIGHT * FluidCharacter::POINT_SIZE);
-    window->centerOnScreen();
-    window->show();
-
-    mainWindow.reset(window);
-
+    play->addView(pView);
 
     return play;
 }
 
 std::shared_ptr<Play> buildFractal()
 {
+    // Build default view
+    QGlWidgetView* view = new QGlWidgetView("MainView");
+    std::shared_ptr<View> pView(view);
+    view->setGlWindowSpace(800, 600);
+    view->centerOnScreen();
+    view->show();
+
+    // Build the Play
     std::shared_ptr<Play> play(new Play("Fractal"));
-    std::shared_ptr<Character> character(new FractalsCharacter(*play));
-    std::shared_ptr<Act> act(new Act(*play, "Main Act"));
+    std::shared_ptr<Character> character(new FractalsCharacter());
+    std::shared_ptr<Act> act(new Act("Main Act"));
     act->addCharacter(character);
     play->appendAct(act);
-
-    // Create and setup default
-    GlMainWindow* window = new GlMainWindow(play);
-    window->setGlWindowSpace(800, 600);
-    window->centerOnScreen();
-    window->show();
-
-    mainWindow.reset(window);
+    play->addView(pView);
 
     return play;
 }
 
 std::shared_ptr<Play> buildPhysics2D()
 {
+    // Build default view
+    QGlWidgetView* view = new QGlWidgetView("MainView");
+    std::shared_ptr<View> pView(view);
+    view->setGlWindowSpace(800, 600);
+    view->centerOnScreen();
+    view->show();
+
+    // Build the Play
     std::shared_ptr<Play> play(new Play("Physics 2D"));
-    std::shared_ptr<Character> character(new Physics2DCharacter(*play));
-    std::shared_ptr<Act> act(new Act(*play, "Main Act"));
+    std::shared_ptr<Character> character(new Physics2DCharacter());
+    std::shared_ptr<Act> act(new Act("Main Act"));
     act->addCharacter(character);
     play->appendAct(act);
-
-    // Create and setup default
-    GlMainWindow* window = new GlMainWindow(play);
-    window->setGlWindowSpace(800, 600);
-    window->centerOnScreen();
-    window->show();
-
-    mainWindow.reset(window);
+    play->addView(pView);
 
     return play;
 }
@@ -186,6 +160,5 @@ int main(int argc, char* argv[])
     // Retreive and setup selected demo
     app.setPlay(dialog.selectedDemo().second());
     int exitCode = app.execute();
-    mainWindow.reset();
     return exitCode;
 }

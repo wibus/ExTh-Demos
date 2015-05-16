@@ -33,8 +33,8 @@ const int FluidCharacter::AREA = WIDTH * HEIGHT;
 const int FluidCharacter::POINT_SIZE = 3;
 
 
-FluidCharacter::FluidCharacter(Play& play) :
-    Character(play, "FluidCharacter"),
+FluidCharacter::FluidCharacter() :
+    Character("FluidCharacter"),
     DX(1.0f),
     DT(1.0f),
     VISCOSITY(0.01f),

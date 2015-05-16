@@ -1,5 +1,4 @@
-#include "QPostProdManager.h"
-#include "ui_QPostProdUnit.h"
+#include "PostProdManager.h"
 
 #include <cassert>
 
@@ -10,59 +9,59 @@
 
 #include <CellarWorkbench/Misc/StringUtils.h>
 #include <CellarWorkbench/Misc/Log.h>
-
 #include <CellarWorkbench/GL/GlInputsOutputs.h>
 
+#include <PropRoom3D/Team/ArtDirector/GlPostProdUnit.h>
 
-QPostProdManager::QPostProdManager() :
-    _isSetup(false),
-    _ui(new Ui::QPostProdManager())
+#include "RaytracerGui.h"
+#include "ui_RaytracerGui.h"
+
+using namespace prop3;
+
+
+PostProdManager::PostProdManager(Ui::RaytracerGui* ui) :
+    _ui(ui)
 {
-    _ui->setupUi(this);
-
     connect(_ui->activateLowpassCheck, &QCheckBox::stateChanged,
-            this,                      &QPostProdManager::activateLowPassChecked);
+            this,                      &PostProdManager::activateLowPassChecked);
 
     connect(_ui->lowpassSizeCombo, (void (QComboBox::*)(int)) &QComboBox::currentIndexChanged,
-            this,                  &QPostProdManager::lowpassSizeChanged);
+            this,                  &PostProdManager::lowpassSizeChanged);
 
     connect(_ui->lowpassVarianceSpin, (void (QDoubleSpinBox::*)(double)) &QDoubleSpinBox::valueChanged,
-            this,                     &QPostProdManager::lowpassVarianceChanged);
+            this,                     &PostProdManager::lowpassVarianceChanged);
 
     connect(_ui->useAdaptativeFilteringCheck, &QCheckBox::stateChanged,
-            this,                             &QPostProdManager::useAdaptativeFilteringChecked);
+            this,                             &PostProdManager::useAdaptativeFilteringChecked);
 
     connect(_ui->adaptativeFactorSlider, &QSlider::valueChanged,
-            this,                        &QPostProdManager::adaptativeFilteringFactorChanged);
+            this,                        &PostProdManager::adaptativeFilteringFactorChanged);
 
     connect(_ui->temperatureSpin,   (void (QSpinBox::*)(int)) &QSpinBox::valueChanged,
-            this,                   &QPostProdManager::temperatureChanged);
+            this,                   &PostProdManager::temperatureChanged);
 
     connect(_ui->temperatureDefaultBtn, &QPushButton::clicked,
-            this,                       &QPostProdManager::temperatureDefaultClicked);
+            this,                       &PostProdManager::temperatureDefaultClicked);
 
     connect(_ui->contrastSlider, &QSlider::valueChanged,
-            this,                &QPostProdManager::contrastChanged);
+            this,                &PostProdManager::contrastChanged);
 
     connect(_ui->luminositySlider, &QSlider::valueChanged,
-            this,                  &QPostProdManager::luminosityChanged);
+            this,                  &PostProdManager::luminosityChanged);
 
     connect(_ui->saveButton, &QPushButton::clicked,
-            this,            &QPostProdManager::saveOutputImage);
+            this,            &PostProdManager::saveOutputImage);
 }
 
-QPostProdManager::~QPostProdManager()
+PostProdManager::~PostProdManager()
 {
 }
 
-void QPostProdManager::setPostProdUnit(
-    std::shared_ptr<prop3::GlPostProdUnit> unitBackend)
+void PostProdManager::setPostProdUnit(
+        const std::shared_ptr<prop3::GlPostProdUnit>& unitBackend)
 {
     _unitBackend = unitBackend;
-}
 
-void QPostProdManager::setup()
-{
     lowpassSizeChanged(_ui->lowpassSizeCombo->currentIndex());
     lowpassVarianceChanged(_ui->lowpassVarianceSpin->value());
     adaptativeFilteringFactorChanged(_ui->adaptativeFactorSlider->value());
@@ -74,11 +73,9 @@ void QPostProdManager::setup()
     temperatureDefaultClicked();
     contrastChanged(_ui->contrastSlider->value());
     luminosityChanged(_ui->luminositySlider->value());
-
-    _isSetup = true;
 }
 
-void QPostProdManager::activateLowPassChecked(int state)
+void PostProdManager::activateLowPassChecked(int state)
 {
     bool isChecked = state;
     _ui->lowpassWidget->setEnabled(isChecked);
@@ -90,7 +87,7 @@ void QPostProdManager::activateLowPassChecked(int state)
     }
 }
 
-void QPostProdManager::lowpassSizeChanged(int sizeIndex)
+void PostProdManager::lowpassSizeChanged(int sizeIndex)
 {
     prop3::KernelSize size;
     if(sizeIndex == 0) size = prop3::KernelSize::SIZE_3x3;
@@ -101,39 +98,39 @@ void QPostProdManager::lowpassSizeChanged(int sizeIndex)
     updateLowpassKernelTable(_ui->kernelTable, _unitBackend->lowpassKernel());
 }
 
-void QPostProdManager::lowpassVarianceChanged(double variance)
+void PostProdManager::lowpassVarianceChanged(double variance)
 {
     _unitBackend->setLowpassVariance(variance);
     updateLowpassKernelTable(_ui->kernelTable, _unitBackend->lowpassKernel());
 }
 
-void QPostProdManager::useAdaptativeFilteringChecked(int state)
+void PostProdManager::useAdaptativeFilteringChecked(int state)
 {
     bool isChecked = state;
-    _ui->adaptativeWidget->setEnabled(isChecked);
+    _ui->adaptativeLayout->setEnabled(isChecked);
     _unitBackend->enableAdaptativeFiltering(isChecked);
 }
 
-void QPostProdManager::adaptativeFilteringFactorChanged(int factor)
+void PostProdManager::adaptativeFilteringFactorChanged(int factor)
 {
     float zeroToOne = computeAdaptativeFactor(factor);
     _ui->adaptativeFactorLabel->setText(QString::number(zeroToOne*100) + '%');
     _unitBackend->setAdaptativeFilteringFactor(zeroToOne);
 }
 
-void QPostProdManager::temperatureChanged(int kelvin)
+void PostProdManager::temperatureChanged(int kelvin)
 {
     _ui->temperatureDefaultBtn->setEnabled(
         kelvin != prop3::GlPostProdUnit::DEFAULT_WHITE_TEMPERATURE);
     _unitBackend->setImageTemperature(kelvin);
 }
 
-void QPostProdManager::temperatureDefaultClicked()
+void PostProdManager::temperatureDefaultClicked()
 {
     temperatureChanged(prop3::GlPostProdUnit::DEFAULT_WHITE_TEMPERATURE);
 }
 
-void QPostProdManager::contrastChanged(int contrast)
+void PostProdManager::contrastChanged(int contrast)
 {
     float minusOneToOne = computeContrastFactor(contrast);
     _ui->contrastLabel->setText(
@@ -141,7 +138,7 @@ void QPostProdManager::contrastChanged(int contrast)
     _unitBackend->setImageContrast(minusOneToOne);
 }
 
-void QPostProdManager::luminosityChanged(int luminosity)
+void PostProdManager::luminosityChanged(int luminosity)
 {
     float zeroToOne = computeLuminosityFactor(luminosity);
     _ui->luminosityLabel->setText(
@@ -149,27 +146,27 @@ void QPostProdManager::luminosityChanged(int luminosity)
     _unitBackend->setImageLuminosity(zeroToOne);
 }
 
-void QPostProdManager::saveOutputImage()
+void PostProdManager::saveOutputImage()
 {
     _unitBackend->saveOutputImage();
 }
 
-float QPostProdManager::computeLuminosityFactor(int luminosity)
+float PostProdManager::computeLuminosityFactor(int luminosity)
 {
     return (luminosity - 50) / 50.0f;
 }
 
-float QPostProdManager::computeContrastFactor(int contrast)
+float PostProdManager::computeContrastFactor(int contrast)
 {
     return contrast / 50.0f;
 }
 
-float QPostProdManager::computeAdaptativeFactor(int factor)
+float PostProdManager::computeAdaptativeFactor(int factor)
 {
     return factor / 100.0f;
 }
 
-void QPostProdManager::updateLowpassKernelTable(QTableWidget* widget, const float* kernel)
+void PostProdManager::updateLowpassKernelTable(QTableWidget* widget, const float* kernel)
 {
     for(int j=0; j<5; ++j)
     {

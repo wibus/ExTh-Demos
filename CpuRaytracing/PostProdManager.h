@@ -1,37 +1,33 @@
-#ifndef CPURAYTRACING_QPOSTPRODMANAGER_H
-#define CPURAYTRACING_QPOSTPRODMANAGER_H
+#ifndef POSTPRODMANAGER_H
+#define POSTPRODMANAGER_H
 
 #include <memory>
 
 #include <GLM/glm.hpp>
 
-#include <QWidget>
 #include <QTableWidget>
-
-#include <PropRoom3D/Team/ArtDirector/GlPostProdUnit.h>
-
 
 namespace Ui
 {
-    class QPostProdManager;
+    class RaytracerGui;
+}
+
+namespace prop3
+{
+    class GlPostProdUnit;
 }
 
 
-class QPostProdManager :
-        public QWidget,
-        public prop3::PostProdManager
+class PostProdManager : public QObject
 {
     Q_OBJECT
 
 public:
-    QPostProdManager();
-    virtual ~QPostProdManager();
+    PostProdManager(Ui::RaytracerGui* ui);
+    virtual ~PostProdManager();
 
-    virtual void setup() override;
     virtual void setPostProdUnit(
-        std::shared_ptr<prop3::GlPostProdUnit> unitBackend) override;
-
-protected:
+        const std::shared_ptr<prop3::GlPostProdUnit>& unitBackend);
 
 private slots:
     virtual void activateLowPassChecked(int state);
@@ -53,9 +49,8 @@ private:
 
 
 private:
-    bool _isSetup;
-    std::shared_ptr<Ui::QPostProdManager> _ui;
+    Ui::RaytracerGui* _ui;
     std::shared_ptr<prop3::GlPostProdUnit> _unitBackend;
 };
 
-#endif // CPURAYTRACING_QPOSTPRODMANAGER_H
+#endif // POSTPRODMANAGER_H

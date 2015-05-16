@@ -16,7 +16,7 @@ class Visualizer :
         public scaena::Character
 {
 public:
-    Visualizer(scaena::Play& play);
+    Visualizer();
     virtual ~Visualizer();
 
     virtual void enterStage() override;

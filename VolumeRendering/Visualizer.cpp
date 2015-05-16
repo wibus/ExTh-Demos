@@ -23,8 +23,8 @@ using namespace cellar;
 using namespace scaena;
 
 
-Visualizer::Visualizer(Play& play) :
-    Character(play, "Visualizer"),
+Visualizer::Visualizer() :
+    Character("Visualizer"),
     _skyBoxRenderer(),
     _dataRenderer(),
     _dataBox(),

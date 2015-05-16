@@ -1,5 +1,5 @@
-#ifndef CPURAYTRACING_CHARACTER_H
-#define CPURAYTRACING_CHARACTER_H
+#ifndef CPURAYTRACINGCHARACTER_H
+#define CPURAYTRACINGCHARACTER_H
 
 #include <memory>
 
@@ -29,7 +29,7 @@ class CpuRaytracingCharacter :
         public cellar::SpecificObserver<cellar::CameraMsg>
 {
 public:
-    CpuRaytracingCharacter(scaena::Play& play);
+    CpuRaytracingCharacter();
 
     virtual void enterStage() override;
     virtual void beginStep(const scaena::StageTime &time) override;
@@ -53,4 +53,4 @@ private:
 
 };
 
-#endif // CPURAYTRACING_CHARACTER_H
+#endif // CPURAYTRACINGCHARACTER_H

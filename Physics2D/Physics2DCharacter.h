@@ -22,7 +22,7 @@ namespace prop2
 class Physics2DCharacter : public scaena::Character
 {
 public:
-    Physics2DCharacter(scaena::Play& play);
+    Physics2DCharacter();
 
     virtual void enterStage() override;
     virtual void beginStep(const scaena::StageTime &time) override;

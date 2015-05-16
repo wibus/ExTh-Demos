@@ -19,7 +19,7 @@ class FluidCharacter : public scaena::Character,
                        public cellar::SpecificObserver<cellar::CameraMsg>
 {
 public:
-    FluidCharacter(scaena::Play& play);
+    FluidCharacter();
     virtual ~FluidCharacter();
 
     virtual void enterStage() override;

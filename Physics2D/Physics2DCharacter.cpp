@@ -27,8 +27,8 @@ using namespace prop2;
 using namespace scaena;
 
 
-Physics2DCharacter::Physics2DCharacter(Play& play) :
-    Character(play, "Character")
+Physics2DCharacter::Physics2DCharacter() :
+    Character("Character")
 {
 }
 

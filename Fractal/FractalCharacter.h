@@ -12,7 +12,7 @@
 class FractalsCharacter : public scaena::Character
 {
 public:
-    FractalsCharacter(scaena::Play& play);
+    FractalsCharacter();
 
     void enterStage() override;
     void beginStep(const scaena::StageTime &time) override;

@@ -11,8 +11,8 @@ using namespace cellar;
 using namespace scaena;
 
 
-FractalsCharacter::FractalsCharacter(scaena::Play& play) :
-    Character(play, "Fractal Chracter"),
+FractalsCharacter::FractalsCharacter() :
+    Character("Fractal Chracter"),
     _update(true),
     _fractalProgram(),
     _fractalsVao(),

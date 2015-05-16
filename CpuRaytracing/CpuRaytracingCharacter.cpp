@@ -28,8 +28,8 @@ using namespace prop3;
 using namespace scaena;
 
 
-CpuRaytracingCharacter::CpuRaytracingCharacter(Play& play) :
-    Character(play, "CPU Raytracing Character")
+CpuRaytracingCharacter::CpuRaytracingCharacter() :
+    Character("CPU Raytracing Character")
 {
 }
 
