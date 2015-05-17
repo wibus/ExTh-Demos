@@ -17,6 +17,7 @@ public:
 
 
 protected:
+    virtual void resizeGL(int w, int h) override;
     virtual void setupArtDirectors(scaena::Play& play) override;
 
 

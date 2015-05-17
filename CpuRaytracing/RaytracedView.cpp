@@ -19,12 +19,16 @@ RaytracedView::RaytracedView(
     _cameraManager(cameraManager),
     _postProdManager(postProdManager)
 {
-    setFocus();
 }
 
 RaytracedView::~RaytracedView()
 {
 
+}
+
+void RaytracedView::resizeGL(int w, int h)
+{
+    glViewport(0, 0, w, h);
 }
 
 void RaytracedView::setupArtDirectors(scaena::Play& play)

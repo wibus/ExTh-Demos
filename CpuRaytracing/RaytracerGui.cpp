@@ -2,6 +2,8 @@
 #include "ui_RaytracerGui.h"
 
 #include <QSpinBox>
+#include <QApplication>
+#include <QDesktopWidget>
 
 #include "Managers/CameraManager.h"
 #include "Managers/PostProdManager.h"
@@ -15,6 +17,8 @@ RaytracerGui::RaytracerGui(const std::shared_ptr<Play>& play) :
     _play(play)
 {
     _ui->setupUi(this);
+    QPoint center = QApplication::desktop()->availableGeometry(this).center();
+    move(center.x()-width()*0.5, center.y()-height()*0.5);
 
     _cameraManager.reset(new CameraManager(_ui));
     _postProdManager.reset(new PostProdManager(_ui));

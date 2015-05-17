@@ -61,8 +61,6 @@ void CpuRaytracingCharacter::enterStage()
 
     std::shared_ptr<Camera> camera = play().view()->camera3D();
     camera->updateView(glm::lookAt(_camPos, _camPos+_frontVec, _upVec));
-    camera->registerObserver(*this);
-    camera->refresh();
 
 
     glm::dvec3 negLim(-20.0, -20.0, 0.0);
@@ -183,19 +181,4 @@ void CpuRaytracingCharacter::exitStage()
 {
     play().propTeam2D()->deleteTextHud(_fps);
     play().propTeam2D()->deleteTextHud(_ups);
-}
-
-void CpuRaytracingCharacter::notify(cellar::CameraMsg& msg)
-{
-    if(msg.change == CameraMsg::EChange::VIEWPORT &&
-       msg.camera.viewport().x != 0 &&
-       msg.camera.viewport().y != 0)
-    {
-        msg.camera.updateProjection(
-            glm::perspectiveFov(
-              glm::pi<double>() / 9.0,
-              (double) msg.camera.viewport().x,
-              (double) msg.camera.viewport().y,
-              1.0, 2.0));
-    }
 }

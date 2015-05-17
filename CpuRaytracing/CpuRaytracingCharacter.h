@@ -5,8 +5,6 @@
 
 #include <GLM/glm.hpp>
 
-#include <CellarWorkbench/DesignPattern/SpecificObserver.h>
-
 #include <Scaena/Play/Character.h>
 
 namespace cellar
@@ -25,8 +23,7 @@ namespace prop3
 }
 
 class CpuRaytracingCharacter :
-        public scaena::Character,
-        public cellar::SpecificObserver<cellar::CameraMsg>
+        public scaena::Character
 {
 public:
     CpuRaytracingCharacter();
@@ -37,7 +34,6 @@ public:
                       const scaena::StageTime&time) override;
     virtual void exitStage() override;
 
-    virtual void notify(cellar::CameraMsg& msg) override;
 
 private:
     std::shared_ptr<prop2::TextHud> _fps;
