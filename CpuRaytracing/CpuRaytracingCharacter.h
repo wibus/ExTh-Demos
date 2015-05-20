@@ -9,7 +9,7 @@
 
 namespace cellar
 {
-    class CameraMsg;
+    class CameraManFree;
 }
 
 namespace prop2
@@ -36,17 +36,14 @@ public:
 
 
 private:
+    std::shared_ptr<cellar::CameraManFree> _camMan;
+
     std::shared_ptr<prop2::TextHud> _fps;
     std::shared_ptr<prop2::TextHud> _ups;
-    std::shared_ptr<prop3::Prop> _walls;
-    std::shared_ptr<prop3::Prop> _glassLens;
-    std::shared_ptr<prop3::Prop> _chromeBall;
-
-    glm::dvec3 _upVec;
-    glm::dvec3 _frontVec;
-    glm::dvec3 _rightVec;
-    glm::dvec3 _camPos;
-
+    std::shared_ptr<prop3::Prop> _socle;
+    std::shared_ptr<prop3::Prop> _stage;
+    std::shared_ptr<prop3::Prop> _bowl;
+    std::shared_ptr<prop3::Prop> _ball;
 };
 
 #endif // CPURAYTRACINGCHARACTER_H

@@ -3,6 +3,7 @@
 #include <GLM/gtc/matrix_transform.hpp>
 
 #include <CellarWorkbench/Camera/Camera.h>
+#include <CellarWorkbench/Camera/CameraManFree.h>
 #include <CellarWorkbench/Misc/StringUtils.h>
 
 #include <PropRoom2D/Prop/Hud/TextHud.h>
@@ -21,6 +22,7 @@
 #include <Scaena/Play/View.h>
 #include <Scaena/StageManagement/Event/StageTime.h>
 #include <Scaena/StageManagement/Event/SynchronousKeyboard.h>
+#include <Scaena/StageManagement/Event/SynchronousMouse.h>
 
 using namespace cellar;
 using namespace prop2;
@@ -53,121 +55,141 @@ void CpuRaytracingCharacter::enterStage()
 
     // Setup Camera
     glm::dvec3 focusPos = glm::dvec3(-1.2, -1.2, 5.25);
-    _camPos = focusPos + glm::dvec3(25, -40, 14) * 2.0;
-
-    _upVec = glm::dvec3(0, 0, 1);
-    _frontVec = glm::normalize(focusPos - _camPos);
-    _rightVec = glm::normalize(glm::cross(_frontVec, _upVec));
+    glm::dvec3 camPos = focusPos + glm::dvec3(25, -40, 14) * 2.0;
+    glm::dvec3 dir = glm::normalize(focusPos - camPos);
+    double tilt = glm::atan(dir.z, glm::length(glm::dvec2(dir.x, dir.y)));
+    double pan = glm::atan(dir.y, dir.x);
 
     std::shared_ptr<Camera> camera = play().view()->camera3D();
-    camera->updateView(glm::lookAt(_camPos, _camPos+_frontVec, _upVec));
+    _camMan.reset(new CameraManFree(camera, false));
+    _camMan->setOrientation(pan, tilt);
+    _camMan->setPosition(camPos);
 
 
     glm::dvec3 negLim(-20.0, -20.0, 0.0);
     glm::dvec3 posLim( 20.0,  20.0, 0.0);
-    std::shared_ptr<Volume> xNeg(new PlaneGhost(glm::dvec3(-1, 0, 0), negLim));
-    std::shared_ptr<Volume> xPos(new PlaneGhost(glm::dvec3( 1, 0, 0), posLim));
-    std::shared_ptr<Volume> yNeg(new PlaneGhost(glm::dvec3( 0,-1, 0), negLim));
-    std::shared_ptr<Volume> yPos(new PlaneGhost(glm::dvec3( 0, 1, 0), posLim));
-    std::shared_ptr<Volume> zSoc(new Plane(glm::dvec3( 0, 0, 1), negLim));
-    std::shared_ptr<Volume> socle = (zSoc & xNeg & xPos & yNeg & yPos);
+    glm::dvec3 socleDia = posLim - negLim;
+    pVol xNeg(new Plane(glm::dvec3(-1, 0, 0), negLim));
+    pVol xPos(new Plane(glm::dvec3( 1, 0, 0), posLim));
+    pVol yNeg(new Plane(glm::dvec3( 0,-1, 0), negLim));
+    pVol yPos(new Plane(glm::dvec3( 0, 1, 0), posLim));
+    pVol zSoc(new PlaneTexture(glm::dvec3( 0, 0, 1), negLim,
+              glm::dvec3(socleDia.x, 0.0, 0.0),
+              glm::dvec3(0.0, socleDia.y, 0.0),
+              negLim));
+    pVol socle = (zSoc & ~(xNeg & xPos & yNeg & yPos));
 
 
     glm::dvec3 boxMin(-10.0, -10.0, 0.0);
     glm::dvec3 boxMax( 10.0,  10.0, 20.0);
     glm::dvec3 boxDia = boxMax - boxMin;
-    std::shared_ptr<Volume> xBot(new Plane(glm::dvec3(-1,  0,  0), boxMin));
-    std::shared_ptr<Volume> xTop(new Plane(glm::dvec3( 1,  0,  0), boxMax));
-    std::shared_ptr<Volume> yTop(new Plane(glm::dvec3( 0,  1,  0), boxMax));
-    std::shared_ptr<Volume> zTop(new Plane(glm::dvec3( 0,  0,  1), boxMax));
-    std::shared_ptr<Volume> yBot(new PlaneTexture(
+    pVol xBot(new Plane(glm::dvec3(-1,  0,  0), boxMin));
+    pVol xTop(new Plane(glm::dvec3( 1,  0,  0), boxMax));
+    pVol yTop(new Plane(glm::dvec3( 0,  1,  0), boxMax));
+    pVol zTop(new Plane(glm::dvec3( 0,  0,  1), boxMax));
+    pVol yBot(new PlaneTexture(
         glm::dvec3( 0, -1,  0), boxMin,
         glm::dvec3(boxDia.x, 0, 0),
         glm::dvec3(0, 0, boxDia.z),
         boxMin));
-    std::shared_ptr<Volume> box = (xBot & yBot & xTop & yTop & zTop);
+    pVol box = (xBot & yBot & xTop & yTop & zTop) & ~(!zSoc);
 
     glm::dvec3 thickness = glm::dvec3(0.5);
     glm::dvec3 boxCenter = glm::dvec3(0, 0, 10);
     glm::dvec3 pillard(boxMax.x, boxMin.y, boxMin.z);
-    std::shared_ptr<Volume> xPlane(new Plane(glm::dvec3(1, 0, 0), boxCenter));
-    std::shared_ptr<Volume> zPlane(new Plane(glm::dvec3(0, 0, 1), boxCenter));
-    std::shared_ptr<Volume> roof(new Plane(glm::dvec3( 0, 0, -1), boxMax - thickness));
-    std::shared_ptr<Volume> pillarX(new Plane(glm::dvec3(-1, 0, 0), pillard - thickness));
-    std::shared_ptr<Volume> pillarY(new Plane(glm::dvec3( 0, 1, 0), pillard + thickness));
-    std::shared_ptr<Volume> yPlane(new PlaneTexture(
+    pVol sideWall(new Plane(glm::dvec3(1, 0, 0), boxCenter));
+    pVol ceiling(new Plane(glm::dvec3( 0, 0, -1), boxMax - thickness));
+    pVol pillarX(new Plane(glm::dvec3(-1, 0, 0), pillard - thickness));
+    pVol pillarY(new Plane(glm::dvec3( 0, 1, 0), pillard + thickness));
+    pVol zStep(new Plane(glm::dvec3(0, 0, 1), boxCenter));
+    pVol yStep(new PlaneTexture(
        glm::dvec3( 0, -1, 0), boxCenter,
        glm::dvec3(boxDia.x, 0, 0),
        glm::dvec3(0, 0, boxDia.z),
        boxMin));
-    std::shared_ptr<Volume> rearWall(new PlaneTexture(
+    pVol rearWall(new PlaneTexture(
        glm::dvec3( 0, -1, 0), boxMax - thickness,
        glm::dvec3(boxDia.x, 0, 0),
        glm::dvec3(0, 0, boxDia.z),
        boxMin));
 
-    std::shared_ptr<Volume> crop =
-        (rearWall | roof | (pillarX & pillarY) | xPlane | (yPlane & zPlane));
+    pVol stage = box &
+        ((rearWall | ceiling | sideWall) |
+         (pillarX & pillarY) |
+         (yStep & zStep));
 
-    std::shared_ptr<Volume> chromeBallSphere(
-                new Sphere(glm::dvec3(5.0, -5.0, 2), 2.0));
-    std::shared_ptr<Volume> glassBallSphere =
-        std::shared_ptr<Volume>(new Sphere(glm::dvec3(15, 3, 2), 4.0)) &
-        std::shared_ptr<Volume>(new Sphere(glm::dvec3(15, -3, 2), 4.0));
+    pVol chromeBallSphere(
+                new Sphere(glm::dvec3(5.0, -15.0, 2), 2.0));
 
-    std::shared_ptr<prop3::Costume> wallsCostume(
+    pVol glassBallBase = pVol(new Sphere(glm::dvec3(15, -5, 2.7), 3.0));
+    pVol glassBallSphere = glassBallBase &
+        !(pVol(new Sphere(glm::dvec3(15, -5, 2.7), 2.3)) &
+          pVol(new Plane(glm::dvec3(0,0,-1), glm::dvec3(0,0,0.7))))&
+        pVol(new Plane(glm::dvec3(0,0,1), glm::dvec3(0,0,2.7))) &
+        pVol(new Plane(glm::dvec3(0,0,-1), glm::dvec3(0,0,0.05)));
+
+    std::shared_ptr<prop3::Costume> socleCostume(
+                new TexturedPaint(":/CpuRaytracing/Bathroom_Tiles.png"));
+    std::shared_ptr<prop3::Costume> stageCostume(
                 new TexturedPaint(":/CpuRaytracing/Fusion_Albums.png",
-                                  glm::dvec3(0.4, 0.4, 0.4)));
+                                  glm::dvec3(0.7, 0.7, 0.7)));
     std::shared_ptr<prop3::Costume> glassBallCostume(
-                new Glass());
+                new Glass(glm::dvec3(0.95, 0.75, 0.72)));
     std::shared_ptr<prop3::Costume> chromeBallCostume(
                 new Chrome(glm::dvec3(212, 175, 55) / 255.0));
 
-    _walls = play().propTeam3D()->createProp();
-    _walls->setVolume(socle | (box & crop));
-    _walls->setCostume(wallsCostume);
+    _socle = play().propTeam3D()->createProp();
+    _socle->setCostume(socleCostume);
+    _socle->setVolume(socle);
 
-    _glassLens = play().propTeam3D()->createProp();
-    _glassLens->setVolume(glassBallSphere);
-    _glassLens->setCostume(glassBallCostume);
+    _stage = play().propTeam3D()->createProp();
+    _stage->setCostume(stageCostume);
+    //_stage->setBoundingVolume(box);
+    _stage->setVolume(stage);
 
-    _chromeBall = play().propTeam3D()->createProp();
-    _chromeBall->setVolume(chromeBallSphere);
-    _chromeBall->setCostume(chromeBallCostume);
+    _bowl = play().propTeam3D()->createProp();
+    _bowl->setCostume(glassBallCostume);
+    _bowl->setBoundingVolume(glassBallBase);
+    _bowl->setVolume(glassBallSphere);
+
+    _ball = play().propTeam3D()->createProp();
+    _ball->setCostume(chromeBallCostume);
+    _ball->setVolume(chromeBallSphere);
 }
 
 void CpuRaytracingCharacter::beginStep(const StageTime &time)
 {
-    _ups->setText("UPS: " + toString(floor(1.0 / time.elapsedTime())));
+    float elapsedtime = time.elapsedTime();
+    _ups->setText("UPS: " + toString(floor(1.0 / elapsedtime)));
 
-    SynchronousKeyboard& keyboard = *play().synchronousKeyboard();
+    float velocity  = 16.0f * elapsedtime;
+    const float turnSpeed = 0.004f;
 
-    bool moved = false;
-    if(keyboard.isAsciiPressed('W'))
+    SynchronousMouse& syncMouse = *play().synchronousMouse();
+    SynchronousKeyboard& syncKeyboard = *play().synchronousKeyboard();
+
+    if(syncKeyboard.isAsciiPressed('w'))
     {
-        _camPos += _frontVec;
-        moved = true;
+        _camMan->forward(velocity);
     }
-    if(keyboard.isAsciiPressed('S'))
+    if(syncKeyboard.isAsciiPressed('s'))
     {
-        _camPos -= _frontVec;
-        moved = true;
+        _camMan->forward(-velocity);
     }
-    if(keyboard.isAsciiPressed('D'))
+    if(syncKeyboard.isAsciiPressed('a'))
     {
-        _camPos += _rightVec;
-        moved = true;
+        _camMan->sideward(-velocity);
     }
-    if(keyboard.isAsciiPressed('A'))
+    if(syncKeyboard.isAsciiPressed('d'))
     {
-        _camPos -= _rightVec;
-        moved = true;
+        _camMan->sideward(velocity);
     }
 
-    if(moved)
+    if(syncMouse.displacement() != glm::ivec2(0, 0) &&
+       syncMouse.buttonIsPressed(EMouseButton::LEFT))
     {
-        std::shared_ptr<Camera> camera = play().view()->camera3D();
-        camera->updateView(glm::lookAt(_camPos, _camPos+_frontVec, _upVec));
+        _camMan->pan( syncMouse.displacement().x * -turnSpeed);
+        _camMan->tilt(syncMouse.displacement().y * -turnSpeed);
     }
 }
 
