@@ -10,12 +10,13 @@
 #include <PropRoom2D/Team/AbstractTeam.h>
 
 #include <PropRoom3D/Prop/Prop.h>
-#include <PropRoom3D/Prop/Volume/Sphere.h>
-#include <PropRoom3D/Prop/Volume/Plane.h>
-#include <PropRoom3D/Prop/Costume/Glass.h>
-#include <PropRoom3D/Prop/Costume/Chrome.h>
-#include <PropRoom3D/Prop/Costume/FlatPaint.h>
-#include <PropRoom3D/Prop/Costume/TexturedPaint.h>
+#include <PropRoom3D/Prop/ImplicitSurface/Sphere.h>
+#include <PropRoom3D/Prop/ImplicitSurface/Plane.h>
+#include <PropRoom3D/Prop/Material/Glass.h>
+#include <PropRoom3D/Prop/Material/Chrome.h>
+#include <PropRoom3D/Prop/Coating/FlatPaint.h>
+#include <PropRoom3D/Prop/Coating/TexturedFlatPaint.h>
+#include <PropRoom3D/Prop/Coating/TexturedGlossyPaint.h>
 #include <PropRoom3D/Team/AbstractTeam.h>
 
 #include <Scaena/Play/Play.h>
@@ -28,6 +29,11 @@ using namespace cellar;
 using namespace prop2;
 using namespace prop3;
 using namespace scaena;
+
+
+typedef std::shared_ptr<ImplicitSurface> pSurf;
+typedef std::shared_ptr<Material> pMat;
+typedef std::shared_ptr<Coating> pCoat;
 
 
 CpuRaytracingCharacter::CpuRaytracingCharacter() :
@@ -66,95 +72,103 @@ void CpuRaytracingCharacter::enterStage()
     _camMan->setPosition(camPos);
 
 
+    // Coatings
+    pCoat socleCoat(new TexturedGlossyPaint(":/CpuRaytracing/Bathroom_Tiles_albedo.png",
+                                            ":/CpuRaytracing/Bathroom_Tiles_gloss.png",
+                                            glm::dvec3(1.0, 1.0, 1.0)));
+    pCoat posterCoat(new TexturedFlatPaint(":/CpuRaytracing/Fusion_Albums.png",
+                                           glm::dvec3(0.7, 0.7, 0.7)));
+
+
+    // Materials
+    pMat bowlMat(new Glass(glm::dvec3(0.95, 0.75, 0.72), 0.9));
+    pMat ballMat(new Chrome(glm::dvec3(212, 175, 55) / 255.0));
+
+
+    // Surfaces
+    // Socle
     glm::dvec3 negLim(-20.0, -20.0, 0.0);
     glm::dvec3 posLim( 20.0,  20.0, 0.0);
     glm::dvec3 socleDia = posLim - negLim;
-    pVol xNeg(new Plane(glm::dvec3(-1, 0, 0), negLim));
-    pVol xPos(new Plane(glm::dvec3( 1, 0, 0), posLim));
-    pVol yNeg(new Plane(glm::dvec3( 0,-1, 0), negLim));
-    pVol yPos(new Plane(glm::dvec3( 0, 1, 0), posLim));
-    pVol zSoc(new PlaneTexture(glm::dvec3( 0, 0, 1), negLim,
+    pSurf xNeg(new Plane(glm::dvec3(-1, 0, 0), negLim));
+    pSurf xPos(new Plane(glm::dvec3( 1, 0, 0), posLim));
+    pSurf yNeg(new Plane(glm::dvec3( 0,-1, 0), negLim));
+    pSurf yPos(new Plane(glm::dvec3( 0, 1, 0), posLim));
+    pSurf zSoc(new PlaneTexture(glm::dvec3( 0, 0, 1), negLim,
               glm::dvec3(socleDia.x, 0.0, 0.0),
               glm::dvec3(0.0, socleDia.y, 0.0),
               negLim));
-    pVol socle = (zSoc & ~(xNeg & xPos & yNeg & yPos));
+    pSurf socle = (zSoc & ~(xNeg & xPos & yNeg & yPos));
 
-
+    // Stage
     glm::dvec3 boxMin(-10.0, -10.0, 0.0);
     glm::dvec3 boxMax( 10.0,  10.0, 20.0);
     glm::dvec3 boxDia = boxMax - boxMin;
-    pVol xBot(new Plane(glm::dvec3(-1,  0,  0), boxMin));
-    pVol xTop(new Plane(glm::dvec3( 1,  0,  0), boxMax));
-    pVol yTop(new Plane(glm::dvec3( 0,  1,  0), boxMax));
-    pVol zTop(new Plane(glm::dvec3( 0,  0,  1), boxMax));
-    pVol yBot(new PlaneTexture(
+    pSurf xBot(new Plane(glm::dvec3(-1,  0,  0), boxMin));
+    pSurf xTop(new Plane(glm::dvec3( 1,  0,  0), boxMax));
+    pSurf yTop(new Plane(glm::dvec3( 0,  1,  0), boxMax));
+    pSurf zTop(new Plane(glm::dvec3( 0,  0,  1), boxMax));
+    pSurf yBot(new PlaneTexture(
         glm::dvec3( 0, -1,  0), boxMin,
         glm::dvec3(boxDia.x, 0, 0),
         glm::dvec3(0, 0, boxDia.z),
         boxMin));
-    pVol box = (xBot & yBot & xTop & yTop & zTop) & ~(!zSoc);
+    pSurf box = (xBot & yBot & xTop & yTop & zTop) & ~(!zSoc);
 
     glm::dvec3 thickness = glm::dvec3(0.5);
     glm::dvec3 boxCenter = glm::dvec3(0, 0, 10);
     glm::dvec3 pillard(boxMax.x, boxMin.y, boxMin.z);
-    pVol sideWall(new Plane(glm::dvec3(1, 0, 0), boxCenter));
-    pVol ceiling(new Plane(glm::dvec3( 0, 0, -1), boxMax - thickness));
-    pVol pillarX(new Plane(glm::dvec3(-1, 0, 0), pillard - thickness));
-    pVol pillarY(new Plane(glm::dvec3( 0, 1, 0), pillard + thickness));
-    pVol zStep(new Plane(glm::dvec3(0, 0, 1), boxCenter));
-    pVol yStep(new PlaneTexture(
+    pSurf sideWall(new Plane(glm::dvec3(1, 0, 0), boxCenter));
+    pSurf ceiling(new Plane(glm::dvec3( 0, 0, -1), boxMax - thickness));
+    pSurf pillarX(new Plane(glm::dvec3(-1, 0, 0), pillard - thickness));
+    pSurf pillarY(new Plane(glm::dvec3( 0, 1, 0), pillard + thickness));
+    pSurf zStep(new Plane(glm::dvec3(0, 0, 1), boxCenter));
+    pSurf yStep(new PlaneTexture(
        glm::dvec3( 0, -1, 0), boxCenter,
        glm::dvec3(boxDia.x, 0, 0),
        glm::dvec3(0, 0, boxDia.z),
        boxMin));
-    pVol rearWall(new PlaneTexture(
+    pSurf rearWall(new PlaneTexture(
        glm::dvec3( 0, -1, 0), boxMax - thickness,
        glm::dvec3(boxDia.x, 0, 0),
        glm::dvec3(0, 0, boxDia.z),
        boxMin));
 
-    pVol stage = box &
+    pSurf stage = box &
         ((rearWall | ceiling | sideWall) |
          (pillarX & pillarY) |
          (yStep & zStep));
 
-    pVol chromeBallSphere(
-                new Sphere(glm::dvec3(5.0, -15.0, 2), 2.0));
+    // Bowl
+    pSurf bowlBase = pSurf(new Sphere(glm::dvec3(15, -5, 2.7), 3.0));
+    pSurf bowl = bowlBase &
+        !(pSurf(new Sphere(glm::dvec3(15, -5, 2.7), 2.6)) &
+          pSurf(new Plane(glm::dvec3(0,0,-1), glm::dvec3(0,0,0.5))))&
+        pSurf(new Plane(glm::dvec3(0,0,1), glm::dvec3(0,0,2.7))) &
+        pSurf(new Plane(glm::dvec3(0,0,-1), glm::dvec3(0,0,0.1)));
 
-    pVol glassBallBase = pVol(new Sphere(glm::dvec3(15, -5, 2.7), 3.0));
-    pVol glassBallSphere = glassBallBase &
-        !(pVol(new Sphere(glm::dvec3(15, -5, 2.7), 2.3)) &
-          pVol(new Plane(glm::dvec3(0,0,-1), glm::dvec3(0,0,0.7))))&
-        pVol(new Plane(glm::dvec3(0,0,1), glm::dvec3(0,0,2.7))) &
-        pVol(new Plane(glm::dvec3(0,0,-1), glm::dvec3(0,0,0.05)));
+    // Ball
+    pSurf ball(new Sphere(glm::dvec3(5.0, -15.0, 2), 2.0));
 
-    std::shared_ptr<prop3::Costume> socleCostume(
-                new TexturedPaint(":/CpuRaytracing/Bathroom_Tiles.png"));
-    std::shared_ptr<prop3::Costume> stageCostume(
-                new TexturedPaint(":/CpuRaytracing/Fusion_Albums.png",
-                                  glm::dvec3(0.7, 0.7, 0.7)));
-    std::shared_ptr<prop3::Costume> glassBallCostume(
-                new Glass(glm::dvec3(0.95, 0.75, 0.72)));
-    std::shared_ptr<prop3::Costume> chromeBallCostume(
-                new Chrome(glm::dvec3(212, 175, 55) / 255.0));
+
+    socle->setCoating(socleCoat);
+    stage->setCoating(posterCoat);
 
     _socle = play().propTeam3D()->createProp();
-    _socle->setCostume(socleCostume);
-    _socle->setVolume(socle);
+    _socle->setSurface(socle);
 
     _stage = play().propTeam3D()->createProp();
-    _stage->setCostume(stageCostume);
-    //_stage->setBoundingVolume(box);
-    _stage->setVolume(stage);
+    //_stage->setBoundingSurface(box);
+    _stage->setSurface(stage);
 
     _bowl = play().propTeam3D()->createProp();
-    _bowl->setCostume(glassBallCostume);
-    _bowl->setBoundingVolume(glassBallBase);
-    _bowl->setVolume(glassBallSphere);
+    _bowl->setBoundingSurface(bowlBase);
+    _bowl->setSurface(bowl);
+    _bowl->setMaterial(bowlMat);
 
     _ball = play().propTeam3D()->createProp();
-    _ball->setCostume(chromeBallCostume);
-    _ball->setVolume(chromeBallSphere);
+    _ball->setSurface(ball);
+    _ball->setMaterial(ballMat);
 }
 
 void CpuRaytracingCharacter::beginStep(const StageTime &time)

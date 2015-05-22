@@ -24,6 +24,8 @@ SET(CPURAYTRACING_SOURCES
 
 ## Resources ##
 SET(CPURAYTRACING_IMAGES
+    ${CPURAYTRACING_SRC_DIR}/resources/Bathroom_Tiles_albedo.png
+    ${CPURAYTRACING_SRC_DIR}/resources/Bathroom_Tiles_gloss.png
     ${CPURAYTRACING_SRC_DIR}/resources/Fusion_Albums.png)
 QT5_ADD_RESOURCES(CPURAYTRACING_RESOURCES
     ${CPURAYTRACING_SRC_DIR}/resources/CpuRaytracing.qrc)

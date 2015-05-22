@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/CpuRaytracing">
         <file>Fusion_Albums.png</file>
-        <file>Bathroom_Tiles.png</file>
+        <file>Bathroom_Tiles_albedo.png</file>
+        <file>Bathroom_Tiles_gloss.png</file>
     </qresource>
 </RCC>

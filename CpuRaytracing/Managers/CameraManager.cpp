@@ -74,7 +74,7 @@ void CameraManager::setView(QWidget* view)
             this,                  &CameraManager::enterFullscreen);
 
     outputDimensionsChanged(0);
-    outputMatchCaptureDimensions(true);
+    outputMatchCaptureDimensions(_ui->matchCaptureSizeRadioBtn->isChecked());
 }
 
 void CameraManager::setCamera(const std::shared_ptr<cellar::Camera>& camera)
