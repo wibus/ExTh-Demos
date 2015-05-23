@@ -61,7 +61,7 @@ void CpuRaytracingCharacter::enterStage()
 
     // Setup Camera
     glm::dvec3 focusPos = glm::dvec3(-1.2, -1.2, 5.25);
-    glm::dvec3 camPos = focusPos + glm::dvec3(25, -40, 14) * 2.0;
+    glm::dvec3 camPos = focusPos + glm::dvec3(25, -40, 14) * 2.1;
     glm::dvec3 dir = glm::normalize(focusPos - camPos);
     double tilt = glm::atan(dir.z, glm::length(glm::dvec2(dir.x, dir.y)));
     double pan = glm::atan(dir.y, dir.x);
@@ -72,33 +72,29 @@ void CpuRaytracingCharacter::enterStage()
     _camMan->setPosition(camPos);
 
 
-    // Coatings
-    pCoat socleCoat(new TexturedGlossyPaint(":/CpuRaytracing/Bathroom_Tiles_albedo.png",
-                                            ":/CpuRaytracing/Bathroom_Tiles_gloss.png",
-                                            glm::dvec3(1.0, 1.0, 1.0)));
-    pCoat posterCoat(new TexturedFlatPaint(":/CpuRaytracing/Fusion_Albums.png",
-                                           glm::dvec3(0.7, 0.7, 0.7)));
-
-
-    // Materials
-    pMat bowlMat(new Glass(glm::dvec3(0.95, 0.75, 0.72), 0.9));
-    pMat ballMat(new Chrome(glm::dvec3(212, 175, 55) / 255.0));
-
-
     // Surfaces
     // Socle
     glm::dvec3 negLim(-20.0, -20.0, 0.0);
     glm::dvec3 posLim( 20.0,  20.0, 0.0);
     glm::dvec3 socleDia = posLim - negLim;
     pSurf xNeg(new Plane(glm::dvec3(-1, 0, 0), negLim));
-    pSurf xPos(new Plane(glm::dvec3( 1, 0, 0), posLim));
-    pSurf yNeg(new Plane(glm::dvec3( 0,-1, 0), negLim));
     pSurf yPos(new Plane(glm::dvec3( 0, 1, 0), posLim));
+    pSurf zNeg(new Plane(glm::dvec3( 0, 0,-1), negLim + glm::dvec3(0, 0, -0.8)));
+    pSurf xPos(new PlaneTexture(glm::dvec3( 1, 0, 0), posLim,
+               glm::dvec3(socleDia.x, 0.0, 0.0),
+               glm::dvec3(0.0, socleDia.y, 0.0),
+               negLim));
+    pSurf yNeg(new PlaneTexture(glm::dvec3( 0,-1, 0), negLim,
+               glm::dvec3(socleDia.x, 0.0, 0.0),
+               glm::dvec3(0.0, socleDia.y, 0.0),
+               negLim));
     pSurf zSoc(new PlaneTexture(glm::dvec3( 0, 0, 1), negLim,
-              glm::dvec3(socleDia.x, 0.0, 0.0),
-              glm::dvec3(0.0, socleDia.y, 0.0),
-              negLim));
-    pSurf socle = (zSoc & ~(xNeg & xPos & yNeg & yPos));
+               glm::dvec3(socleDia.x, 0.0, 0.0),
+               glm::dvec3(0.0, socleDia.y, 0.0),
+               negLim));
+    pSurf socleSide = xPos & yNeg;
+    pSurf socleTop = (zSoc & ~xNeg & ~yPos & ~zNeg);
+    pSurf socle = socleTop & socleSide;
 
     // Stage
     glm::dvec3 boxMin(-10.0, -10.0, 0.0);
@@ -151,8 +147,31 @@ void CpuRaytracingCharacter::enterStage()
     pSurf ball(new Sphere(glm::dvec3(5.0, -15.0, 2), 2.0));
 
 
-    socle->setCoating(socleCoat);
+    // Coatings
+    pCoat socleTopCoat(new TexturedGlossyPaint(
+            ":/CpuRaytracing/Bathroom_Tiles_albedo.png",
+            ":/CpuRaytracing/Bathroom_Tiles_gloss.png",
+            glm::dvec3(1.0, 1.0, 1.0)));
+    pCoat socleSideCoat(new FlatPaint(
+            glm::dvec3(0.5, 0.5, 0.5)));
+    pCoat posterCoat(new TexturedFlatPaint(
+            ":/CpuRaytracing/Fusion_Albums.png",
+            glm::dvec3(0.7, 0.7, 0.7)));
+
+    socleTop->setCoating(socleTopCoat);
+    socleSide->setCoating(socleSideCoat);
     stage->setCoating(posterCoat);
+
+
+    // Materials
+    pMat bowlMat(new Glass(glm::dvec3(0.95, 0.75, 0.72), 6.0));
+    pMat ballMat(new Chrome(glm::dvec3(212, 175, 55) / 255.0));
+
+
+    _bowl = play().propTeam3D()->createProp();
+    _bowl->setBoundingSurface(bowlBase);
+    _bowl->setSurface(bowl);
+    _bowl->setMaterial(bowlMat);
 
     _socle = play().propTeam3D()->createProp();
     _socle->setSurface(socle);
@@ -160,11 +179,6 @@ void CpuRaytracingCharacter::enterStage()
     _stage = play().propTeam3D()->createProp();
     //_stage->setBoundingSurface(box);
     _stage->setSurface(stage);
-
-    _bowl = play().propTeam3D()->createProp();
-    _bowl->setBoundingSurface(bowlBase);
-    _bowl->setSurface(bowl);
-    _bowl->setMaterial(bowlMat);
 
     _ball = play().propTeam3D()->createProp();
     _ball->setSurface(ball);
