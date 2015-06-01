@@ -2,6 +2,7 @@
 #define CPURAYTRACINGCHARACTER_H
 
 #include <memory>
+#include <vector>
 
 #include <GLM/glm.hpp>
 
@@ -34,16 +35,17 @@ public:
                       const scaena::StageTime&time) override;
     virtual void exitStage() override;
 
+protected:
+    virtual void setupSatgeScene();
+    virtual void setupConvergenceScene();
+    virtual void setupQuadricScene();
 
 private:
     std::shared_ptr<cellar::CameraManFree> _camMan;
 
     std::shared_ptr<prop2::TextHud> _fps;
     std::shared_ptr<prop2::TextHud> _ups;
-    std::shared_ptr<prop3::Prop> _socle;
-    std::shared_ptr<prop3::Prop> _stage;
-    std::shared_ptr<prop3::Prop> _bowl;
-    std::shared_ptr<prop3::Prop> _ball;
+    std::vector<std::shared_ptr<prop3::Prop>> _props;
 };
 
 #endif // CPURAYTRACINGCHARACTER_H
