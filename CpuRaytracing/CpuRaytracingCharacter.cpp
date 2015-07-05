@@ -14,7 +14,7 @@
 #include <PropRoom3D/Prop/ImplicitSurface/Plane.h>
 #include <PropRoom3D/Prop/ImplicitSurface/Quadric.h>
 #include <PropRoom3D/Prop/Material/Glass.h>
-#include <PropRoom3D/Prop/Material/Chrome.h>
+#include <PropRoom3D/Prop/Material/Metal.h>
 #include <PropRoom3D/Prop/Coating/FlatPaint.h>
 #include <PropRoom3D/Prop/Coating/GlossyPaint.h>
 #include <PropRoom3D/Prop/Coating/TexturedFlatPaint.h>
@@ -62,9 +62,10 @@ void CpuRaytracingCharacter::enterStage()
     _ups->setIsVisible(false);
 
     // Choose and setup scene
-    //setupSatgeScene();
+    setupStageScene();
+    //setupManufacturingScene();
     //setupConvergenceScene();
-    setupQuadricScene();
+    //setupQuadricScene();
 }
 
 void CpuRaytracingCharacter::beginStep(const StageTime &time)
@@ -72,7 +73,7 @@ void CpuRaytracingCharacter::beginStep(const StageTime &time)
     float elapsedtime = time.elapsedTime();
     _ups->setText("UPS: " + toString(floor(1.0 / elapsedtime)));
 
-    float velocity  = 16.0f * elapsedtime;
+    float velocity = 16.0f * elapsedtime;
     const float turnSpeed = 0.004f;
 
     SynchronousMouse& syncMouse = *play().synchronousMouse();
@@ -120,7 +121,7 @@ void CpuRaytracingCharacter::exitStage()
     }
 }
 
-void CpuRaytracingCharacter::setupSatgeScene()
+void CpuRaytracingCharacter::setupStageScene()
 {
     // Setup Camera
     glm::dvec3 focusPos = glm::dvec3(-1.2, -1.2, 5.25);
@@ -222,14 +223,26 @@ void CpuRaytracingCharacter::setupSatgeScene()
     _props.push_back(stage);
 
 
+    // Bus shelter
+    glm::dmat4 frontGlassTrans = glm::translate(glm::dmat4(), glm::dvec3(5 - thickness.x / 2.0, -10 + thickness.y / 2.0, 0));
+    createBusGlass(frontGlassTrans, 10.0 - thickness.x / 2.0, 20.0 - thickness.z);
+
+    glm::dmat4 sideRot = glm::rotate(glm::dmat4(), glm::pi<double>() / 2.0, glm::dvec3(0, 0, 1));
+    glm::dmat4 sideFullGlassTrans = glm::translate(glm::dmat4(), glm::dvec3(10.0 - thickness.x / 2.0, -5 + thickness.y / 2.0, 0));
+    createBusGlass(sideFullGlassTrans * sideRot, 10.0 - thickness.y / 2.0, 20.0 - thickness.z);
+
+    glm::dmat4 sideHalfGlassTrans = glm::translate(glm::dmat4(), glm::dvec3(10.0 - thickness.x / 2.0, 5 - thickness.y / 2.0, 10));
+    createBusGlass(sideHalfGlassTrans * sideRot, 10.0 - thickness.y / 2.0, 10.0 - thickness.z);
+
 
     // Bowl
-    pSurf bowlBase = Sphere::sphere(glm::dvec3(15, -5, 2.7), 3.0);
+    pSurf bowlBase = Sphere::sphere(glm::dvec3(0, 0, 2.7), 3.0);
     pSurf bowlSurf = bowlBase &
-        !(Sphere::sphere(glm::dvec3(15, -5, 2.7), 2.6) &
+        !(Sphere::sphere(glm::dvec3(0, 0, 2.7), 2.6) &
           Plane::plane(glm::dvec3(0,0,-1), glm::dvec3(0,0,0.5)))&
         Plane::plane(glm::dvec3(0,0,1), glm::dvec3(0,0,2.7)) &
         Plane::plane(glm::dvec3(0,0,-1), glm::dvec3(0,0,0.1));
+    bowlSurf->transform(glm::translate(glm::dmat4(), glm::dvec3(15, -5, 0)));
     pMat bowlMat(new Glass(glm::dvec3(0.95, 0.75, 0.72), 6.0));
 
     std::shared_ptr<Prop> bowl = play().propTeam3D()->createProp();
@@ -242,11 +255,31 @@ void CpuRaytracingCharacter::setupSatgeScene()
 
     // Ball
     pSurf ballSurf = Sphere::sphere(glm::dvec3(5.0, -15.0, 2), 2.0);
-    pMat ballMat(new Chrome(glm::dvec3(212, 175, 55) / 255.0));
+    pMat ballMat(new Metal(glm::dvec3(212, 175, 55) / 255.0));
     std::shared_ptr<Prop> ball = play().propTeam3D()->createProp();
     ball->setSurface(ballSurf);
     ball->setMaterial(ballMat);
     _props.push_back(ball);
+}
+
+
+void CpuRaytracingCharacter::setupManufacturingScene()
+{
+    // Setup Camera
+    glm::dvec3 focusPos = glm::dvec3(0, 0, 0);
+    glm::dvec3 camPos = glm::dvec3(0, 2, 0);
+    glm::dvec3 dir = glm::normalize(focusPos - camPos);
+    double tilt = glm::atan(dir.z, glm::length(glm::dvec2(dir.x, dir.y)));
+    double pan = glm::atan(dir.y, dir.x);
+
+    std::shared_ptr<Camera> camera = play().view()->camera3D();
+    _camMan.reset(new CameraManFree(camera, false));
+    _camMan->setOrientation(pan, tilt);
+    _camMan->setPosition(camPos);
+
+    // Setup bus shelter
+    glm::dmat4 frontGlassTrans = glm::translate(glm::dmat4(), glm::dvec3(5, -10, 0));
+    createBusGlass(frontGlassTrans, 10.0, 20.0);
 }
 
 void CpuRaytracingCharacter::setupConvergenceScene()
@@ -344,3 +377,111 @@ void CpuRaytracingCharacter::setupQuadricScene()
     _props.push_back(coneProp);
 }
 
+
+void CpuRaytracingCharacter::createBusGlass(
+        const glm::dmat4& transform,
+        double width,
+        double height)
+{
+    double glassWidth = width;
+    double glassHeight = height;
+    double glassDepth = 0.40;
+
+    double fixturePadding = 0.50;
+    double sidePadding = 0.50;
+
+
+    pSurf glassNegX = Plane::plane(glm::dvec3(-1, 0, 0), glm::dvec3(-glassWidth/2.0+sidePadding, 0, 0));
+    pSurf glassPosX = Plane::plane(glm::dvec3( 1, 0, 0), glm::dvec3( glassWidth/2.0-sidePadding, 0, 0));
+    pSurf glassNegY = Plane::plane(glm::dvec3(0, -1, 0), glm::dvec3(0, -glassDepth/2.0, 0));
+    pSurf glassPosY = Plane::plane(glm::dvec3(0,  1, 0), glm::dvec3(0,  glassDepth/2.0, 0));
+    pSurf glassNegZ = Plane::plane(glm::dvec3(0, 0, -1), glm::dvec3(0, 0, fixturePadding));
+    pSurf glassPosZ = Plane::plane(glm::dvec3(0, 0,  1), glm::dvec3(0, 0, glassHeight - fixturePadding));
+    pSurf glassSurf = glassNegX & glassPosX & glassNegY & glassPosY & glassPosZ & glassNegZ;
+
+    pMat glassMat(new Glass(glm::dvec3(0.5, 0.5, 0.45), 1.0));
+
+    std::shared_ptr<Prop> glassProp = play().propTeam3D()->createProp();
+    glassProp->setSurface(glassSurf);
+    glassProp->setMaterial(glassMat);
+    glassProp->surface()->transform(transform);
+
+
+
+    std::shared_ptr<Prop> bottomLeftFix = createFixture();
+    bottomLeftFix->surface()->transform(transform * glm::translate(glm::dmat4(), glm::dvec3(-glassWidth*0.30, 0, 0)));
+
+    std::shared_ptr<Prop> bottomRightFix = createFixture();
+    bottomRightFix->surface()->transform(transform * glm::translate(glm::dmat4(), glm::dvec3(glassWidth*0.30, 0, 0)));
+
+
+    std::shared_ptr<Prop> topLeftFix = createFixture();
+    topLeftFix->surface()->transform(transform * glm::translate(glm::dmat4(), glm::dvec3(-glassWidth*0.30, 0, glassHeight))
+                                     *glm::rotate(glm::dmat4(), glm::pi<double>(), glm::dvec3(0, 1, 0)));
+
+    std::shared_ptr<Prop> topRightFix = createFixture();
+    topRightFix->surface()->transform(transform * glm::translate(glm::dmat4(), glm::dvec3(glassWidth*0.30, 0, glassHeight))
+                                      *glm::rotate(glm::dmat4(), glm::pi<double>(), glm::dvec3(0, 1, 0)));
+
+    _props.push_back(bottomLeftFix);
+    _props.push_back(bottomRightFix);
+    _props.push_back(topLeftFix);
+    _props.push_back(topRightFix);
+    _props.push_back(glassProp);
+}
+
+std::shared_ptr<prop3::Prop> CpuRaytracingCharacter::createFixture()
+{
+    double footWidth  = 1.0;
+    double footDepth  = 0.50;
+    double footHeight = 0.10;
+
+    double legRadius = 0.10;
+    double legHeight = 0.30;
+
+    double handWidth  = 1.0;
+    double handDepth  = 0.50;
+    double handHeight = 0.50;
+
+    double handHoleDepth = 0.40;
+    double handHoleHeight = 0.40;
+
+
+    pSurf footNegX = Plane::plane(glm::dvec3(-1, 0, 0), glm::dvec3(-footWidth/2.0, 0, 0));
+    pSurf footPosX = Plane::plane(glm::dvec3( 1, 0, 0), glm::dvec3( footWidth/2.0, 0, 0));
+    pSurf footNegY = Plane::plane(glm::dvec3(0, -1, 0), glm::dvec3(0, -footDepth/2.0, 0));
+    pSurf footPosY = Plane::plane(glm::dvec3(0,  1, 0), glm::dvec3(0,  footDepth/2.0, 0));
+    pSurf footNegZ = Plane::plane(glm::dvec3(0, 0, -1), glm::dvec3(0, 0, 0));
+    pSurf footPosZ = Plane::plane(glm::dvec3(0, 0,  1), glm::dvec3(0, 0, footHeight));
+    pSurf footSurf = footNegX & footPosX & footNegY & footPosY & footPosZ & ~footNegZ;
+
+
+    pSurf handNegX = Plane::plane(glm::dvec3(-1, 0, 0), glm::dvec3(-handWidth/2.0, 0, 0));
+    pSurf handPosX = Plane::plane(glm::dvec3( 1, 0, 0), glm::dvec3( handWidth/2.0, 0, 0));
+    pSurf handNegY = Plane::plane(glm::dvec3(0, -1, 0), glm::dvec3(0, -handDepth/2.0, 0));
+    pSurf handPosY = Plane::plane(glm::dvec3(0,  1, 0), glm::dvec3(0,  handDepth/2.0, 0));
+    pSurf handNegZ = Plane::plane(glm::dvec3(0, 0, -1), glm::dvec3(0, 0, footHeight + legHeight));
+    pSurf handPosZ = Plane::plane(glm::dvec3(0, 0,  1), glm::dvec3(0, 0, footHeight + legHeight + handHeight));
+    pSurf holeNegY = Plane::plane(glm::dvec3(0, -1, 0), glm::dvec3(0, -handHoleDepth/2.0, 0.0));
+    pSurf holePosY = Plane::plane(glm::dvec3(0,  1, 0), glm::dvec3(0, handHoleDepth/2.0, 0.0));
+    pSurf holeNegZ = Plane::plane(glm::dvec3(0, 0, -1), glm::dvec3(0, 0, footHeight + legHeight + handHeight - handHoleHeight));
+    pSurf handSurf = handNegX & handPosX & handNegY & handPosY & handPosZ & handNegZ &
+                     !(holeNegY & holePosY & holeNegZ);
+
+    pSurf legCylinder(Quadric::cylinder(legRadius, legRadius));
+    pSurf legPosZ = Plane::plane(glm::dvec3(0, 0,  1), glm::dvec3(0, 0, footHeight));
+    pSurf legNegZ = Plane::plane(glm::dvec3(0, 0, -1), glm::dvec3(0, 0, footHeight + legHeight));
+    pSurf legSurf = legCylinder & ~(!legPosZ) & ~(!legNegZ);
+
+    pSurf bBoxNegX = footNegX & footPosX & footNegY & footPosY & footNegZ & handPosZ;
+
+    pMat fixtureMat(new Metal(glm::dvec3(0.4, 0.4, 0.4), 0.85));
+
+    pSurf fixtureSurf = footSurf | handSurf | legSurf;
+    std::shared_ptr<Prop> fixtureProp = play().propTeam3D()->createProp();
+    fixtureProp->setBoundingSurface(bBoxNegX);
+    fixtureProp->setSurface(fixtureSurf);
+    fixtureProp->setMaterial(fixtureMat);
+
+    return fixtureProp;
+}

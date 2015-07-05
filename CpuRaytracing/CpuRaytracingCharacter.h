@@ -36,9 +36,13 @@ public:
     virtual void exitStage() override;
 
 protected:
-    virtual void setupSatgeScene();
+    virtual void setupStageScene();
+    virtual void setupManufacturingScene();
     virtual void setupConvergenceScene();
     virtual void setupQuadricScene();
+
+    virtual void createBusGlass(const glm::dmat4& transform, double width, double height);
+    virtual std::shared_ptr<prop3::Prop> createFixture();
 
 private:
     std::shared_ptr<cellar::CameraManFree> _camMan;
