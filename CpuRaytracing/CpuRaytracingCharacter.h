@@ -6,6 +6,8 @@
 
 #include <GLM/glm.hpp>
 
+#include <PropRoom3D/Scene/Scene.h>
+
 #include <Scaena/Play/Character.h>
 
 namespace cellar
@@ -18,10 +20,6 @@ namespace prop2
     class TextHud;
 }
 
-namespace prop3
-{
-    class Prop;
-}
 
 class CpuRaytracingCharacter :
         public scaena::Character
@@ -49,7 +47,7 @@ private:
 
     std::shared_ptr<prop2::TextHud> _fps;
     std::shared_ptr<prop2::TextHud> _ups;
-    std::vector<std::shared_ptr<prop3::Prop>> _props;
+    prop3::Scene _scene;
 };
 
 #endif // CPURAYTRACINGCHARACTER_H

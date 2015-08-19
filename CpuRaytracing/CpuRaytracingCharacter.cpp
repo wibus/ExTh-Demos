@@ -20,6 +20,7 @@
 #include <PropRoom3D/Prop/Coating/TexturedFlatPaint.h>
 #include <PropRoom3D/Prop/Coating/TexturedGlossyPaint.h>
 #include <PropRoom3D/Team/AbstractTeam.h>
+#include <PropRoom3D/Scene/SceneWriter.h>
 
 #include <Scaena/Play/Play.h>
 #include <Scaena/Play/View.h>
@@ -66,6 +67,9 @@ void CpuRaytracingCharacter::enterStage()
     //setupManufacturingScene();
     //setupConvergenceScene();
     //setupQuadricScene();
+
+    SceneWriter writer;
+    writer.write("Scene.prop3", play().propTeam3D(), _scene);
 }
 
 void CpuRaytracingCharacter::beginStep(const StageTime &time)
@@ -114,11 +118,7 @@ void CpuRaytracingCharacter::exitStage()
 {
     play().propTeam2D()->deleteTextHud(_fps);
     play().propTeam2D()->deleteTextHud(_ups);
-
-    for(auto& prop : _props)
-    {
-        play().propTeam3D()->deleteProp(prop);
-    }
+    _scene.clearProps(play().propTeam3D());
 }
 
 void CpuRaytracingCharacter::setupStageScene()
@@ -168,11 +168,10 @@ void CpuRaytracingCharacter::setupStageScene()
     pCoat socleSideCoat(new FlatPaint(
             glm::dvec3(0.5, 0.5, 0.5)));
 
-    std::shared_ptr<Prop> socle = play().propTeam3D()->createProp();
+    std::shared_ptr<Prop> socle = _scene.addProp(play().propTeam3D());
     socleTop->setCoating(socleTopCoat);
     socleSide->setCoating(socleSideCoat);
     socle->setSurface(socleSurf);
-    _props.push_back(socle);
 
 
     // Stage
@@ -217,10 +216,9 @@ void CpuRaytracingCharacter::setupStageScene()
             ":/CpuRaytracing/Fusion_Albums.png",
             glm::dvec3(0.7, 0.7, 0.7)));
 
-    std::shared_ptr<Prop> stage = play().propTeam3D()->createProp();
+    std::shared_ptr<Prop> stage = _scene.addProp(play().propTeam3D());
     stageSurf->setCoating(posterCoat);
     stage->setSurface(stageSurf);
-    _props.push_back(stage);
 
 
     // Bus shelter
@@ -245,21 +243,19 @@ void CpuRaytracingCharacter::setupStageScene()
     bowlSurf->transform(glm::translate(glm::dmat4(), glm::dvec3(15, -5, 0)));
     pMat bowlMat(new Glass(glm::dvec3(0.95, 0.75, 0.72), 6.0));
 
-    std::shared_ptr<Prop> bowl = play().propTeam3D()->createProp();
+    std::shared_ptr<Prop> bowl = _scene.addProp(play().propTeam3D());
     bowl->setBoundingSurface(bowlBase);
     bowl->setSurface(bowlSurf);
     bowl->setMaterial(bowlMat);
-    _props.push_back(bowl);
 
 
 
     // Ball
     pSurf ballSurf = Sphere::sphere(glm::dvec3(5.0, -15.0, 2), 2.0);
     pMat ballMat(new Metal(glm::dvec3(212, 175, 55) / 255.0));
-    std::shared_ptr<Prop> ball = play().propTeam3D()->createProp();
+    std::shared_ptr<Prop> ball = _scene.addProp(play().propTeam3D());
     ball->setSurface(ballSurf);
     ball->setMaterial(ballMat);
-    _props.push_back(ball);
 }
 
 
@@ -277,9 +273,31 @@ void CpuRaytracingCharacter::setupManufacturingScene()
     _camMan->setOrientation(pan, tilt);
     _camMan->setPosition(camPos);
 
-    // Setup bus shelter
-    glm::dmat4 frontGlassTrans = glm::translate(glm::dmat4(), glm::dvec3(5, -10, 0));
-    createBusGlass(frontGlassTrans, 10.0, 20.0);
+    // Setup
+    double glassWidth = 1.0;
+    double glassDepth = 0.1;
+    double glassHeight = 1.0;
+    pSurf glassNegX = Plane::plane(glm::dvec3(-1, 0, 0), glm::dvec3(-glassWidth/2.0, 0, 0));
+    pSurf glassPosX = Plane::plane(glm::dvec3( 1, 0, 0), glm::dvec3( glassWidth/2.0, 0, 0));
+    pSurf glassNegY = Plane::plane(glm::dvec3(0, -1, 0), glm::dvec3(0, -glassDepth/2.0, 0));
+    pSurf glassPosY = Plane::plane(glm::dvec3(0,  1, 0), glm::dvec3(0,  glassDepth/2.0, 0));
+    pSurf glassNegZ = Plane::plane(glm::dvec3(0, 0, -1), glm::dvec3(0, 0, 0));
+    pSurf glassPosZ = Plane::plane(glm::dvec3(0, 0,  1), glm::dvec3(0, 0, glassHeight));
+    pSurf glassSurf = glassNegX & glassPosX & glassNegY & glassPosY & glassPosZ & glassNegZ;
+
+    pMat glassMat(new Glass(glm::dvec3(1.0), 0.0));
+
+    std::shared_ptr<Prop> glassProp = _scene.addProp(play().propTeam3D());
+    glassProp->setSurface(glassSurf);
+    glassProp->setMaterial(glassMat);
+
+    pSurf ballSurf = Sphere::sphere(glm::dvec3(1.0, 1.0, 0.5), 0.5);
+    std::shared_ptr<Prop> ballProp = _scene.addProp(play().propTeam3D());
+    ballProp->setSurface(ballSurf);
+
+    pSurf floorSurf = Plane::plane(glm::dvec3(0.0, 0.0, 1.0), glm::dvec3());
+    std::shared_ptr<Prop> floorProp = _scene.addProp(play().propTeam3D());
+    floorProp->setSurface(floorSurf);
 }
 
 void CpuRaytracingCharacter::setupConvergenceScene()
@@ -299,10 +317,9 @@ void CpuRaytracingCharacter::setupConvergenceScene()
     // Wall
     pSurf wallPlane = Plane::plane(glm::dvec3(0, 1, 0), glm::dvec3(0, 0, 0));
     pCoat wallPaint(new FlatPaint(glm::dvec3(1, 1, 1)));
-    std::shared_ptr<Prop> wall = play().propTeam3D()->createProp();
+    std::shared_ptr<Prop> wall = _scene.addProp(play().propTeam3D());
     wallPlane->setCoating(wallPaint);
     wall->setSurface(wallPlane);
-    _props.push_back(wall);
 }
 
 void CpuRaytracingCharacter::setupQuadricScene()
@@ -334,10 +351,9 @@ void CpuRaytracingCharacter::setupQuadricScene()
 
     pCoat envPaint(new FlatPaint(glm::dvec3(0.8, 0.8, 0.8)));
     pSurf envSurf = floorPlane | wallPlane | fillet;
-    std::shared_ptr<Prop> envProp = play().propTeam3D()->createProp();
+    std::shared_ptr<Prop> envProp = _scene.addProp(play().propTeam3D());
     envSurf->setCoating(envPaint);
     envProp->setSurface(envSurf);
-    _props.push_back(envProp);
 
     // Paraboloid
     pSurf paraBase = Quadric::paraboloid(0.5, 0.5);
@@ -345,10 +361,9 @@ void CpuRaytracingCharacter::setupQuadricScene()
     pSurf paraSurf = paraBase & paraTopCap;
     paraSurf->transform(glm::translate(glm::dmat4(), glm::dvec3(0.1, -3, 0.5)));
     pCoat paraCoat(new GlossyPaint(glm::dvec3(0.90, 0.90, 0.30), 0.15));
-    std::shared_ptr<Prop> paraProp = play().propTeam3D()->createProp();
+    std::shared_ptr<Prop> paraProp = _scene.addProp(play().propTeam3D());
     paraProp->setSurface(paraSurf);
     paraSurf->setCoating(paraCoat);
-    _props.push_back(paraProp);
 
     // Egg (ellipsoid)
     pSurf eggTop = Quadric::ellipsoid(1, 1, 2);
@@ -359,10 +374,9 @@ void CpuRaytracingCharacter::setupQuadricScene()
     pSurf eggSurf = (eggTop & ~topCap) | (eggBottom & ~bottomCap);
     eggSurf->transform(glm::translate(glm::dmat4(), glm::dvec3(0, 0, 1)));
     pCoat eggCoat(new GlossyPaint(glm::dvec3(0.90, 0.35, 0.10), 0.4));
-    std::shared_ptr<Prop> eggProp = play().propTeam3D()->createProp();
+    std::shared_ptr<Prop> eggProp = _scene.addProp(play().propTeam3D());
     eggProp->setSurface(eggSurf);
     eggSurf->setCoating(eggCoat);
-    _props.push_back(eggProp);
 
     // Cone
     pSurf coneBase = Quadric::cone(0.5, 0.5);
@@ -371,10 +385,9 @@ void CpuRaytracingCharacter::setupQuadricScene()
     pSurf coneSurf = coneBase & coneTopCap & coneBottomCap;
     coneSurf->transform(glm::translate(glm::dmat4(), glm::dvec3(-0.7, 3, 2)));
     pCoat coneCoat(new GlossyPaint(glm::dvec3(0.20, 0.20, 0.80), 0.7));
-    std::shared_ptr<Prop> coneProp = play().propTeam3D()->createProp();
+    std::shared_ptr<Prop> coneProp = _scene.addProp(play().propTeam3D());
     coneProp->setSurface(coneSurf);
     coneSurf->setCoating(coneCoat);
-    _props.push_back(coneProp);
 }
 
 
@@ -401,7 +414,7 @@ void CpuRaytracingCharacter::createBusGlass(
 
     pMat glassMat(new Glass(glm::dvec3(0.5, 0.5, 0.45), 1.0));
 
-    std::shared_ptr<Prop> glassProp = play().propTeam3D()->createProp();
+    std::shared_ptr<Prop> glassProp = _scene.addProp(play().propTeam3D());
     glassProp->setSurface(glassSurf);
     glassProp->setMaterial(glassMat);
     glassProp->surface()->transform(transform);
@@ -422,12 +435,6 @@ void CpuRaytracingCharacter::createBusGlass(
     std::shared_ptr<Prop> topRightFix = createFixture();
     topRightFix->surface()->transform(transform * glm::translate(glm::dmat4(), glm::dvec3(glassWidth*0.30, 0, glassHeight))
                                       *glm::rotate(glm::dmat4(), glm::pi<double>(), glm::dvec3(0, 1, 0)));
-
-    _props.push_back(bottomLeftFix);
-    _props.push_back(bottomRightFix);
-    _props.push_back(topLeftFix);
-    _props.push_back(topRightFix);
-    _props.push_back(glassProp);
 }
 
 std::shared_ptr<prop3::Prop> CpuRaytracingCharacter::createFixture()
@@ -478,7 +485,7 @@ std::shared_ptr<prop3::Prop> CpuRaytracingCharacter::createFixture()
     pMat fixtureMat(new Metal(glm::dvec3(0.4, 0.4, 0.4), 0.85));
 
     pSurf fixtureSurf = footSurf | handSurf | legSurf;
-    std::shared_ptr<Prop> fixtureProp = play().propTeam3D()->createProp();
+    std::shared_ptr<Prop> fixtureProp = _scene.addProp(play().propTeam3D());
     fixtureProp->setBoundingSurface(bBoxNegX);
     fixtureProp->setSurface(fixtureSurf);
     fixtureProp->setMaterial(fixtureMat);
