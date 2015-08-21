@@ -10,9 +10,9 @@
 #include <PropRoom2D/Team/AbstractTeam.h>
 
 #include <PropRoom3D/Prop/Prop.h>
-#include <PropRoom3D/Prop/ImplicitSurface/Sphere.h>
-#include <PropRoom3D/Prop/ImplicitSurface/Plane.h>
-#include <PropRoom3D/Prop/ImplicitSurface/Quadric.h>
+#include <PropRoom3D/Prop/Surface/Sphere.h>
+#include <PropRoom3D/Prop/Surface/Plane.h>
+#include <PropRoom3D/Prop/Surface/Quadric.h>
 #include <PropRoom3D/Prop/Material/Glass.h>
 #include <PropRoom3D/Prop/Material/Metal.h>
 #include <PropRoom3D/Prop/Coating/FlatPaint.h>
@@ -35,7 +35,7 @@ using namespace prop3;
 using namespace scaena;
 
 
-typedef std::shared_ptr<ImplicitSurface> pSurf;
+typedef std::shared_ptr<Surface> pSurf;
 typedef std::shared_ptr<Material> pMat;
 typedef std::shared_ptr<Coating> pCoat;
 
@@ -126,6 +126,13 @@ void CpuRaytracingCharacter::beginStep(const StageTime &time)
         _camMan->pan( syncMouse.displacement().x * -turnSpeed);
         _camMan->tilt(syncMouse.displacement().y * -turnSpeed);
     }
+/*
+    if(_sphere)
+    {
+        _sphere->surface()->transform(Transform(1.0, glm::dquat(),
+            glm::dvec3(glm::sin(time.totalTime()) * time.elapsedTime(), 0.0, 0.0)));
+    }
+    */
 }
 
 void CpuRaytracingCharacter::draw(const std::shared_ptr<scaena::View> &,
@@ -169,11 +176,11 @@ void CpuRaytracingCharacter::setupStageScene()
                glm::dvec3(socleDia.x, 0.0, 0.0),
                glm::dvec3(0.0, socleDia.y, 0.0),
                negLim);
-    pSurf yNeg = PlaneTexture::plane(glm::dvec3( 0,-1, 0), negLim,
+    pSurf yNeg = PlaneTexture::plane(glm::dvec3(0, -1, 0), negLim,
                glm::dvec3(socleDia.x, 0.0, 0.0),
                glm::dvec3(0.0, socleDia.y, 0.0),
                negLim);
-    pSurf zSoc = PlaneTexture::plane(glm::dvec3( 0, 0, 1), negLim,
+    pSurf zSoc = PlaneTexture::plane(glm::dvec3(0, 0, 1), negLim,
                glm::dvec3(socleDia.x, 0.0, 0.0),
                glm::dvec3(0.0, socleDia.y, 0.0),
                negLim);

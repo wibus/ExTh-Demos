@@ -4,7 +4,7 @@
 #include <PropRoom2D/Team/ArtDirector/GlArtDirector.h>
 
 #include <PropRoom3D/Team/AbstractTeam.h>
-#include <PropRoom3D/Team/ArtDirector/CpuRaytracerServer.h>
+#include <PropRoom3D/Team/ArtDirector/ArtDirectorServer.h>
 
 #include <Scaena/Play/Play.h>
 
