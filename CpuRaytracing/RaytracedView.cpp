@@ -37,8 +37,8 @@ void RaytracedView::setupArtDirectors(scaena::Play& play)
     play.propTeam2D()->addArtDirector(_artDirector2D);
     _artDirector2D->resize(width(), height());
 
-    prop3::CpuRaytracerServer* cpuRaytracer(
-        new prop3::CpuRaytracerServer());
+    prop3::ArtDirectorServer* cpuRaytracer(
+        new prop3::ArtDirectorServer());
     _artDirector3D.reset(cpuRaytracer);
     play.propTeam3D()->addArtDirector(_artDirector3D);
     _artDirector3D->resize(width(), height());
