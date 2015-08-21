@@ -19,9 +19,12 @@
 #include <PropRoom3D/Prop/Coating/GlossyPaint.h>
 #include <PropRoom3D/Prop/Coating/TexturedFlatPaint.h>
 #include <PropRoom3D/Prop/Coating/TexturedGlossyPaint.h>
+#include <PropRoom3D/Scene/Scene.h>
 #include <PropRoom3D/Scene/SceneJsonReader.h>
 #include <PropRoom3D/Scene/SceneJsonWriter.h>
 #include <PropRoom3D/Team/AbstractTeam.h>
+#include <PropRoom3D/Environment/Environment.h>
+#include <PropRoom3D/Environment/Backdrop/ProceduralSun.h>
 
 #include <Scaena/Play/Play.h>
 #include <Scaena/Play/View.h>
@@ -163,7 +166,9 @@ void CpuRaytracingCharacter::setupStageScene()
     _camMan->setOrientation(pan, tilt);
     _camMan->setPosition(camPos);
 
-
+    // Environment
+    play().propTeam3D()->scene()->environment()->setBackdrop(
+                std::shared_ptr<Backdrop>(new ProceduralSun(false)));
 
     // Socle
     glm::dvec3 negLim(-20.0, -20.0, 0.0);
