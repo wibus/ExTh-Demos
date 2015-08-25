@@ -13,6 +13,7 @@
 #include <PropRoom3D/Prop/Surface/Sphere.h>
 #include <PropRoom3D/Prop/Surface/Plane.h>
 #include <PropRoom3D/Prop/Surface/Quadric.h>
+#include <PropRoom3D/Prop/Material/Fog.h>
 #include <PropRoom3D/Prop/Material/Glass.h>
 #include <PropRoom3D/Prop/Material/Metal.h>
 #include <PropRoom3D/Prop/Coating/FlatPaint.h>
@@ -129,13 +130,14 @@ void CpuRaytracingCharacter::beginStep(const StageTime &time)
         _camMan->pan( syncMouse.displacement().x * -turnSpeed);
         _camMan->tilt(syncMouse.displacement().y * -turnSpeed);
     }
-/*
+
+    /*
     if(_sphere)
     {
         _sphere->surface()->transform(Transform(1.0, glm::dquat(),
             glm::dvec3(glm::sin(time.totalTime()) * time.elapsedTime(), 0.0, 0.0)));
     }
-    */
+    //*/
 }
 
 void CpuRaytracingCharacter::draw(const std::shared_ptr<scaena::View> &,
@@ -167,8 +169,9 @@ void CpuRaytracingCharacter::setupStageScene()
     _camMan->setPosition(camPos);
 
     // Environment
-    play().propTeam3D()->scene()->environment()->setBackdrop(
-                std::shared_ptr<Backdrop>(new ProceduralSun(false)));
+    auto env = play().propTeam3D()->scene()->environment();
+    env->setBackdrop(std::shared_ptr<Backdrop>(new ProceduralSun(false)));
+    env->setAmbientMaterial(pMat(new Fog(glm::dvec3(0.5, 0.5, 0.52), 0.04, 40.0)));
 
     // Socle
     glm::dvec3 negLim(-20.0, -20.0, 0.0);
