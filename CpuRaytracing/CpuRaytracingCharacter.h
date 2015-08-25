@@ -37,10 +37,10 @@ public:
     virtual void exitStage() override;
 
 protected:
-    virtual void setupStageScene();
-    virtual void setupManufacturingScene();
-    virtual void setupConvergenceScene();
-    virtual void setupQuadricScene();
+    virtual void setupStageStageSet();
+    virtual void setupManufacturingStageSet();
+    virtual void setupConvergenceStageSet();
+    virtual void setupQuadricStageSet();
 
     virtual void createBusGlass(const glm::dmat4& transform, double width, double height);
     virtual std::shared_ptr<prop3::Prop> createFixture();

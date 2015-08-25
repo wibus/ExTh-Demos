@@ -6,4 +6,4 @@ cmake_install.cmake
 install_manifest.txt
 Log.txt
 CMakeLists.txt.user.3.3-pre1
-Scene*.prop3
+StageSet*.prop3

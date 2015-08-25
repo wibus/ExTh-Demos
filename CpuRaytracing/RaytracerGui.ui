@@ -233,13 +233,13 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="sceneTab">
+      <widget class="QWidget" name="stageSetTab">
        <attribute name="title">
-        <string>Scene</string>
+        <string>StageSet</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_11">
         <item>
-         <widget class="QTreeView" name="sceneTreeView"/>
+         <widget class="QTreeView" name="stageSetTreeView"/>
         </item>
        </layout>
       </widget>
@@ -711,9 +711,9 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="materialTab">
+      <widget class="QWidget" name="inspectorTab">
        <attribute name="title">
-        <string>Material</string>
+        <string>Inspector</string>
        </attribute>
       </widget>
      </widget>

@@ -20,12 +20,10 @@
 #include <PropRoom3D/Prop/Coating/GlossyPaint.h>
 #include <PropRoom3D/Prop/Coating/TexturedFlatPaint.h>
 #include <PropRoom3D/Prop/Coating/TexturedGlossyPaint.h>
-#include <PropRoom3D/Scene/Scene.h>
-#include <PropRoom3D/Scene/SceneJsonReader.h>
-#include <PropRoom3D/Scene/SceneJsonWriter.h>
+#include <PropRoom3D/Prop/Environment/Environment.h>
+#include <PropRoom3D/Prop/Environment/Backdrop/ProceduralSun.h>
+#include <PropRoom3D/StageSet/StageSet.h>
 #include <PropRoom3D/Team/AbstractTeam.h>
-#include <PropRoom3D/Environment/Environment.h>
-#include <PropRoom3D/Environment/Backdrop/ProceduralSun.h>
 
 #include <Scaena/Play/Play.h>
 #include <Scaena/Play/View.h>
@@ -67,14 +65,13 @@ void CpuRaytracingCharacter::enterStage()
     _ups->setHeight(20);
     _ups->setIsVisible(false);
 
-    //* Choose and setup scene
-    setupStageScene();
-    //setupManufacturingScene();
-    //setupConvergenceScene();
-    //setupQuadricScene();
+    //* Choose and setup stageSet
+    setupStageStageSet();
+    //setupManufacturingStageSet();
+    //setupConvergenceStageSet();
+    //setupQuadricStageSet();
 
-    SceneJsonWriter writer;
-    writer.saveToFile(*play().propTeam3D()->scene(), "Scene.prop3", true);
+    play().propTeam3D()->saveScene("StageSet.prop3");
     /*/
 
     glm::dvec3 focusPos = glm::dvec3(-1.2, -1.2, 5.25);
@@ -88,12 +85,10 @@ void CpuRaytracingCharacter::enterStage()
     _camMan->setOrientation(pan, tilt);
     _camMan->setPosition(camPos);
 
-    SceneJsonReader reader;
-    reader.loadFromFile(*play().propTeam3D(), "Scene.prop3", true);
+    play().propTeam3D()->loadScene("StageSet.prop3");
     //*/
 
-    SceneJsonWriter copyWriter;
-    copyWriter.saveToFile(*play().propTeam3D()->scene(), "SceneCopy.prop3", true);
+    play().propTeam3D()->saveScene("StageSetCopy.prop3");
 }
 
 void CpuRaytracingCharacter::beginStep(const StageTime &time)
@@ -154,7 +149,7 @@ void CpuRaytracingCharacter::exitStage()
     _sphere.reset();
 }
 
-void CpuRaytracingCharacter::setupStageScene()
+void CpuRaytracingCharacter::setupStageStageSet()
 {
     // Setup Camera
     glm::dvec3 focusPos = glm::dvec3(-1.2, -1.2, 5.25);
@@ -169,7 +164,7 @@ void CpuRaytracingCharacter::setupStageScene()
     _camMan->setPosition(camPos);
 
     // Environment
-    auto env = play().propTeam3D()->scene()->environment();
+    auto env = play().propTeam3D()->stageSet()->environment();
     env->setBackdrop(std::shared_ptr<Backdrop>(new ProceduralSun(false)));
     env->setAmbientMaterial(pMat(new Fog(glm::dvec3(0.5, 0.5, 0.52), 0.04, 40.0)));
 
@@ -297,7 +292,7 @@ void CpuRaytracingCharacter::setupStageScene()
 }
 
 
-void CpuRaytracingCharacter::setupManufacturingScene()
+void CpuRaytracingCharacter::setupManufacturingStageSet()
 {
     // Setup Camera
     glm::dvec3 focusPos = glm::dvec3(0, 0, 0);
@@ -338,7 +333,7 @@ void CpuRaytracingCharacter::setupManufacturingScene()
     floorProp->setSurface(floorSurf);
 }
 
-void CpuRaytracingCharacter::setupConvergenceScene()
+void CpuRaytracingCharacter::setupConvergenceStageSet()
 {
     // Setup Camera
     glm::dvec3 focusPos = glm::dvec3(0, 0, 0);
@@ -360,7 +355,7 @@ void CpuRaytracingCharacter::setupConvergenceScene()
     wall->setSurface(wallPlane);
 }
 
-void CpuRaytracingCharacter::setupQuadricScene()
+void CpuRaytracingCharacter::setupQuadricStageSet()
 {
     // Setup Camera
     glm::dvec3 focusPos = glm::dvec3(0, 0, 2);
