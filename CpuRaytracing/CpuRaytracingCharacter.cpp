@@ -165,8 +165,8 @@ void CpuRaytracingCharacter::setupStageStageSet()
 
     // Environment
     auto env = play().propTeam3D()->stageSet()->environment();
-    env->setBackdrop(std::shared_ptr<Backdrop>(new ProceduralSun(false)));
-    env->setAmbientMaterial(pMat(new Fog(glm::dvec3(0.5, 0.5, 0.52), 0.04, 40.0)));
+    env->setBackdrop(std::shared_ptr<Backdrop>(new ProceduralSun(true)));
+    //env->setAmbientMaterial(pMat(new Fog(glm::dvec3(0.5, 0.5, 0.52), 0.04, 40.0)));
 
     // Socle
     glm::dvec3 negLim(-20.0, -20.0, 0.0);

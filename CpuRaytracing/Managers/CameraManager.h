@@ -27,6 +27,8 @@ protected slots:
     virtual void outputDimensionsChanged(int unused);
     virtual void outputMatchCaptureDimensions(bool match);
     virtual void fieldOfViewChanged(int unused);
+    virtual void dofDistanceChanged(double unused);
+    virtual void dofApertureChanged(double unused);
     virtual void enterFullscreen();
     virtual void exitFullscreen();
 

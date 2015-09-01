@@ -70,6 +70,15 @@ void CameraManager::setView(QWidget* view)
             static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
             this, &CameraManager::fieldOfViewChanged);
 
+    connect(_ui->dofDistanceSpin,
+            static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+            this, &CameraManager::dofDistanceChanged);
+
+    connect(_ui->dofApertureSpin,
+            static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+            this, &CameraManager::dofApertureChanged);
+
+
     connect(_ui->fullscreenButton, &QPushButton::clicked,
             this,                  &CameraManager::enterFullscreen);
 
@@ -132,6 +141,16 @@ void CameraManager::fieldOfViewChanged(int)
     updateCameraProjection();
 }
 
+void CameraManager::dofDistanceChanged(double unused)
+{
+    updateCameraProjection();
+}
+
+void CameraManager::dofApertureChanged(double unused)
+{
+    updateCameraProjection();
+}
+
 
 void CameraManager::enterFullscreen()
 {
@@ -152,12 +171,15 @@ void CameraManager::exitFullscreen()
 
 void CameraManager::updateCameraProjection()
 {
+    float dofDist = _ui->dofDistanceSpin->value();
+    float dofAper = dofDist + _ui->dofApertureSpin->value() + 1.0;
+
     glm::mat4 projection =
         glm::perspectiveFov(
             glm::radians((float)_ui->fieldOfViewSpin->value())/2,
             (float) _ui->captureDimensionsSpinX->value(),
             (float) _ui->captureDimensionsSpinY->value(),
-            1.0f, 2.0f);
+            dofDist, dofAper);
 
     _camera->updateProjection(projection);
 }

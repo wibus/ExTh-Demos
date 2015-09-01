@@ -186,7 +186,7 @@
               <number>100</number>
              </property>
              <property name="value">
-              <number>40</number>
+              <number>52</number>
              </property>
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -211,9 +211,51 @@
               <number>100</number>
              </property>
              <property name="value">
-              <number>40</number>
+              <number>52</number>
              </property>
             </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="depthOfFieldGroup">
+          <property name="title">
+           <string>Depth of field</string>
+          </property>
+          <layout class="QFormLayout" name="formLayout">
+           <item row="0" column="0">
+            <widget class="QLabel" name="dofDistanceLabel">
+             <property name="text">
+              <string>Distance</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QDoubleSpinBox" name="dofDistanceSpin">
+             <property name="suffix">
+              <string>m</string>
+             </property>
+             <property name="minimum">
+              <double>0.500000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>1000.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>30.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="dofApertureLabel">
+             <property name="text">
+              <string>Aperture</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QDoubleSpinBox" name="dofApertureSpin"/>
            </item>
           </layout>
          </widget>
