@@ -42,8 +42,12 @@ protected:
     virtual void setupConvergenceStageSet();
     virtual void setupQuadricStageSet();
 
-    virtual void createBusGlass(const glm::dmat4& transform, double width, double height);
-    virtual std::shared_ptr<prop3::Prop> createFixture();
+    virtual void createBusGlass(
+            const glm::dmat4& transform,
+            double width,
+            double height,
+            double depth);
+    virtual std::shared_ptr<prop3::Prop> createFixture(double size);
 
 private:
     std::shared_ptr<cellar::CameraManFree> _camMan;
