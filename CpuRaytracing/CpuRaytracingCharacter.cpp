@@ -10,6 +10,7 @@
 #include <PropRoom2D/Team/AbstractTeam.h>
 
 #include <PropRoom3D/Prop/Prop.h>
+#include <PropRoom3D/Prop/Surface/Box.h>
 #include <PropRoom3D/Prop/Surface/Sphere.h>
 #include <PropRoom3D/Prop/Surface/Plane.h>
 #include <PropRoom3D/Prop/Surface/Quadric.h>
@@ -179,8 +180,8 @@ void CpuRaytracingCharacter::setupStageStageSet()
     pSurf yNeg = Plane::plane(glm::dvec3(0, -1, 0), negLim);
     pSurf socleSide = xNeg & xPos & yNeg & yPos & zNeg;
     pSurf zSoc = PlaneTexture::plane(glm::dvec3(0, 0, 1), posLim,
-               glm::dvec3(socleDia.x, 0.0, 0.0),
-               glm::dvec3(0.0, socleDia.y, 0.0),
+               glm::dvec3(socleDia.x/7.0, 0.0, 0.0),
+               glm::dvec3(0.0, socleDia.y/7.0, 0.0),
                negLim);
 
     pCoat socleSideCoat(new FlatPaint(
@@ -190,7 +191,8 @@ void CpuRaytracingCharacter::setupStageStageSet()
     pCoat socleTopCoat(new TexturedGlossyPaint(
             ":/CpuRaytracing/Bathroom_Tiles_albedo.png",
             ":/CpuRaytracing/Bathroom_Tiles_gloss.png",
-            glm::dvec3(1.0, 1.0, 1.0)));
+             ESamplerFilter::LINEAR,
+             ESamplerWrapper::REPEAT));
     zSoc->setCoating(socleTopCoat);
 
     std::shared_ptr<Prop> socle = play().propTeam3D()->createProp();
@@ -204,7 +206,7 @@ void CpuRaytracingCharacter::setupStageStageSet()
     glm::dvec3 boxCenter = boxMin + boxDia / 2.0;
     glm::dvec3 wallThickness = glm::dvec3(0.1);
     glm::dvec3 pillard(boxMax.x, boxMin.y, boxMin.z);
-    glm::dvec3 doorDim(0.85, 0.85, 2.0);
+    glm::dvec3 doorDim(0.85, 0.85, 2.0 * 2);
 
     pSurf xBot = Plane::plane(glm::dvec3(-1,  0,  0), boxMin);
     pSurf xTop = Plane::plane(glm::dvec3( 1,  0,  0), boxMax);
@@ -238,68 +240,46 @@ void CpuRaytracingCharacter::setupStageStageSet()
     pSurf roomYtop = Plane::plane(glm::dvec3(0, -1, 0), boxMax - wallThickness);
     pSurf room = roomZTop | roomXbot | roomXtop | roomYbot | roomYtop;
 
-    pSurf doorTop = Plane::plane(glm::dvec3(0, 0, -1), glm::dvec3(0, 0, doorDim.z));
-    pSurf doorXmin = Plane::plane(glm::dvec3(1, 0, 0), glm::dvec3(-doorDim.x/2.0, 0, 0));
-    pSurf doorXmax = Plane::plane(glm::dvec3(-1, 0, 0), glm::dvec3(doorDim.x/2.0, 0, 0));
-    pSurf doorYmin = Plane::plane(glm::dvec3(0, 1, 0), glm::dvec3(0, -doorDim.y/2.0, 0));
-    pSurf doorYmax = Plane::plane(glm::dvec3(0, -1, 0), glm::dvec3(0, doorDim.y/2.0, 0));
-    pSurf door = doorTop | doorXmin | doorXmax | doorYmin | doorYmax;
 
-    pSurf hallEntrance = Shell(door);
-    hallEntrance->transform(glm::translate(glm::dmat4(), glm::dvec3(boxMax.x, boxMax.y/2.0, 0.0)));
+    pSurf hallEntrance = !Box::boxPosDims(glm::dvec3(boxMax.x, boxMax.y/2.0, 0.0), doorDim);
+    pSurf roomEntrance = !Box::boxPosDims(glm::dvec3(boxMin.y, boxMin.y/2.0, 0.0), doorDim);
+    pSurf glassPassage = !Box::boxPosDims(glm::dvec3(boxMax.x/2.0, 0.0, 0.0), doorDim);
+    pSurf roomPassage = !Box::boxPosDims(glm::dvec3(0.0, boxMax.y/2.0, 0.0), doorDim);
 
-    pSurf roomEntrance = Shell(door);
-    roomEntrance->transform(glm::translate(glm::dmat4(), glm::dvec3(boxMin.y, boxMin.y/2.0, 0.0)));
 
-    pSurf glassPassage = Shell(door);
-    glassPassage->transform(glm::translate(glm::dmat4(), glm::dvec3(boxMax.x/2.0, 0.0, 0.0)));
+    pSurf tallWindowHole= !Box::boxPosDims(
+            glm::dvec3(0, boxMin.y * 3.0 / 4.0, boxDia.z / 2.0),
+            glm::dvec3(1, boxDia.y / 4.0 - 0.50, boxDia.z - 0.50));
 
-    pSurf roomPassage = Shell(door);
-    roomPassage->transform(glm::translate(glm::dmat4(), glm::dvec3(0.0, boxMax.y/2.0, 0.0)));
+    pSurf longWindowHole = !Box::boxPosDims(
+            glm::dvec3(boxMin.y, 0, boxDia.z * 0.75),
+            glm::dvec3(1, boxDia.x * 0.9, boxDia.z * 0.20));
 
-    pSurf holeXmin = Plane::plane(glm::dvec3(1, 0, 0), glm::dvec3(-0.5, 0, 0));
-    pSurf holeXmax = Plane::plane(glm::dvec3(-1, 0, 0), glm::dvec3(0.5, 0, 0));
-    pSurf holeYmin = Plane::plane(glm::dvec3(0, 1, 0), glm::dvec3(0, -0.5, 0));
-    pSurf holeYmax = Plane::plane(glm::dvec3(0, -1, 0), glm::dvec3(0, 0.5, 0));
-    pSurf holeZmin = Plane::plane(glm::dvec3(0, 0, 1), glm::dvec3(0, 0, -0.5));
-    pSurf holeZmax = Plane::plane(glm::dvec3(0, 0, -1), glm::dvec3(0, 0, 0.5));
-
-    pSurf hole = (holeXmin | holeXmax | holeYmin | holeYmax | holeZmin | holeZmax);
-
-    glm::dmat4 tallWindowHoleTrans;
-    tallWindowHoleTrans = glm::translate(tallWindowHoleTrans, glm::dvec3(0, boxMin.y * 3.0 / 4.0, boxDia.z / 2.0));
-    tallWindowHoleTrans = glm::scale(tallWindowHoleTrans, glm::dvec3(1, boxDia.y / 4.0 - 0.50, boxDia.z - 0.50));
-    pSurf tallWindowHole = Shell(hole);
-    tallWindowHole->transform(tallWindowHoleTrans);
-
-    glm::dmat4 smallWindowHoleTrans;
-    smallWindowHoleTrans = glm::translate(smallWindowHoleTrans, glm::dvec3(boxMax.x - boxDia.x/8.0, boxMax.y, boxDia.z*0.3));
-    smallWindowHoleTrans = glm::scale(smallWindowHoleTrans, glm::dvec3(boxDia.z/6.0, 1, boxDia.z/7.0));
-    glm::dmat4 smallWindowGap = glm::translate(glm::dmat4(), glm::dvec3(-boxDia.x/4.0, 0, 0));
-
-    pSurf squareWindowHole1 = Shell(hole);
-    glm::dmat4 smallWindowHoleTrans1 = smallWindowHoleTrans;
-    squareWindowHole1->transform(smallWindowHoleTrans1);
-    glm::dmat4 smallWindowHoleTrans2 = smallWindowGap * smallWindowHoleTrans1;
-    pSurf squareWindowHole2 = Shell(hole);
-    squareWindowHole2->transform(smallWindowHoleTrans2);
-    glm::dmat4 smallWindowHoleTrans3 = smallWindowGap * smallWindowHoleTrans2;
-    pSurf squareWindowHole3 = Shell(hole);
-    squareWindowHole3->transform(smallWindowHoleTrans3);
-    glm::dmat4 smallWindowHoleTrans4 = smallWindowGap * smallWindowHoleTrans3;
-    pSurf squareWindowHole4 = Shell(hole);
-    squareWindowHole4->transform(smallWindowHoleTrans4);
+    pSurf smallWindowHole1 = !Box::boxPosDims(
+            glm::dvec3(boxMax.x - boxDia.x/8.0, boxMax.y, boxDia.z*0.3),
+            glm::dvec3(boxDia.z/6.0, 1, boxDia.z/7.0));
+    pSurf smallWindowHole2 = !Box::boxPosDims(
+            glm::dvec3(boxMax.x - boxDia.x*3.0/8.0, boxMax.y, boxDia.z*0.3),
+            glm::dvec3(boxDia.z/6.0, 1, boxDia.z/7.0));
+    pSurf smallWindowHole3 = !Box::boxPosDims(
+            glm::dvec3(boxMax.x - boxDia.x*5.0/8.0, boxMax.y, boxDia.z*0.3),
+            glm::dvec3(boxDia.z/6.0, 1, boxDia.z/7.0));
+    pSurf smallWindowHole4 = !Box::boxPosDims(
+            glm::dvec3(boxMax.x - boxDia.x*7.0/8.0, boxMax.y, boxDia.z*0.3),
+            glm::dvec3(boxDia.z/6.0, 1, boxDia.z/7.0));
 
     pSurf stageSurf = box & hall & room &
         hallEntrance & roomEntrance & glassPassage & roomPassage &
-        tallWindowHole & squareWindowHole1 & squareWindowHole2 &
-                         squareWindowHole3 & squareWindowHole4 &
+        tallWindowHole & smallWindowHole1 & smallWindowHole2 &
+        longWindowHole & smallWindowHole3 & smallWindowHole4 &
         ((rearWall | ceiling | sideWall) |
          (pillarX & pillarY) |
          (yStep & zStep));
 
     pCoat posterCoat(new TexturedFlatPaint(
             ":/CpuRaytracing/Fusion_Albums.png",
+            ESamplerFilter::LINEAR,
+            ESamplerWrapper::CLAMP,
             glm::dvec3(0.7, 0.7, 0.7)));
 
     std::shared_ptr<Prop> stage = play().propTeam3D()->createProp();
@@ -337,6 +317,113 @@ void CpuRaytracingCharacter::setupStageStageSet()
                    boxMax.z/2.0 - wallThickness.z,
                    wallThickness.x);
 
+
+    // Fence
+    double fenceSide = 0.20;
+    double fenceHeight = 1.0;
+    double fenceCapSide = fenceSide * 1.33;
+    double fenceCapRadius = fenceCapSide * 1.05;
+    double fenceWallWidth = fenceSide * 0.6;
+    double fenceWallHeight = fenceHeight * 0.8;
+    glm::dmat4 capXRot = glm::rotate(glm::dmat4(), glm::pi<double>() / 2.0, glm::dvec3(1, 0, 0));
+    glm::dmat4 capYRot = glm::rotate(glm::dmat4(), glm::pi<double>() / 2.0, glm::dvec3(0, 1, 0));
+    pSurf capXneg = Quadric::cylinder(fenceCapRadius, fenceCapRadius);
+    capXneg->transform(glm::translate(capXRot, glm::dvec3(-fenceCapSide, 0, 0)));
+    pSurf capXpos = Quadric::cylinder(fenceCapRadius, fenceCapRadius);
+    capXpos->transform(glm::translate(capXRot, glm::dvec3( fenceCapSide, 0, 0)));
+    pSurf capYneg = Quadric::cylinder(fenceCapRadius, fenceCapRadius);
+    capYneg->transform(glm::translate(capYRot, glm::dvec3(0, -fenceCapSide, 0)));
+    pSurf capYpos = Quadric::cylinder(fenceCapRadius, fenceCapRadius);
+    capYpos->transform(glm::translate(capYRot, glm::dvec3(0,  fenceCapSide, 0)));
+    pSurf capBox = Box::boxPosDims(glm::dvec3(0, 0, -fenceCapSide/2.0), glm::dvec3(fenceCapSide));
+    pSurf capSphere = Sphere::sphere(glm::dvec3(0, 0, -fenceSide/2.0), fenceSide / 2.0);
+    pSurf capSurf = capSphere | (capBox & !(capXneg | capXpos | capYneg | capYpos));
+    capSurf->transform(glm::translate(glm::dmat4(), glm::dvec3(0, 0.0, fenceHeight + fenceCapSide)));
+
+    pSurf fencePostBeam = Box::boxPosDims(glm::dvec3(0, 0, fenceHeight/2.0), glm::dvec3(fenceSide, fenceSide, fenceHeight));
+    pSurf fencePost = fencePostBeam | capSurf;
+
+    std::vector<glm::dvec3> postPos = {
+        glm::dvec3(-1.0,     -1.0,     0.0),
+        glm::dvec3(-1.0/3.0, -1.0,     0.0),
+        glm::dvec3( 1.0/3.0, -1.0,     0.0),
+        glm::dvec3( 1.0,     -1.0,     0.0),
+        glm::dvec3( 1.0,     -1.0/3.0, 0.0),
+        glm::dvec3( 1.0,      1.0/3.0, 0.0),
+        glm::dvec3( 1.0,      1.0,     0.0),
+        glm::dvec3( 1.0/3.0,  1.0,     0.0),
+        glm::dvec3(-1.0/3.0,  1.0,     0.0),
+        glm::dvec3(-1.0,      1.0,     0.0),
+        glm::dvec3(-1.0,      1.0/3.0, 0.0),
+        glm::dvec3(-1.0,     -1.0/3.0, 0.0)
+    };
+
+    glm::dvec3 sceneDim((socleDia.x-fenceCapSide) / 2.0,
+                        (socleDia.y-fenceCapSide) / 2.0,
+                        0.0);
+    for(const auto& pos : postPos)
+    {
+        glm::dvec3 postOffset = sceneDim * pos;
+        glm::dmat4 postTrans = glm::translate(glm::dmat4(), postOffset);
+
+        pSurf postShell = Shell(fencePost);
+        postShell->transform(postTrans);
+
+        pSurf postBounds = Box::boxPosDims(
+            postOffset + glm::dvec3(0, 0, (fenceHeight + fenceCapSide)/2.0),
+            glm::dvec3(fenceCapSide, fenceCapSide, fenceHeight + fenceCapSide));
+
+        std::shared_ptr<Prop> postProp = play().propTeam3D()->createProp();
+        postProp->setBoundingSurface(postBounds);
+        postProp->setSurface(postShell);
+    }
+
+    std::shared_ptr<Prop> fenceWallPropXNeg = play().propTeam3D()->createProp();
+    fenceWallPropXNeg->setSurface(Box::boxPosDims(
+        glm::dvec3(-sceneDim.x, 0, fenceWallHeight/2.0),
+        glm::dvec3(fenceWallWidth, 2*sceneDim.y, fenceWallHeight)));
+    std::shared_ptr<Prop> fenceWallPropXPos = play().propTeam3D()->createProp();
+    fenceWallPropXPos->setSurface(Box::boxPosDims(
+        glm::dvec3(sceneDim.x, 0, fenceWallHeight/2.0),
+        glm::dvec3(fenceWallWidth, 2*sceneDim.y, fenceWallHeight)));
+    std::shared_ptr<Prop> fenceWallPropYNeg = play().propTeam3D()->createProp();
+    fenceWallPropYNeg->setSurface(Box::boxPosDims(
+        glm::dvec3(0, -sceneDim.y, fenceWallHeight/2.0),
+        glm::dvec3(2*sceneDim.x, fenceWallWidth, fenceWallHeight)));
+    std::shared_ptr<Prop> fenceWallPropYPos = play().propTeam3D()->createProp();
+    fenceWallPropYPos->setSurface(Box::boxPosDims(
+        glm::dvec3(0, sceneDim.y, fenceWallHeight/2.0),
+        glm::dvec3(2*sceneDim.x, fenceWallWidth, fenceWallHeight)));
+
+
+    // Egg (ellipsoid)
+    double eggRadius = 0.3;
+    double eggStandSide = eggRadius * 4;
+    double eggStandHeight = eggStandSide * 0.15;
+    pSurf eggTop = Quadric::ellipsoid(eggRadius, eggRadius, 2*eggRadius);
+    eggTop->transform(glm::translate(glm::dmat4(), glm::dvec3(0, 0, 0)));
+    pSurf eggBottom = Sphere::sphere(glm::dvec3(), eggRadius);
+    pSurf topCap = Plane::plane(glm::dvec3(0, 0, -1), glm::dvec3(0, 0, 0));
+    pSurf bottomCap = Plane::plane(glm::dvec3(0, 0, 1), glm::dvec3(0, 0, 0));
+    pSurf eggSurf = (eggTop & ~topCap) | (eggBottom & ~bottomCap);
+    eggSurf->transform(glm::translate(glm::dmat4(), glm::dvec3(
+         sceneDim.x / 4.0, -sceneDim.y / 4.0, eggRadius + eggStandHeight)));
+
+
+    pMat eggMat(new Metal(glm::dvec3(1, 0.765557, 0.336057), 1.0));
+    std::shared_ptr<Prop> eggProp = play().propTeam3D()->createProp();
+    eggProp->setSurface(eggSurf);
+    eggProp->setMaterial(eggMat);
+
+    // Egg stand
+    pSurf eggStandSurf = Box::boxPosDims(
+        glm::dvec3(sceneDim.x/4, -sceneDim.y/4, eggStandHeight/2.0),
+        glm::dvec3(eggStandSide, eggStandSide, eggStandHeight));
+    pCoat eggStandCoat(new GlossyPaint(glm::dvec3(0.08), 1.0));
+    std::shared_ptr<Prop> eggStandProp = play().propTeam3D()->createProp();
+    eggStandProp->setSurface(eggStandSurf);
+    eggStandSurf->setCoating(eggStandCoat);
+
 /*
     // Bowl
     pSurf bowlBase = Sphere::sphere(glm::dvec3(0, 0, 2.7), 3.0);
@@ -353,17 +440,6 @@ void CpuRaytracingCharacter::setupStageStageSet()
     bowl->setSurface(bowlSurf);
     bowl->setMaterial(bowlMat);
 */
-
-/*
-    // Ball
-    pSurf ballSurf = Sphere::sphere(glm::dvec3(5.0, -15.0, 2), 2.0);
-    pMat ballMat(new Metal(glm::dvec3(212, 175, 55) / 255.0));
-    std::shared_ptr<Prop> ball = play().propTeam3D()->createProp();
-    ball->setSurface(ballSurf);
-    ball->setMaterial(ballMat);
-
-    _sphere = ball;
-    */
 }
 
 

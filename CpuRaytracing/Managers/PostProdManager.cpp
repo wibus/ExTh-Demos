@@ -127,7 +127,8 @@ void PostProdManager::temperatureChanged(int kelvin)
 
 void PostProdManager::temperatureDefaultClicked()
 {
-    temperatureChanged(prop3::GlPostProdUnit::DEFAULT_WHITE_TEMPERATURE);
+    _ui->temperatureSpin->setValue(
+        prop3::GlPostProdUnit::DEFAULT_WHITE_TEMPERATURE);
 }
 
 void PostProdManager::contrastChanged(int contrast)
