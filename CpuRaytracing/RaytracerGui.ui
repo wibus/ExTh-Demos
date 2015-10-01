@@ -186,7 +186,7 @@
               <number>100</number>
              </property>
              <property name="value">
-              <number>52</number>
+              <number>60</number>
              </property>
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -211,7 +211,7 @@
               <number>100</number>
              </property>
              <property name="value">
-              <number>52</number>
+              <number>60</number>
              </property>
             </widget>
            </item>
