@@ -14,6 +14,7 @@
 #include <PropRoom3D/Prop/Surface/Sphere.h>
 #include <PropRoom3D/Prop/Surface/Plane.h>
 #include <PropRoom3D/Prop/Surface/Quadric.h>
+#include <PropRoom3D/Prop/Material/Concrete.h>
 #include <PropRoom3D/Prop/Material/Fog.h>
 #include <PropRoom3D/Prop/Material/Glass.h>
 #include <PropRoom3D/Prop/Material/Metal.h>
@@ -67,12 +68,12 @@ void CpuRaytracingCharacter::enterStage()
     _ups->setIsVisible(false);
 
     //* Choose and setup stageSet
-    setupStageStageSet();
-    //setupManufacturingStageSet();
+    //setupStageStageSet();
+    setupManufacturingStageSet();
     //setupConvergenceStageSet();
     //setupQuadricStageSet();
 
-    play().propTeam3D()->saveScene("StageSet.prop3");
+    //play().propTeam3D()->saveScene("StageSet.prop3");
     /*/
 
     glm::dvec3 focusPos = glm::dvec3(-1.2, -1.2, 5.25);
@@ -89,7 +90,7 @@ void CpuRaytracingCharacter::enterStage()
     play().propTeam3D()->loadScene("StageSet.prop3");
     //*/
 
-    play().propTeam3D()->saveScene("StageSetCopy.prop3");
+    //play().propTeam3D()->saveScene("StageSetCopy.prop3");
 }
 
 void CpuRaytracingCharacter::beginStep(const StageTime &time)
@@ -97,7 +98,7 @@ void CpuRaytracingCharacter::beginStep(const StageTime &time)
     float elapsedtime = time.elapsedTime();
     _ups->setText("UPS: " + toString(floor(1.0 / elapsedtime)));
 
-    float velocity = 3.0f * elapsedtime;
+    float velocity = 1.0f * elapsedtime;
     const float turnSpeed = 0.004f;
 
     SynchronousMouse& syncMouse = *play().synchronousMouse();
@@ -623,7 +624,7 @@ void CpuRaytracingCharacter::setupManufacturingStageSet()
 {
     // Setup Camera
     glm::dvec3 focusPos = glm::dvec3(0, 0, 0);
-    glm::dvec3 camPos = glm::dvec3(0, 2, 0);
+    glm::dvec3 camPos = glm::dvec3(0, -2, 0);
     glm::dvec3 dir = glm::normalize(focusPos - camPos);
     double tilt = glm::atan(dir.z, glm::length(glm::dvec2(dir.x, dir.y)));
     double pan = glm::atan(dir.y, dir.x);
@@ -633,31 +634,159 @@ void CpuRaytracingCharacter::setupManufacturingStageSet()
     _camMan->setOrientation(pan, tilt);
     _camMan->setPosition(camPos);
 
+
+    auto env = play().propTeam3D()->stageSet()->environment();
+    env->setBackdrop(std::shared_ptr<Backdrop>(new ProceduralSun(true)));
+
     // Setup
-    double glassWidth = 1.0;
-    double glassDepth = 0.1;
-    double glassHeight = 1.0;
-    pSurf glassNegX = Plane::plane(glm::dvec3(-1, 0, 0), glm::dvec3(-glassWidth/2.0, 0, 0));
-    pSurf glassPosX = Plane::plane(glm::dvec3( 1, 0, 0), glm::dvec3( glassWidth/2.0, 0, 0));
-    pSurf glassNegY = Plane::plane(glm::dvec3(0, -1, 0), glm::dvec3(0, -glassDepth/2.0, 0));
-    pSurf glassPosY = Plane::plane(glm::dvec3(0,  1, 0), glm::dvec3(0,  glassDepth/2.0, 0));
-    pSurf glassNegZ = Plane::plane(glm::dvec3(0, 0, -1), glm::dvec3(0, 0, 0));
-    pSurf glassPosZ = Plane::plane(glm::dvec3(0, 0,  1), glm::dvec3(0, 0, glassHeight));
-    pSurf glassSurf = glassNegX & glassPosX & glassNegY & glassPosY & glassPosZ & glassNegZ;
-
-    pMat glassMat(new Glass(glm::dvec3(1.0), 0.0));
-
-    std::shared_ptr<Prop> glassProp = play().propTeam3D()->createProp();
-    glassProp->setSurface(glassSurf);
-    glassProp->setMaterial(glassMat);
-
-    pSurf ballSurf = Sphere::sphere(glm::dvec3(1.0, 1.0, 0.5), 0.5);
-    std::shared_ptr<Prop> ballProp = play().propTeam3D()->createProp();
-    ballProp->setSurface(ballSurf);
-
     pSurf floorSurf = Plane::plane(glm::dvec3(0.0, 0.0, 1.0), glm::dvec3());
     std::shared_ptr<Prop> floorProp = play().propTeam3D()->createProp();
+    floorProp->setMaterial(pMat(new Concrete(glm::dvec3(0.7, 0.7, 0.7))));
     floorProp->setSurface(floorSurf);
+
+
+    pSurf lampSurf;
+
+    // Head
+    double headRot = -glm::pi<double>() / 8;
+    double headTwist = -glm::pi<double>() / 6;
+    double elbowRot = glm::pi<double>() / 1.5;
+    double shoulderRot = -glm::pi<double>() / 1.5;
+
+
+    double headRad = 0.05;
+    double headLen = 0.10;
+    double headThick = 0.015;
+    double neckRad = headRad * 0.5;
+    double neckLen = headLen * 0.4;
+    pSurf headOut = Quadric::paraboloid(1, 1);
+    pSurf headIn = Quadric::paraboloid(1, 1);
+    headIn->transform(glm::translate(glm::dmat4(), glm::dvec3(0, 0, headThick)));
+    pSurf headCap = Plane::plane(glm::dvec3(0, 0, 1), glm::dvec3(0, 0, 1));
+    pSurf headSurf = headCap & headOut & !headIn;
+    headSurf->transform(glm::scale(glm::dmat4(), glm::dvec3(headRad, headRad, headLen)));
+    pSurf neckCyl = Quadric::cylinder(neckRad, neckRad);
+    pSurf neckTop = Plane::plane(glm::dvec3(0, 0, 1), glm::dvec3(0, 0, neckLen/2.0));
+    pSurf neckBot = Plane::plane(glm::dvec3(0, 0,-1), glm::dvec3(0, 0,-neckLen/2.0));
+    pSurf neckSurf = neckCyl & neckTop & neckBot;
+
+    lampSurf = headSurf | neckSurf;
+    lampSurf->transform(glm::rotate(glm::dmat4(), glm::pi<double>(), glm::dvec3(0, 1, 0)));
+    lampSurf->transform(glm::rotate(glm::dmat4(), headTwist, glm::dvec3(1, 0, 0)));
+    lampSurf->transform(glm::rotate(glm::dmat4(), headRot, glm::dvec3(0, 1, 0)));
+
+
+    double forearmLen = 0.40;
+    double forearmRad = 0.005;
+    pSurf forearmCyl = Quadric::cylinder(forearmRad, forearmRad);
+    pSurf forearmTop = Plane::plane(glm::dvec3(0, 0, 1), glm::dvec3(0, 0, 0));
+    pSurf forearmBot = Plane::plane(glm::dvec3(0, 0,-1), glm::dvec3(0, 0, -forearmLen));
+    pSurf foreArmSurf = forearmCyl & forearmTop & forearmBot;
+    foreArmSurf->transform(glm::rotate(glm::dmat4(), glm::pi<double>()/2.0, glm::dvec3(0, 1, 0)));
+
+    lampSurf = lampSurf | foreArmSurf;
+    lampSurf->transform(glm::translate(glm::dmat4(), glm::dvec3(forearmLen, 0, 0)));
+
+
+    double elbowRad = 0.02;
+    double elbowWidth = 0.015;
+    pSurf elbowCyl = Quadric::cylinder(elbowRad, elbowRad);
+    pSurf elbowTop = Plane::plane(glm::dvec3(0, 0, 1), glm::dvec3(0, 0, elbowWidth/2.0));
+    pSurf elbowBot = Plane::plane(glm::dvec3(0, 0,-1), glm::dvec3(0, 0, -elbowWidth/2.0));
+    pSurf elbowSurf = elbowCyl & elbowTop & elbowBot;
+    elbowSurf->transform(glm::rotate(glm::dmat4(), glm::pi<double>()/2.0, glm::dvec3(1, 0, 0)));
+
+    lampSurf = lampSurf | elbowSurf;
+    lampSurf->transform(glm::rotate(glm::dmat4(), elbowRot, glm::dvec3(0, 1, 0)));
+
+
+    double armLen = forearmLen;
+    double armRad = forearmRad;
+    pSurf armCyl = Quadric::cylinder(armRad, armRad);
+    pSurf armTop = Plane::plane(glm::dvec3(0, 0, 1), glm::dvec3(0, 0, 0));
+    pSurf armBot = Plane::plane(glm::dvec3(0, 0,-1), glm::dvec3(0, 0, -armLen));
+    pSurf armSurf = armCyl & armTop & armBot;
+    armSurf->transform(glm::rotate(glm::dmat4(), glm::pi<double>()/2.0, glm::dvec3(0, 1, 0)));
+
+    lampSurf = lampSurf | armSurf;
+    lampSurf->transform(glm::translate(glm::dmat4(), glm::dvec3(armLen, 0, 0)));
+
+
+    double shoulderRad = elbowRad * 0.8;
+    double shoulderWidth = elbowWidth * 2.0;
+    pSurf shoulderCyl = Quadric::cylinder(shoulderRad, shoulderRad);
+    pSurf shoulderTop = Plane::plane(glm::dvec3(0, 0, 1), glm::dvec3(0, 0, shoulderWidth/2.0));
+    pSurf shoulderBot = Plane::plane(glm::dvec3(0, 0,-1), glm::dvec3(0, 0, -shoulderWidth/2.0));
+    pSurf shoulderSurf = shoulderCyl & shoulderTop & shoulderBot;
+    shoulderSurf->transform(glm::rotate(glm::dmat4(), glm::pi<double>()/2.0, glm::dvec3(1, 0, 0)));
+
+    lampSurf = lampSurf | shoulderSurf;
+    lampSurf->transform(glm::rotate(glm::dmat4(), shoulderRot, glm::dvec3(0, 1, 0)));
+    lampSurf->transform(glm::translate(glm::dmat4(), glm::dvec3(0, 0, shoulderRad)));
+
+
+    double bodyRad = 0.10;
+    double bodyHeight = 0.01;
+    double shoulderOffset = -bodyRad * 0.65;
+    double creaseHeight = bodyHeight * 0.35;
+    double creaseOffset = bodyRad * 0.2;
+    double creaseRad = bodyRad * 0.4;
+    pSurf bodyCyl = Quadric::cylinder(bodyRad, bodyRad);
+    pSurf bodyTop = Plane::plane(glm::dvec3(0, 0, 1), glm::dvec3(0, 0, 0));
+    pSurf bodyBot = Plane::plane(glm::dvec3(0, 0,-1), glm::dvec3(0, 0, -bodyHeight));
+    pSurf bodySurf = bodyCyl & bodyTop & bodyBot;
+    pSurf creaseCone = Quadric::cone(creaseRad, creaseRad);
+    pSurf creaseBottom = Plane::plane(glm::dvec3(0, 0, -1), glm::dvec3(0, 0, 1.0-creaseHeight));
+    pSurf creaseSurf = creaseCone & creaseBottom;
+    creaseSurf->transform(glm::translate(glm::dmat4(), glm::dvec3(creaseOffset, 0, -1.0)));
+    bodySurf = bodySurf & !creaseSurf;
+
+    lampSurf->transform(glm::translate(glm::dmat4(), glm::dvec3(shoulderOffset, 0, 0)));
+    lampSurf = lampSurf | bodySurf;
+    lampSurf->transform(glm::translate(glm::dmat4(), glm::dvec3(0, 0, bodyHeight)));
+
+    pSurf lampBounds = Box::boxPosDims(
+        glm::dvec3(-0.02, 0, armLen/2.0*1.05),
+        glm::dvec3(armLen*1.35, bodyRad*2.25, armLen*1.05));
+
+    pMat lampMat(new Metal(glm::dvec3(0.89803, 0.89411, 0.88627) * 0.5, 0.75));
+    std::shared_ptr<Prop> lampProp = play().propTeam3D()->createProp();
+    lampProp->setBoundingSurface(lampBounds);
+    lampProp->setMaterial(lampMat);
+    lampProp->setSurface(lampSurf);
+
+
+    // Lamp light
+    double lamLightRad = headRad * 0.7;
+    pSurf lampLightSurf = Sphere::sphere(glm::dvec3(0, 0, headLen/1.5), lamLightRad);
+
+    lampLightSurf->transform(glm::rotate(glm::dmat4(), glm::pi<double>(), glm::dvec3(0, 1, 0)));
+    lampLightSurf->transform(glm::rotate(glm::dmat4(), headTwist, glm::dvec3(1, 0, 0)));
+    lampLightSurf->transform(glm::rotate(glm::dmat4(), headRot, glm::dvec3(0, 1, 0)));
+    lampLightSurf->transform(glm::translate(glm::dmat4(), glm::dvec3(forearmLen, 0, 0)));
+    lampLightSurf->transform(glm::rotate(glm::dmat4(), elbowRot, glm::dvec3(0, 1, 0)));
+    lampLightSurf->transform(glm::translate(glm::dmat4(), glm::dvec3(armLen, 0, 0)));
+    lampLightSurf->transform(glm::rotate(glm::dmat4(), shoulderRot, glm::dvec3(0, 1, 0)));
+    lampLightSurf->transform(glm::translate(glm::dmat4(), glm::dvec3(0, 0, shoulderRad)));
+    lampLightSurf->transform(glm::translate(glm::dmat4(), glm::dvec3(shoulderOffset, 0, 0)));
+    lampLightSurf->transform(glm::translate(glm::dmat4(), glm::dvec3(0, 0, bodyHeight)));
+
+
+    std::shared_ptr<Prop> lampLightProp = play().propTeam3D()->createProp();
+    lampLightProp->setSurface(lampLightSurf);
+
+
+    // Shelter
+    double shelterThick = 0.02;
+    glm::dvec3 shelterDims(0.75, 0.75, 0.6);
+    pSurf shelterBody = Box::boxPosDims(glm::dvec3(0, 0, shelterDims.z/2.0), shelterDims);
+    pSurf shelterHole = Box::boxPosDims(glm::dvec3(shelterThick, -shelterThick, shelterDims.z/2.0-shelterThick),
+                                        shelterDims);
+    pSurf shelterSurf = shelterBody & !shelterHole;
+
+    std::shared_ptr<Prop> shelterProp = play().propTeam3D()->createProp();
+    shelterProp->setMaterial(pMat(new Concrete(glm::dvec3(0.5, 0.3, 0.25))));
+    shelterProp->setSurface(shelterSurf);
 }
 
 void CpuRaytracingCharacter::setupConvergenceStageSet()
