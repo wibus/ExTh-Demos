@@ -24,8 +24,8 @@
 #include <PropRoom3D/Prop/Coating/GlossyPaint.h>
 #include <PropRoom3D/Prop/Coating/TexturedFlatPaint.h>
 #include <PropRoom3D/Prop/Coating/TexturedGlossyPaint.h>
-#include <PropRoom3D/Prop/Environment/Environment.h>
-#include <PropRoom3D/Prop/Environment/Backdrop/ProceduralSun.h>
+#include <PropRoom3D/Lighting/Environment.h>
+#include <PropRoom3D/Lighting/Backdrop/ProceduralSun.h>
 #include <PropRoom3D/StageSet/StageSet.h>
 #include <PropRoom3D/Team/AbstractTeam.h>
 
@@ -76,23 +76,6 @@ void CpuRaytracingCharacter::enterStage()
     //setupQuadricStageSet();
 
     play().propTeam3D()->saveScene("StageSet.prop3");
-    /*/
-
-    glm::dvec3 focusPos = glm::dvec3(-1.2, -1.2, 5.25);
-    glm::dvec3 camPos = focusPos + glm::dvec3(25, -40, 14) * 2.1;
-    glm::dvec3 dir = glm::normalize(focusPos - camPos);
-    double tilt = glm::atan(dir.z, glm::length(glm::dvec2(dir.x, dir.y)));
-    double pan = glm::atan(dir.y, dir.x);
-
-    std::shared_ptr<Camera> camera = play().view()->camera3D();
-    _camMan.reset(new CameraManFree(camera, false));
-    _camMan->setOrientation(pan, tilt);
-    _camMan->setPosition(camPos);
-
-    play().propTeam3D()->loadScene("StageSet.prop3");
-    //*/
-
-    //play().propTeam3D()->saveScene("StageSetCopy.prop3");
 }
 
 void CpuRaytracingCharacter::beginStep(const StageTime &time)
@@ -142,14 +125,6 @@ void CpuRaytracingCharacter::beginStep(const StageTime &time)
         std::cout << "Pos: (" << p.x << ", " << p.y << ", " << p.z << "); ";
         std::cout << "Dist: " << glm::distance(p, glm::dvec3()) << "m" << std::endl;
     }
-
-    /*
-    if(_sphere)
-    {
-        _sphere->surface()->transform(Transform(1.0, glm::dquat(),
-            glm::dvec3(glm::sin(time.totalTime()) * time.elapsedTime(), 0.0, 0.0)));
-    }
-    //*/
 }
 
 void CpuRaytracingCharacter::draw(const std::shared_ptr<scaena::View> &,
@@ -163,7 +138,6 @@ void CpuRaytracingCharacter::exitStage()
     play().propTeam2D()->deleteTextHud(_fps);
     play().propTeam2D()->deleteTextHud(_ups);
     play().propTeam3D()->clearProps();
-    _sphere.reset();
 }
 
 void CpuRaytracingCharacter::setupStageStageSet()
@@ -183,39 +157,32 @@ void CpuRaytracingCharacter::setupStageStageSet()
     // Environment
     auto env = play().propTeam3D()->stageSet()->environment();
     env->setBackdrop(std::shared_ptr<Backdrop>(new ProceduralSun(true)));
-//    env->setAmbientMaterial(pMat(new Fog(glm::dvec3(0.95, 0.95, 0.95), 0.005, 40.0)));
 
 
     ///////////
     // Socle //
     ///////////
-    glm::dvec3 negLim(-10.0, -10.0, -0.2);
-    glm::dvec3 posLim( 10.0,  10.0, 0.0);
-    glm::dvec3 socleDia = posLim - negLim;
-    pSurf xNeg = Plane::plane(glm::dvec3(-1, 0, 0), negLim);
-    pSurf yPos = Plane::plane(glm::dvec3( 0, 1, 0), posLim);
-    pSurf zNeg = Plane::plane(glm::dvec3( 0, 0,-1), negLim);
-    pSurf xPos = Plane::plane(glm::dvec3( 1, 0, 0), posLim);
-    pSurf yNeg = Plane::plane(glm::dvec3(0, -1, 0), negLim);
-    pSurf socleSide = xNeg & xPos & yNeg & yPos & zNeg;
-    pSurf zSoc = PlaneTexture::plane(glm::dvec3(0, 0, 1), posLim,
-               glm::dvec3(socleDia.x/7.0, 0.0, 0.0),
-               glm::dvec3(0.0, socleDia.y/7.0, 0.0),
-               negLim);
+    glm::dvec3 socelMin(-10.0, -10.0, -0.2);
+    glm::dvec3 socelMax( 10.0,  10.0, 0.0);
+    glm::dvec3 socleDia = socelMax - socelMin;
 
-    pCoat socleSideCoat(new FlatPaint(
-            glm::dvec3(0.5, 0.5, 0.5)));
-    socleSide->setCoating(socleSideCoat);
+    pSurf soceSurf = BoxTexture::boxCorners(
+            socelMin, socelMax, // Corners
+            socelMin,         // Tex Origin
+            glm::dvec3(socleDia.x/7.0, 0.0, 0.0),
+            glm::dvec3(0.0, socleDia.y/7.0, 0.0),
+            true);
 
-    pCoat socleTopCoat(new TexturedGlossyPaint(
+    pCoat socleCoat(new TexturedGlossyPaint(
             ":/CpuRaytracing/Bathroom_Tiles_albedo.png",
             ":/CpuRaytracing/Bathroom_Tiles_gloss.png",
              ESamplerFilter::LINEAR,
-             ESamplerWrapper::REPEAT));
-    zSoc->setCoating(socleTopCoat);
+             ESamplerWrapper::REPEAT,
+             glm::dvec3(0.5)));
 
     std::shared_ptr<Prop> socle = play().propTeam3D()->createProp();
-    socle->setSurface(zSoc & socleSide);
+    soceSurf->setCoating(socleCoat);
+    socle->setSurface(soceSurf);
 
 
     ///////////
@@ -226,38 +193,26 @@ void CpuRaytracingCharacter::setupStageStageSet()
     glm::dvec3 boxDia = boxMax - boxMin;
     glm::dvec3 boxCenter = boxMin + boxDia / 2.0;
     glm::dvec3 wallThickness = glm::dvec3(0.1);
-    glm::dvec3 pillard(boxMax.x, boxMin.y, boxMin.z);
+    glm::dvec3 pillar(boxMax.x, boxMin.y, boxMin.z);
     glm::dvec3 doorDim(0.85, 0.85, 2.0 * 2);
 
+    glm::dvec3 hallMin(boxCenter.x + wallThickness.x, boxCenter.y + wallThickness.y, -1.0);
+    glm::dvec3 hallMax(boxMax.x - wallThickness.x, boxMax.y - wallThickness.y, boxCenter.z - wallThickness.z);
+    glm::dvec3 roomMin(boxMin.x + wallThickness.x, boxMin.y + wallThickness.y, -1.0);
+    glm::dvec3 roomMax(boxCenter.x - wallThickness.x, boxMax.y - wallThickness.y, boxMax.z - wallThickness.z);
 
-    pSurf xBot = Plane::plane(glm::dvec3(-1,  0,  0), boxMin);
-    pSurf xTop = Plane::plane(glm::dvec3( 1,  0,  0), boxMax);
-    pSurf yTop = Plane::plane(glm::dvec3( 0,  1,  0), boxMax);
-    pSurf zTop = Plane::plane(glm::dvec3( 0,  0,  1), boxMax);
-    pSurf yBot = Plane::plane(glm::dvec3( 0, -1,  0), boxMin);
-    pSurf box = (xBot & yBot & xTop & yTop & zTop) & ~(!zSoc);
+
+    pSurf box = Box::boxCorners( glm::dvec3(boxMin.x, boxMin.y, socelMin.z), boxMax);
     pSurf sideWall = Plane::plane(glm::dvec3(1, 0, 0), boxCenter);
     pSurf ceiling = Plane::plane(glm::dvec3( 0, 0, -1), boxMax - wallThickness);
-    pSurf pillarX = Plane::plane(glm::dvec3(-1, 0, 0), pillard - wallThickness);
-    pSurf pillarY = Plane::plane(glm::dvec3( 0, 1, 0), pillard + wallThickness);
+    pSurf pillarX = Plane::plane(glm::dvec3(-1, 0, 0), pillar - wallThickness);
+    pSurf pillarY = Plane::plane(glm::dvec3( 0, 1, 0), pillar + wallThickness);
     pSurf zStep = Plane::plane(glm::dvec3(0, 0, 1), boxCenter);
     pSurf yStep = Plane::plane(glm::dvec3( 0, -1, 0), boxCenter);
     pSurf rearWall = Plane::plane(glm::dvec3( 0, -1, 0), boxMax - wallThickness);
 
-    pSurf hallZTop = Plane::plane(glm::dvec3(0, 0, -1), boxCenter - wallThickness);
-    pSurf hallXbot = Plane::plane(glm::dvec3(1, 0, 0), boxCenter + wallThickness);
-    pSurf hallXtop = Plane::plane(glm::dvec3(-1, 0, 0), boxMax - wallThickness);
-    pSurf hallYbot = Plane::plane(glm::dvec3(0, 1, 0), boxCenter + wallThickness);
-    pSurf hallYtop = Plane::plane(glm::dvec3(0, -1, 0), boxMax - wallThickness);
-    pSurf hall = hallZTop | hallXbot | hallXtop | hallYbot | hallYtop;
-
-    pSurf roomZTop = Plane::plane(glm::dvec3(0, 0, -1), boxMax - wallThickness);
-    pSurf roomXbot = Plane::plane(glm::dvec3(1, 0, 0), boxMin + wallThickness);
-    pSurf roomXtop = Plane::plane(glm::dvec3(-1, 0, 0), boxCenter - wallThickness);
-    pSurf roomYbot = Plane::plane(glm::dvec3(0, 1, 0), boxMin + wallThickness);
-    pSurf roomYtop = Plane::plane(glm::dvec3(0, -1, 0), boxMax - wallThickness);
-    pSurf room = roomZTop | roomXbot | roomXtop | roomYbot | roomYtop;
-
+    pSurf hall = !Box::boxCorners(hallMin, hallMax);
+    pSurf room = !Box::boxCorners(roomMin, roomMax);
 
     pSurf hallEntrance = !Box::boxPosDims(glm::dvec3(boxMax.x, boxMax.y/2.0, 0.0), doorDim);
     pSurf roomEntrance = !Box::boxPosDims(glm::dvec3(boxMin.y, boxMin.y/2.0, 0.0), doorDim);
@@ -873,6 +828,8 @@ void CpuRaytracingCharacter::setupStageStageSet()
         std::shared_ptr<Prop> cordProp = play().propTeam3D()->createProp();
         cordProp->setSurface(cordSurf);
     }
+
+    //*/
 }
 
 

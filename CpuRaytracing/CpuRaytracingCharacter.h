@@ -54,7 +54,6 @@ private:
 
     std::shared_ptr<prop2::TextHud> _fps;
     std::shared_ptr<prop2::TextHud> _ups;
-    std::shared_ptr<prop3::Prop> _sphere;
 };
 
 #endif // CPURAYTRACINGCHARACTER_H
