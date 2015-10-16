@@ -21,6 +21,8 @@ namespace prop2
 namespace prop3
 {
     class Prop;
+    class Surface;
+    class Material;
 }
 
 
@@ -39,21 +41,24 @@ public:
 protected:
     virtual void setupStageStageSet();
     virtual void setupManufacturingStageSet();
-    virtual void setupConvergenceStageSet();
-    virtual void setupQuadricStageSet();
 
+    virtual void createFixturePrototype(double size);
     virtual void createBusGlass(
             const glm::dmat4& transform,
             double width,
             double height,
             double depth);
-    virtual std::shared_ptr<prop3::Prop> createFixture(double size);
 
 private:
     std::shared_ptr<cellar::CameraManFree> _camMan;
 
     std::shared_ptr<prop2::TextHud> _fps;
     std::shared_ptr<prop2::TextHud> _ups;
+
+    std::shared_ptr<prop3::Material> _glassMat;
+    std::shared_ptr<prop3::Material> _fixtureMat;
+    std::shared_ptr<prop3::Surface> _fixtureSurf;
+    std::shared_ptr<prop3::Surface> _fixtureBounds;
 };
 
 #endif // CPURAYTRACINGCHARACTER_H
