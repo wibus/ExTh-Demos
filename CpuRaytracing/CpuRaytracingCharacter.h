@@ -42,12 +42,11 @@ protected:
     virtual void setupStageStageSet();
     virtual void setupManufacturingStageSet();
 
-    virtual void createFixturePrototype(double size);
-    virtual void createBusGlass(
-            const glm::dmat4& transform,
-            double width,
-            double height,
-            double depth);
+    virtual std::shared_ptr<prop3::Surface> createHoleStrippedWall(
+            const glm::dvec3& size,
+            double stripeWidth,
+            double holeWidth,
+            double border);
 
 private:
     std::shared_ptr<cellar::CameraManFree> _camMan;
