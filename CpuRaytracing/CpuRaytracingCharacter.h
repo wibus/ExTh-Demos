@@ -23,6 +23,8 @@ namespace prop3
     class Prop;
     class Surface;
     class Material;
+
+    class ProceduralSun;
 }
 
 
@@ -58,6 +60,8 @@ private:
     std::shared_ptr<prop3::Material> _fixtureMat;
     std::shared_ptr<prop3::Surface> _fixtureSurf;
     std::shared_ptr<prop3::Surface> _fixtureBounds;
+
+    prop3::ProceduralSun* _backdrop;
 };
 
 #endif // CPURAYTRACINGCHARACTER_H

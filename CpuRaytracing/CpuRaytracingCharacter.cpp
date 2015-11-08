@@ -107,11 +107,20 @@ void CpuRaytracingCharacter::beginStep(const StageTime &time)
         moved = true;
     }
 
-    if(syncMouse.displacement() != glm::ivec2(0, 0) &&
-       syncMouse.buttonIsPressed(EMouseButton::LEFT))
+    if(syncMouse.displacement() != glm::ivec2(0, 0))
     {
-        _camMan->pan( syncMouse.displacement().x * -turnSpeed);
-        _camMan->tilt(syncMouse.displacement().y * -turnSpeed);
+        if(syncMouse.buttonIsPressed(EMouseButton::LEFT))
+        {
+            _camMan->pan( syncMouse.displacement().x * -turnSpeed);
+            _camMan->tilt(syncMouse.displacement().y * -turnSpeed);
+        }
+        else if(syncMouse.buttonIsPressed(EMouseButton::RIGHT))
+        {
+            const glm::dvec3 ROT_AXIS = glm::normalize(glm::dvec3(1, 5, 0));
+            const glm::dmat3 ROT_MAT = glm::dmat3(glm::rotate(glm::dmat4(), syncMouse.displacement().y / 100.0, ROT_AXIS));
+            _backdrop->setSunDirection(ROT_MAT * _backdrop->sunDirection());
+        }
+
     }
 
     if(moved)
@@ -149,12 +158,14 @@ void CpuRaytracingCharacter::setupStageStageSet()
     _camMan->setOrientation(pan, tilt);
     _camMan->setPosition(camPos);
 
-    // Environment
-    auto env = play().propTeam3D()->stageSet()->environment();
-    env->setBackdrop(std::shared_ptr<Backdrop>(new ProceduralSun(true)));
 
     // Bounding Hierarchy
-    std::shared_ptr<StageZone> stageSet = play().propTeam3D()->stageSet();
+    std::shared_ptr<StageSet> stageSet = play().propTeam3D()->stageSet();
+
+    // Environment
+    auto env = stageSet->environment();
+    _backdrop = new ProceduralSun(true);
+    env->setBackdrop(std::shared_ptr<Backdrop>(_backdrop));
 
 
 
@@ -272,7 +283,6 @@ void CpuRaytracingCharacter::setupStageStageSet()
     stageProp->addSurface(stageSurf);
     pZone stageZone(new StageZone("Stage Zone"));
     stageSet->addSubzone(stageZone);
-    stageZone->setBounds( Box::boxCorners(boxMin, boxMax) );
     stageZone->addProp(stageProp);
 
     pProp xStrippedProp(new Prop("X Stripped Wall"));
@@ -582,14 +592,10 @@ void CpuRaytracingCharacter::setupStageStageSet()
         glm::dvec3(0.1, 0.1, workTableDims.z - workTableTopThick));
     pSurf workTableSurf = workTableTop | workTableLeg1 | workTableLeg2 | workTableLeg3 | workTableLeg4;
 
-    pZone workTableZone(new StageZone("Work Table Zone"));
-    workZone->addSubzone(workTableZone);
-    workTableZone->setBounds( Box::boxPosDims(
-        glm::dvec3(workTablePos, workTableDims.z/2.0), workTableDims));
 
     pProp workTableProp(new Prop("Work Table"));
     workTableProp->addSurface(workTableSurf);
-    workTableZone->addProp(workTableProp);
+    workZone->addProp(workTableProp);
 
 
     //////////
@@ -764,7 +770,7 @@ void CpuRaytracingCharacter::setupStageStageSet()
     lampZone->addProp(lampBulbProp);
 
 
-    // Work zone bounds
+    //Work zone bounds
     workZone->setBounds(Box::boxCorners(
         glm::dvec3(workTablePos.x - workTableDims.x/2, workTablePos.y - workTableDims.y/2, 0.0),
         glm::dvec3(workTablePos.x + workTableDims.x/2, workTablePos.y + workTableDims.y/2,
@@ -875,7 +881,7 @@ void CpuRaytracingCharacter::setupManufacturingStageSet()
 {
     // Setup Camera
     glm::dvec3 focusPos = glm::dvec3(0, 0, 0);
-    glm::dvec3 camPos = glm::dvec3(0, -2, 0);
+    glm::dvec3 camPos = glm::dvec3(0, -4, 0);
     glm::dvec3 dir = glm::normalize(focusPos - camPos);
     double tilt = glm::atan(dir.z, glm::length(glm::dvec2(dir.x, dir.y)));
     double pan = glm::atan(dir.y, dir.x);
@@ -886,40 +892,27 @@ void CpuRaytracingCharacter::setupManufacturingStageSet()
     _camMan->setPosition(camPos);
 
 
-    auto env = play().propTeam3D()->stageSet()->environment();
-    env->setBackdrop(std::shared_ptr<Backdrop>(new ProceduralSun(true)));
+    std::shared_ptr<StageSet> stageSet = play().propTeam3D()->stageSet();
 
-    // Setup
-    pSurf floorSurf = Plane::plane(glm::dvec3(0.0, 0.0, 1.0), glm::dvec3());
-    pProp floorProp(new Prop(""));
-    floorSurf->setCoating(coating::CLEAR_ROUGH);
-    floorProp->addSurface(floorSurf);
-
-    glm::dvec3 color(0.97, 0.61, 0.51);
-    double refractIndex = 1.38;
-    double opacity = 0.7;
-
-    // Grapefruit pulp
-    pSurf pulpSurf = Sphere::sphere(glm::dvec3(-0.5, 0.0, 0.5), 0.5);
-    pMat pulpMat = material::createInsulator(color, refractIndex, 0.9999, 0.2);
-    pProp pulpProp(new Prop(""));
-    pulpSurf->setCoating(coating::CLEAR_ROUGH);
-    pulpSurf->setInnerMaterial(pulpMat);
-    pulpProp->addSurface(pulpSurf);
-
-    // Reference mat
-    pSurf refSurf = Sphere::sphere(glm::dvec3( 0.5, 0.0, 0.5), 0.5);
-    pMat refpMat = material::createInsulator(color, refractIndex, 1.0, 0.2);
-    pProp refProp(new Prop(""));
-    refSurf->setCoating(coating::CLEAR_ROUGH);
-    refSurf->setInnerMaterial(refpMat);
-    refProp->addSurface(refSurf);
+    auto env = stageSet->environment();
+    _backdrop = new ProceduralSun(true);
+    env->setBackdrop(std::shared_ptr<Backdrop>(_backdrop));
 
 
-    // Background prop
-    pSurf backSurf = Sphere::sphere(glm::dvec3(0, 2.0, 0.3), 0.3);
-    pProp backProp(new Prop(""));
-    backProp->addSurface(backSurf);
+    // Ball
+    pSurf ballSurf = Sphere::sphere(glm::dvec3(0, 0.0, 0.5), 0.5);
+    ballSurf->setInnerMaterial(material::SILVER);
+    pProp ballProp(new Prop("Ball"));
+    ballProp->addSurface(ballSurf);
+    stageSet->addProp(ballProp);
+
+    // Box
+    pSurf boxSurf = Box::boxPosDims(glm::dvec3(0, 0, -1.0), glm::dvec3(4.0, 4.0, 2.0)) &
+                    Plane::plane(glm::dvec3(1, 0, 0), glm::dvec3(0.5, 0, 0));
+    boxSurf->setInnerMaterial(material::createInsulator(glm::dvec3(1.0), 1.50, 1.0, 1.0));
+    pProp boxProp(new Prop("Box"));
+    boxProp->addSurface(boxSurf);
+    stageSet->addProp(boxProp);
 }
 
 
