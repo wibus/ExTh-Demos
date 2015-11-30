@@ -43,6 +43,7 @@ public:
 protected:
     virtual void setupStageStageSet();
     virtual void setupManufacturingStageSet();
+    virtual void setupCornBoardStageSet();
 
     virtual std::shared_ptr<prop3::Surface> createHoleStrippedWall(
             const glm::dvec3& size,

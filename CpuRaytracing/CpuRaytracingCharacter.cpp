@@ -69,6 +69,7 @@ void CpuRaytracingCharacter::enterStage()
     //* Choose and setup stageSet
     setupStageStageSet();
     //setupManufacturingStageSet();
+    //setupCornBoardStageSet();
 
     play().propTeam3D()->saveScene("StageSet.prop3");
 }
@@ -881,7 +882,7 @@ void CpuRaytracingCharacter::setupManufacturingStageSet()
 {
     // Setup Camera
     glm::dvec3 focusPos = glm::dvec3(0, 0, 0);
-    glm::dvec3 camPos = glm::dvec3(0, -4, 0);
+    glm::dvec3 camPos = glm::dvec3(4, -8, 3);
     glm::dvec3 dir = glm::normalize(focusPos - camPos);
     double tilt = glm::atan(dir.z, glm::length(glm::dvec2(dir.x, dir.y)));
     double pan = glm::atan(dir.y, dir.x);
@@ -901,7 +902,8 @@ void CpuRaytracingCharacter::setupManufacturingStageSet()
 
     // Ball
     pSurf ballSurf = Sphere::sphere(glm::dvec3(0, 0.0, 0.5), 0.5);
-    ballSurf->setInnerMaterial(material::SILVER);
+    ballSurf->setInnerMaterial(material::createInsulator(glm::dvec3(0.98, 0.85, 0.83), 1.45, 0.90, 0.0));
+    ballSurf->setCoating(coating::createClearCoat(0.2));
     pProp ballProp(new Prop("Ball"));
     ballProp->addSurface(ballSurf);
     stageSet->addProp(ballProp);
@@ -913,6 +915,72 @@ void CpuRaytracingCharacter::setupManufacturingStageSet()
     pProp boxProp(new Prop("Box"));
     boxProp->addSurface(boxSurf);
     stageSet->addProp(boxProp);
+}
+
+void CpuRaytracingCharacter::setupCornBoardStageSet()
+{
+    // Setup Camera
+    glm::dvec3 focusPos = glm::dvec3(0, 0, 0);
+    glm::dvec3 camPos = glm::dvec3(10, -25, 8);
+    glm::dvec3 dir = glm::normalize(focusPos - camPos);
+    double tilt = glm::atan(dir.z, glm::length(glm::dvec2(dir.x, dir.y)));
+    double pan = glm::atan(dir.y, dir.x);
+
+    std::shared_ptr<Camera> camera = play().view()->camera3D();
+    _camMan.reset(new CameraManFree(camera, false));
+    _camMan->setOrientation(pan, tilt);
+    _camMan->setPosition(camPos);
+
+
+    std::shared_ptr<StageSet> stageSet = play().propTeam3D()->stageSet();
+
+    auto env = stageSet->environment();
+    _backdrop = new ProceduralSun(true);
+    env->setBackdrop(std::shared_ptr<Backdrop>(_backdrop));
+
+    // Board
+    glm::dvec3 boardMin = glm::dvec3(-10, -10, -0.1);
+    glm::dvec3 boardMax = glm::dvec3( 10,  10,  0.0);
+    pSurf boardSurf = Box::boxCorners(boardMin, boardMax) & !(
+                          Plane::plane(glm::dvec3(1, 0, 0), glm::dvec3(0.0)) &
+                          Plane::plane(glm::dvec3(0, 1, 0), glm::dvec3(0.0)) |
+                          Plane::plane(glm::dvec3(1, 1, 0), boardMin*0.32));
+    boardSurf->setInnerMaterial(material::createInsulator(glm::dvec3(0.8, 0.75, 0.3), 1.35, 0.95, 0.8));
+    boardSurf->setCoating(coating::createClearCoat(0.7));
+    pProp boardProp(new Prop("Board"));
+    boardProp->addSurface(boardSurf);
+    stageSet->addProp(boardProp);
+
+    // Twin Towers
+    pMat twinTowerMat = material::createMetal(glm::dvec3(0.9, 0.3, 0.3));
+    pCoat twinTowerCoat = coating::CLEAR_POLISH;
+
+    glm::dvec3 tallTowerPos = glm::dvec3(boardMax.x/2.0, boardMin.y/1.5, boardMax.z + 1.251);
+    glm::dvec3 tallTowerDim = glm::dvec3(0.5,  0.5,  2.5);
+    pSurf tallTowerSurf = Box::boxPosDims(tallTowerPos, tallTowerDim);
+    tallTowerSurf->setInnerMaterial(twinTowerMat);
+    tallTowerSurf->setCoating(twinTowerCoat);
+
+    glm::dvec3 shortTowerPos = glm::dvec3(boardMax.x/1.6, boardMin.y/1.35, boardMax.z + 1.001);
+    glm::dvec3 shortTowerDim = glm::dvec3(0.5,  0.5,  2.0);
+    pSurf shortTowerSurf = Box::boxPosDims(shortTowerPos, shortTowerDim);
+    shortTowerSurf->setInnerMaterial(twinTowerMat);
+    shortTowerSurf->setCoating(twinTowerCoat);
+
+    // Capacitor
+    glm::dvec3 capaTowerPos = glm::dvec3(boardMax.x/3.0, boardMin.y/1.30, boardMax.z + 0.001);
+    pSurf capaTowerSurf = Quadric::cylinder(0.4, 0.4) &
+                          Plane::plane(glm::dvec3(0, 0,-1), glm::dvec3(0, 0, 0)) &
+                          Plane::plane(glm::dvec3(0, 0, 1), glm::dvec3(0, 0, 1.35));
+    capaTowerSurf = Surface::translate(capaTowerSurf, capaTowerPos);
+    capaTowerSurf->setInnerMaterial(material::createInsulator(glm::dvec3(0.2), 1.40, 1.0, 1.0));
+    capaTowerSurf->setCoating(coating::createClearCoat(0.4));
+
+    pProp towersProp(new Prop("Towers"));
+    stageSet->addProp(towersProp);
+    towersProp->addSurface(tallTowerSurf);
+    towersProp->addSurface(shortTowerSurf);
+    towersProp->addSurface(capaTowerSurf);
 }
 
 

@@ -6,6 +6,11 @@
 class CameraManager;
 class PostProdManager;
 
+namespace prop3
+{
+    class ArtDirectorServer;
+}
+
 
 class RaytracedView : public scaena::QGlWidgetView
 {
@@ -17,13 +22,14 @@ public:
 
 
 protected:
-    virtual void resizeGL(int w, int h) override;
-    virtual void setupArtDirectors(scaena::Play& play) override;
+    virtual void installArtDirectors(scaena::Play& play) override;
+    virtual void setup() override;
 
 
 private:
     std::shared_ptr<CameraManager> _cameraManager;
     std::shared_ptr<PostProdManager> _postProdManager;
+    std::shared_ptr<prop3::ArtDirectorServer> _raytracerServer;
 };
 
 #endif // RAYTRACEDVIEW_H

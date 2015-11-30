@@ -26,23 +26,19 @@ RaytracedView::~RaytracedView()
 
 }
 
-void RaytracedView::resizeGL(int w, int h)
-{
-    glViewport(0, 0, w, h);
-}
-
-void RaytracedView::setupArtDirectors(scaena::Play& play)
+void RaytracedView::installArtDirectors(scaena::Play& play)
 {
     _artDirector2D.reset(new prop2::GlArtDirector());
     play.propTeam2D()->addArtDirector(_artDirector2D);
+
+    _raytracerServer.reset(new prop3::ArtDirectorServer());
+    play.propTeam3D()->addArtDirector(_raytracerServer);
+    _artDirector3D = _raytracerServer;
+}
+
+void RaytracedView::setup()
+{
     _artDirector2D->resize(width(), height());
-
-    prop3::ArtDirectorServer* cpuRaytracer(
-        new prop3::ArtDirectorServer());
-    _artDirector3D.reset(cpuRaytracer);
-    play.propTeam3D()->addArtDirector(_artDirector3D);
-    _artDirector3D->resize(width(), height());
-
-    _cameraManager->setCamera(cpuRaytracer->camera());
-    _postProdManager->setPostProdUnit(cpuRaytracer->postProdUnit());
+    _cameraManager->setCamera(_raytracerServer->camera());
+    _postProdManager->setPostProdUnit(_raytracerServer->postProdUnit());
 }
