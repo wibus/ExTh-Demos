@@ -20,8 +20,9 @@
 #include <PropRoom3D/Prop/Material/UniformStdMaterial.h>
 #include <PropRoom3D/Prop/Coating/UniformStdCoating.h>
 #include <PropRoom3D/Prop/Coating/TexturedStdCoating.h>
-#include <PropRoom3D/Light/Environment.h>
 #include <PropRoom3D/Light/Backdrop/ProceduralSun.h>
+#include <PropRoom3D/Light/LightBulb/CircularLight.h>
+#include <PropRoom3D/Light/LightBulb/SphericalLight.h>
 #include <PropRoom3D/Team/AbstractTeam.h>
 
 #include <Scaena/Play/Play.h>
@@ -37,6 +38,7 @@ using namespace scaena;
 
 
 typedef std::shared_ptr<StageZone> pZone;
+typedef std::shared_ptr<LightBulb> pLight;
 typedef std::shared_ptr<Surface> pSurf;
 typedef std::shared_ptr<Material> pMat;
 typedef std::shared_ptr<Coating> pCoat;
@@ -67,8 +69,8 @@ void CpuRaytracingCharacter::enterStage()
     _ups->setIsVisible(false);
 
     //* Choose and setup stageSet
-    setupStageStageSet();
-    //setupManufacturingStageSet();
+    //setupStageStageSet();
+    setupManufacturingStageSet();
     //setupCornBoardStageSet();
 
     play().propTeam3D()->saveScene("StageSet.prop3");
@@ -164,9 +166,8 @@ void CpuRaytracingCharacter::setupStageStageSet()
     std::shared_ptr<StageSet> stageSet = play().propTeam3D()->stageSet();
 
     // Environment
-    auto env = stageSet->environment();
-    _backdrop = new ProceduralSun(true);
-    env->setBackdrop(std::shared_ptr<Backdrop>(_backdrop));
+    _backdrop = new ProceduralSun();
+    stageSet->setBackdrop(std::shared_ptr<Backdrop>(_backdrop));
 
 
 
@@ -237,7 +238,7 @@ void CpuRaytracingCharacter::setupStageStageSet()
 
     pSurf longWindowHole = !Box::boxPosDims(
             glm::dvec3(boxMin.y, 0, boxDia.z * 0.75),
-            glm::dvec3(1, boxDia.y * 0.8, boxDia.z * 0.20));
+            glm::dvec3(1, boxDia.y * 0.9, boxDia.z * 0.40));
 
     pSurf smallWindowHole1 = !Box::boxPosDims(
             glm::dvec3(boxMax.x - boxDia.x/8.0, boxMax.y, boxDia.z*0.3),
@@ -278,12 +279,17 @@ void CpuRaytracingCharacter::setupStageStageSet()
     stageSurf->setCoating(stageCoat);
     xposStripWall->setCoating(stageCoat);
     ynegStripWall->setCoating(stageCoat);
+    pMat stageMat = material::createInsulator(glm::dvec3(0.7), 1.45, 1.0, 1.0);
+    stageSurf->setInnerMaterial(stageMat);
+    xposStripWall->setInnerMaterial(stageMat);
+    ynegStripWall->setInnerMaterial(stageMat);
 
+
+    pZone stageZone(new StageZone("Stage Zone"));
+    stageSet->addSubzone(stageZone);
 
     pProp stageProp(new Prop("Stage"));
     stageProp->addSurface(stageSurf);
-    pZone stageZone(new StageZone("Stage Zone"));
-    stageSet->addSubzone(stageZone);
     stageZone->addProp(stageProp);
 
     pProp xStrippedProp(new Prop("X Stripped Wall"));
@@ -409,6 +415,15 @@ void CpuRaytracingCharacter::setupStageStageSet()
     Surface::translate(bitchesBrewSurf, glm::dvec3(
         boxMin.x / 2.0,  boxMin.y - posterEpsilon * 10.0,  boxMax.z * 0.72));
 
+    pSurf dessinCocoSurf = BoxTexture::boxPosDims(glm::dvec3(),
+        glm::dvec3(posterLength, posterEpsilon, posterLength),
+        glm::dvec3(posterLength/2.0, 0, -posterLength/2.0),
+        glm::dvec3(-posterLength, 0, 0),
+        glm::dvec3(0, 0, posterLength),
+        true);
+    Surface::translate(dessinCocoSurf, glm::dvec3(
+        boxMin.x / 2.0,  boxMin.y + wallThickness.y + posterEpsilon * 10.0,  boxMax.z * 0.72));
+
     auto pPosterCoat = new TexturedStdCoating();
     pPosterCoat->setPaintColorTexName(":/CpuRaytracing/Fusion_Albums.png");
     pPosterCoat->setDefaultPaintColor(glm::dvec4(0.2, 0.2, 0.2, 1.0));
@@ -417,6 +432,14 @@ void CpuRaytracingCharacter::setupStageStageSet()
     pPosterCoat->setDefaultRoughness(1.0);
     pCoat posterCoat = pCoat(pPosterCoat);
 
+    auto pDessinCocoCoat = new TexturedStdCoating();
+    pDessinCocoCoat->setPaintColorTexName(":/CpuRaytracing/Dessin_Coco.png");
+    pDessinCocoCoat->setDefaultPaintColor(glm::dvec4(0.2, 0.2, 0.2, 1.0));
+    pDessinCocoCoat->setTexFilter(ESamplerFilter::LINEAR);
+    pDessinCocoCoat->setTexWrapper(ESamplerWrapper::CLAMP);
+    pDessinCocoCoat->setDefaultRoughness(1.0);
+    pCoat dessinCocoCoat = pCoat(pDessinCocoCoat);
+
     pProp postersProp(new Prop("Posters"));
     postersProp->addSurface(herbieSextantSurf);
     herbieSextantSurf->setCoating(posterCoat);
@@ -424,6 +447,8 @@ void CpuRaytracingCharacter::setupStageStageSet()
     herbieCrossingsSurf->setCoating(posterCoat);
     postersProp->addSurface(bitchesBrewSurf);
     bitchesBrewSurf->setCoating(posterCoat);
+    postersProp->addSurface(dessinCocoSurf);
+    dessinCocoSurf->setCoating(dessinCocoCoat);
 
     stageSet->addProp(postersProp);
 
@@ -561,9 +586,9 @@ void CpuRaytracingCharacter::setupStageStageSet()
     eggProp->addSurface(eggStandSurf);
     eggZone->addProp(eggProp);
 
-
     pZone workZone(new StageZone("Work Zone"));
     stageZone->addSubzone(workZone);
+
 
     ////////////////
     // Work table //
@@ -754,21 +779,22 @@ void CpuRaytracingCharacter::setupStageStageSet()
 
     // Lamp bulb
     double lamLightRad = headRad * 0.5;
-    pSurf lampBulbSurf = Sphere::sphere(glm::dvec3(0, 0, headLen/3.0), lamLightRad);
-    Surface::rotate(lampBulbSurf, glm::pi<double>(), glm::dvec3(0, 1, 0));
-    Surface::rotate(lampBulbSurf, headTwist, glm::dvec3(1, 0, 0));
-    Surface::rotate(lampBulbSurf, headRot, glm::dvec3(0, 1, 0));
-    Surface::translate(lampBulbSurf, glm::dvec3(forearmLen, 0, 0));
-    Surface::rotate(lampBulbSurf, elbowRot, glm::dvec3(0, 1, 0));
-    Surface::translate(lampBulbSurf, glm::dvec3(armLen, 0, 0));
-    Surface::rotate(lampBulbSurf, shoulderRot, glm::dvec3(0, 1, 0));
-    Surface::translate(lampBulbSurf, glm::dvec3(0, 0, shoulderRad));
-    Surface::translate(lampBulbSurf, glm::dvec3(shoulderOffset, 0, 0));
-    Surface::translate(lampBulbSurf, glm::dvec3(0, 0, bodyHeight));
-    Surface::translate(lampBulbSurf, lampPos);
-    pProp lampBulbProp(new Prop("Lamp Bulb"));
-    lampBulbProp->addSurface(lampBulbSurf);
-    lampZone->addProp(lampBulbProp);
+    pLight lampLight(new SphericalLight("Lamp Light",
+        glm::dvec3(0, 0, headLen/3.0), lamLightRad));
+    lampLight->setRadiantFlux(glm::dvec3(1.00, 0.77, 0.68) * 200.0);
+    lampLight->rotate(glm::pi<double>(), glm::dvec3(0, 1, 0));
+    lampLight->rotate(headTwist, glm::dvec3(1, 0, 0));
+    lampLight->rotate(headRot, glm::dvec3(0, 1, 0));
+    lampLight->translate(glm::dvec3(forearmLen, 0, 0));
+    lampLight->rotate(elbowRot, glm::dvec3(0, 1, 0));
+    lampLight->translate(glm::dvec3(armLen, 0, 0));
+    lampLight->rotate(shoulderRot, glm::dvec3(0, 1, 0));
+    lampLight->translate(glm::dvec3(0, 0, shoulderRad));
+    lampLight->translate(glm::dvec3(shoulderOffset, 0, 0));
+    lampLight->translate(glm::dvec3(0, 0, bodyHeight));
+    lampLight->translate(lampPos);
+    lampZone->addLight(lampLight);
+    lampLight->setIsOn(false);
 
 
     //Work zone bounds
@@ -776,7 +802,6 @@ void CpuRaytracingCharacter::setupStageStageSet()
         glm::dvec3(workTablePos.x - workTableDims.x/2, workTablePos.y - workTableDims.y/2, 0.0),
         glm::dvec3(workTablePos.x + workTableDims.x/2, workTablePos.y + workTableDims.y/2,
                    workTableDims.z + lampBoundsTop)));
-
 
     /////////////////////
     // Sculpture table //
@@ -834,7 +859,7 @@ void CpuRaytracingCharacter::setupStageStageSet()
     pSurf lightFixtureTop = Plane::plane(glm::dvec3(0, 0, 1), glm::dvec3(0, 0, lightFixtureHeight/2.0));
     pSurf lightFixtureBot = Plane::plane(glm::dvec3(0, 0,-1), glm::dvec3(0, 0,-lightFixtureHeight/2.0));
     pSurf lightFixtureSurf = lightFixtureTop & lightFixtureBot &
-                             lightFixtureOut & !(lightFixtureIn & lightFixtureMid);
+                             lightFixtureOut & !(lightFixtureIn & ~lightFixtureMid);
 
     lightFixtureSurf->setInnerMaterial(material::TITANIUM);
     lightFixtureSurf->setCoating(lampCoat);
@@ -850,6 +875,11 @@ void CpuRaytracingCharacter::setupStageStageSet()
     pMat cordMat = material::createInsulator(glm::dvec3(0.1), 1.44, 1.0, 1.0);
     for(const glm::dvec3& pos : fixturePositions)
     {
+        const glm::dvec3 down(0, 0, -1);
+        pLight fixtureBulb(new CircularLight("Fixture bulb",
+            pos, down, lightFixtureInRad));
+        fixtureBulb->setRadiantFlux(color::tungsten100W * 60.0);
+
         pSurf surf = Surface::shell(lightFixtureSurf);
         Surface::translate(surf, pos);
 
@@ -874,6 +904,8 @@ void CpuRaytracingCharacter::setupStageStageSet()
         lightFixturesProp->addSurface(surf);
         lightFixturesProp->addSurface(cordSurf);
         fixtureZone->addProp(lightFixturesProp);
+        fixtureZone->addLight(fixtureBulb);
+        fixtureBulb->setIsOn(false);
     }
 }
 
@@ -895,23 +927,68 @@ void CpuRaytracingCharacter::setupManufacturingStageSet()
 
     std::shared_ptr<StageSet> stageSet = play().propTeam3D()->stageSet();
 
-    auto env = stageSet->environment();
-    _backdrop = new ProceduralSun(true);
-    env->setBackdrop(std::shared_ptr<Backdrop>(_backdrop));
+    _backdrop = new ProceduralSun();
+    stageSet->setBackdrop(std::shared_ptr<Backdrop>(_backdrop));
 
 
-    // Ball
-    pSurf ballSurf = Sphere::sphere(glm::dvec3(0, 0.0, 0.5), 0.5);
-    ballSurf->setInnerMaterial(material::createInsulator(glm::dvec3(0.98, 0.85, 0.83), 1.45, 0.90, 0.0));
-    ballSurf->setCoating(coating::createClearCoat(0.2));
-    pProp ballProp(new Prop("Ball"));
-    ballProp->addSurface(ballSurf);
-    stageSet->addProp(ballProp);
+    // Sculpture
+    pSurf flowerSurf;
+    for(int i=0; i < 8; ++i)
+    {
+        pSurf outerSurf = Sphere::sphere(glm::dvec3(0, 0, -0.5), 1.0);
+        pSurf innerSurf = Quadric::ellipsoid(0.985, 2.0, 1.0);
+        pSurf petalSurf = outerSurf & !innerSurf;
+
+        Surface::scale(petalSurf, 1.0 - i / 25.0);
+        Surface::rotate(petalSurf, glm::pi<double>() * i * 3.0 / 16.0, glm::dvec3(0, 0, 1));
+        Surface::translate(petalSurf, glm::dvec3(0, 0, 1.3));
+
+        flowerSurf = flowerSurf | petalSurf;
+    }
+
+    flowerSurf->setInnerMaterial(material::createInsulator(glm::dvec3(0.95, 0.60, 0.55), 1.2, 0.98, 0.95));
+    flowerSurf->setCoating(coating::createClearCoat(0.5));
+    pProp sculptProp(new Prop("Sculpture"));
+    sculptProp->addSurface(flowerSurf);
+    stageSet->addProp(sculptProp);
+
+
+    // Holes
+    pSurf outer1 = Box::boxPosDims(glm::dvec3(0, 1.5, 0.5), glm::dvec3(1, 0.3, 0.99));
+    pSurf inner1 = Box::boxPosDims(glm::dvec3(0, 1.5, 0.5), glm::dvec3(0.5, 0.5, 0.5));
+    pSurf bloc1 = outer1;// & !inner1;
+    bloc1->setInnerMaterial(material::GOLD);
+    bloc1->setCoating(coating::createClearCoat(0.25));
+
+    pSurf outer2 = Box::boxPosDims(glm::dvec3(0, 0.0, 0.5), glm::dvec3(1, 0.3, 0.99));
+    pSurf inner2 = Box::boxPosDims(glm::dvec3(0, 0.0, 0.5), glm::dvec3(0.5, 0.5, 0.5));
+    pSurf bloc2 = outer2;// & !inner2;
+    bloc2->setInnerMaterial(material::GLASS);
+    bloc2->setCoating(coating::createClearCoat(0.0001));
+
+    pSurf outer3 = Box::boxPosDims(glm::dvec3(0,-1.5, 0.5), glm::dvec3(1, 0.3, 0.99));
+    pSurf inner3 = Box::boxPosDims(glm::dvec3(0,-1.5, 0.5), glm::dvec3(0.5, 0.5, 0.5));
+    pSurf bloc3 = outer3;// & !inner3;
+    bloc3->setInnerMaterial(material::createInsulator(glm::dvec3(0.3, 0.3, 0.3), 1.3, 0.7, 1.0));
+    bloc3->setCoating(coating::createClearCoat(0.2));
+
+    pProp blocsProp(new Prop("Blocs"));
+    blocsProp->addSurface(bloc1);
+    blocsProp->addSurface(bloc2);
+    blocsProp->addSurface(bloc3);
+    //stageSet->addProp(blocsProp);
+
+    // Light
+    pLight lampLight(new SphericalLight("Lamp Light",
+        glm::dvec3(-1.25, 0.75, 0.4), 0.2));
+    lampLight->setRadiantFlux(glm::dvec3(16.0));
+    //stageSet->addLight(lampLight);
 
     // Box
-    pSurf boxSurf = Box::boxPosDims(glm::dvec3(0, 0, -1.0), glm::dvec3(4.0, 4.0, 2.0)) &
-                    Plane::plane(glm::dvec3(1, 0, 0), glm::dvec3(0.5, 0, 0));
+    pSurf boxSurf = Box::boxPosDims(glm::dvec3(0, 0, -1.0), glm::dvec3(4.0, 4.0, 2.0));
     boxSurf->setInnerMaterial(material::createInsulator(glm::dvec3(1.0), 1.50, 1.0, 1.0));
+    pCoat eggStandCoat = coating::createClearPaint(glm::dvec3(0.65, 0.65, 0.65), 0.00);
+    boxSurf->setCoating(eggStandCoat);
     pProp boxProp(new Prop("Box"));
     boxProp->addSurface(boxSurf);
     stageSet->addProp(boxProp);
@@ -934,9 +1011,9 @@ void CpuRaytracingCharacter::setupCornBoardStageSet()
 
     std::shared_ptr<StageSet> stageSet = play().propTeam3D()->stageSet();
 
-    auto env = stageSet->environment();
-    _backdrop = new ProceduralSun(true);
-    env->setBackdrop(std::shared_ptr<Backdrop>(_backdrop));
+    _backdrop = new ProceduralSun;
+    stageSet->setBackdrop(std::shared_ptr<Backdrop>(_backdrop));
+
 
     // Board
     glm::dvec3 boardMin = glm::dvec3(-10, -10, -0.1);
