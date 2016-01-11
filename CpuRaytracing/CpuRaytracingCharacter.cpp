@@ -347,7 +347,7 @@ void CpuRaytracingCharacter::setupStageStageSet()
         roofPillardXnYn | roofPillardXpYn | roofPillardXnYp | roofPillardXpYp |
         pillarBootXnYn  | pillarBootXpYn  | pillarBootXnYp  | pillarBootXpYp;
 
-    pCoat roofCoat = coating::createClearCoat(0.5);
+    pCoat roofCoat = coating::createClearCoat(0.2);
     roofSurf->setInnerMaterial(material::TITANIUM);
     roofSurf->setCoating(roofCoat);
 
@@ -620,6 +620,10 @@ void CpuRaytracingCharacter::setupStageStageSet()
 
 
     pProp workTableProp(new Prop("Work Table"));
+    pMat workTableMat = material::createInsulator(glm::dvec3(0.4), 1.3, 1.0, 1.0);
+    pCoat workTableCoat = coating::createClearCoat(1.0);
+    workTableSurf->setInnerMaterial(workTableMat);
+    workTableSurf->setCoating(workTableCoat);
     workTableProp->addSurface(workTableSurf);
     workZone->addProp(workTableProp);
 
@@ -794,7 +798,7 @@ void CpuRaytracingCharacter::setupStageStageSet()
     lampLight->translate(glm::dvec3(0, 0, bodyHeight));
     lampLight->translate(lampPos);
     lampZone->addLight(lampLight);
-    lampLight->setIsOn(false);
+    lampLight->setIsOn(true);
 
 
     //Work zone bounds
@@ -905,7 +909,7 @@ void CpuRaytracingCharacter::setupStageStageSet()
         lightFixturesProp->addSurface(cordSurf);
         fixtureZone->addProp(lightFixturesProp);
         fixtureZone->addLight(fixtureBulb);
-        fixtureBulb->setIsOn(false);
+        fixtureBulb->setIsOn(true);
     }
 }
 
@@ -936,20 +940,27 @@ void CpuRaytracingCharacter::setupManufacturingStageSet()
     for(int i=0; i < 8; ++i)
     {
         pSurf outerSurf = Sphere::sphere(glm::dvec3(0, 0, -0.5), 1.0);
-        pSurf innerSurf = Quadric::ellipsoid(0.985, 2.0, 1.0);
+        pSurf innerSurf = Quadric::ellipsoid(0.985 - i/25.0, 2.0, 1.0);
         pSurf petalSurf = outerSurf & !innerSurf;
 
         Surface::scale(petalSurf, 1.0 - i / 25.0);
-        Surface::rotate(petalSurf, glm::pi<double>() * i * 3.0 / 16.0, glm::dvec3(0, 0, 1));
-        Surface::translate(petalSurf, glm::dvec3(0, 0, 1.3));
+        Surface::rotate(petalSurf, glm::pi<double>() * i * 3.0 / 8.0, glm::dvec3(0, 0, 1));
+        Surface::translate(petalSurf, glm::dvec3(0, 0, 1.5));
 
         flowerSurf = flowerSurf | petalSurf;
     }
 
-    flowerSurf->setInnerMaterial(material::createInsulator(glm::dvec3(0.95, 0.60, 0.55), 1.2, 0.98, 0.95));
-    flowerSurf->setCoating(coating::createClearCoat(0.5));
+    flowerSurf = flowerSurf & !Sphere::sphere(glm::dvec3(0.0, 0.0, 1.10), 0.65);
+    flowerSurf->setInnerMaterial(material::createInsulator(glm::dvec3(0.95, 0.60, 0.55), 1.2, 0.93, 1.0));
+    flowerSurf->setCoating(coating::createClearCoat(1.0));
+
+    pSurf pearlSurf = Sphere::sphere(glm::dvec3(0.0, 0.0, 1.10), 0.63);
+    pearlSurf->setCoating(coating::createClearPaint(glm::dvec3(1.0), 0.0, 0.8));
+    pearlSurf->setInnerMaterial(material::SILVER);
+
     pProp sculptProp(new Prop("Sculpture"));
     sculptProp->addSurface(flowerSurf);
+    sculptProp->addSurface(pearlSurf);
     stageSet->addProp(sculptProp);
 
 
@@ -958,19 +969,19 @@ void CpuRaytracingCharacter::setupManufacturingStageSet()
     pSurf inner1 = Box::boxPosDims(glm::dvec3(0, 1.5, 0.5), glm::dvec3(0.5, 0.5, 0.5));
     pSurf bloc1 = outer1;// & !inner1;
     bloc1->setInnerMaterial(material::GOLD);
-    bloc1->setCoating(coating::createClearCoat(0.25));
+    bloc1->setCoating(coating::createClearCoat(0.10));
 
     pSurf outer2 = Box::boxPosDims(glm::dvec3(0, 0.0, 0.5), glm::dvec3(1, 0.3, 0.99));
     pSurf inner2 = Box::boxPosDims(glm::dvec3(0, 0.0, 0.5), glm::dvec3(0.5, 0.5, 0.5));
     pSurf bloc2 = outer2;// & !inner2;
     bloc2->setInnerMaterial(material::GLASS);
-    bloc2->setCoating(coating::createClearCoat(0.0001));
+    bloc2->setCoating(coating::createClearCoat(0.01));
 
     pSurf outer3 = Box::boxPosDims(glm::dvec3(0,-1.5, 0.5), glm::dvec3(1, 0.3, 0.99));
     pSurf inner3 = Box::boxPosDims(glm::dvec3(0,-1.5, 0.5), glm::dvec3(0.5, 0.5, 0.5));
     pSurf bloc3 = outer3;// & !inner3;
-    bloc3->setInnerMaterial(material::createInsulator(glm::dvec3(0.3, 0.3, 0.3), 1.3, 0.7, 1.0));
-    bloc3->setCoating(coating::createClearCoat(0.2));
+    bloc3->setInnerMaterial(material::createInsulator(glm::dvec3(0.3, 0.3, 0.3), 1.3, 0.8, 1.0));
+    bloc3->setCoating(coating::createClearCoat(1.0));
 
     pProp blocsProp(new Prop("Blocs"));
     blocsProp->addSurface(bloc1);
@@ -986,12 +997,11 @@ void CpuRaytracingCharacter::setupManufacturingStageSet()
 
     // Box
     pSurf boxSurf = Box::boxPosDims(glm::dvec3(0, 0, -1.0), glm::dvec3(4.0, 4.0, 2.0));
-    boxSurf->setInnerMaterial(material::createInsulator(glm::dvec3(1.0), 1.50, 1.0, 1.0));
-    pCoat eggStandCoat = coating::createClearPaint(glm::dvec3(0.65, 0.65, 0.65), 0.00);
+    pCoat eggStandCoat = coating::createClearPaint(glm::dvec3(0.6), 0.0);
     boxSurf->setCoating(eggStandCoat);
     pProp boxProp(new Prop("Box"));
     boxProp->addSurface(boxSurf);
-    stageSet->addProp(boxProp);
+    //stageSet->addProp(boxProp);
 }
 
 void CpuRaytracingCharacter::setupCornBoardStageSet()
