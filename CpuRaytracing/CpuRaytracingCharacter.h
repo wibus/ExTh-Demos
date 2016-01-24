@@ -41,15 +41,9 @@ public:
     virtual void exitStage() override;
 
 protected:
-    virtual void setupStageStageSet();
+    virtual void setupTheFruitStageSet();
     virtual void setupManufacturingStageSet();
     virtual void setupCornBoardStageSet();
-
-    virtual std::shared_ptr<prop3::Surface> createHoleStrippedWall(
-            const glm::dvec3& size,
-            double stripeWidth,
-            double holeWidth,
-            double border);
 
 private:
     std::shared_ptr<cellar::CameraManFree> _camMan;

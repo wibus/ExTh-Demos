@@ -8,6 +8,7 @@
 
 #include <Scaena/Play/Play.h>
 
+#include "TheFruitChoreographer.h"
 #include "Managers/CameraManager.h"
 #include "Managers/PostProdManager.h"
 
@@ -34,6 +35,11 @@ void RaytracedView::installArtDirectors(scaena::Play& play)
     _raytracerServer.reset(new prop3::ArtDirectorServer());
     play.propTeam3D()->addArtDirector(_raytracerServer);
     _artDirector3D = _raytracerServer;
+
+    auto choreo = std::make_shared<TheFruitChoreographer>(
+                _raytracerServer->camera(),
+                _raytracerServer->raytracerState());
+    play.propTeam3D()->switchChoreographer( choreo );
 }
 
 void RaytracedView::setup()

@@ -7,6 +7,7 @@ SET(CPURAYTRACING_MANAGERS_HEADERS
 
 SET(CPURAYTRACING_HEADERS
     ${CPURAYTRACING_SRC_DIR}/CpuRaytracingCharacter.h
+    ${CPURAYTRACING_SRC_DIR}/TheFruitChoreographer.h
     ${CPURAYTRACING_SRC_DIR}/RaytracedView.h
     ${CPURAYTRACING_SRC_DIR}/RaytracerGui.h)
     
@@ -18,6 +19,7 @@ SET(CPURAYTRACING_MANAGERS_SOURCES
 
 SET(CPURAYTRACING_SOURCES
     ${CPURAYTRACING_SRC_DIR}/CpuRaytracingCharacter.cpp
+    ${CPURAYTRACING_SRC_DIR}/TheFruitChoreographer.cpp
     ${CPURAYTRACING_SRC_DIR}/RaytracedView.cpp
     ${CPURAYTRACING_SRC_DIR}/RaytracerGui.cpp)
 
