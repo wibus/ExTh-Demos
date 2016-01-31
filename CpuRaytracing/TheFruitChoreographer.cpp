@@ -466,9 +466,10 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
     eggProp->addSurface(eggStandSurf);
     eggZone->addProp(eggProp);
 
+
+
     pZone workZone(new StageZone("Work Zone"));
     stageZone->addSubzone(workZone);
-
 
     ////////////////
     // Work table //
@@ -526,15 +527,17 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
         material::GLASS_REFRACTIVE_INDEX,
         0.975,
         0.0);
+
     bowlSurf->setInnerMaterial(bowlMat);
+
+    pProp bowlProp(new Prop("Bowl"));
+    bowlProp->addSurface(bowlSurf);
 
     pZone bowlZone(new StageZone("Bowl Zone"));
     workZone->addSubzone(bowlZone);
     bowlZone->setBounds(bowlBase);
-
-    pProp bowlProp(new Prop("Bowl"));
-    bowlProp->addSurface(bowlSurf);
     bowlZone->addProp(bowlProp);
+
 
 
     //////////
@@ -642,23 +645,23 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
     lampSurf = lampSurf | bodySurf;
     Surface::translate(lampSurf, glm::dvec3(0, 0, bodyHeight));
 
-    Surface::translate(lampSurf, lampPos);
-
-    double lampBoundsTop = armLen*1.05;
-    pZone lampZone(new StageZone("Lamp Zone"));
-    workZone->addSubzone(lampZone);
-    lampZone->setBounds(Box::boxPosDims(
-        glm::dvec3(-0.02, 0, armLen/2.0*1.05),
-        glm::dvec3(armLen*1.35, bodyRad*2.25, lampBoundsTop)));
-
-
     pCoat lampCoat = coating::createClearCoat(0.25);
     lampSurf->setCoating(lampCoat);
     lampSurf->setInnerMaterial(material::TITANIUM);
 
     pProp lampProp(new Prop("Lamp"));
     lampProp->addSurface(lampSurf);
+
+    double lampBoundsTop = armLen*1.05;
+    pZone lampZone(new StageZone("Lamp Zone"));
+    workZone->addSubzone(lampZone);
     lampZone->addProp(lampProp);
+    lampZone->setBounds(Box::boxPosDims(
+        glm::dvec3(-0.02, 0, armLen/2.0*1.05),
+        glm::dvec3(armLen*1.35, bodyRad*2.25, lampBoundsTop)));
+    lampZone->translate(lampPos);
+
+
 
 
     // Lamp bulb
@@ -687,12 +690,17 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
         glm::dvec3(workTablePos.x + workTableDims.x/2, workTablePos.y + workTableDims.y/2,
                    workTableDims.z + lampBoundsTop)));
 
+
+
+    pZone sculptZone(new StageZone("Sculpture Zone"));
+    stageZone->addSubzone(sculptZone);
+
     /////////////////////
     // Sculpture table //
     /////////////////////
     double scultpTableRadius = 0.30;
     double sculptTableHeight = 1.20;
-    glm::dvec3 sculptTablePos(boxMin.x/2.0, boxMin.y/2.0, 0);
+    glm::dvec3 sculptTablePos(boxMin.x/2.0, boxMin.y/1.5, 0);
 
     double sculptTableTopThick = 0.02;
     double sculptTableTopRadius = scultpTableRadius + sculptTableTopThick;
@@ -712,23 +720,64 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
     sculptTableSurf->setInnerMaterial(material::GLASS);
 
     pSurf sculptTopCyl = Quadric::cylinder(sculptTableTopRadius, sculptTableTopRadius);
-    pSurf sculptTopBot = Plane::plane(glm::dvec3(0, 0,-1), glm::dvec3(0,0, sculptTableHeight + 0.001));
+    pSurf sculptTopBot = Plane::plane(glm::dvec3(0, 0,-1), glm::dvec3(0,0, sculptTableHeight + 0.002));
     pSurf sculptTopTop = Plane::plane(glm::dvec3(0, 0, 1), glm::dvec3(0,0, sculptTableHeight + sculptTableTopThick));
     pSurf sculptTopSurf = sculptTopCyl & sculptTopBot & sculptTopTop;
     Surface::translate(sculptTopSurf, sculptTablePos);
 
     sculptTopSurf->setInnerMaterial(material::SILVER);
 
-    pZone sculptZone(new StageZone("Sculpture Zone"));
-    stageZone->addSubzone(sculptZone);
-    sculptZone->setBounds(Box::boxPosDims(
+    pZone sculptTableZone(new StageZone("Sculpture Table Zone"));
+    sculptZone->addSubzone(sculptTableZone);
+    sculptTableZone->setBounds(Box::boxPosDims(
         sculptTablePos + glm::dvec3(0, 0, (sculptTableHeight + sculptTableTopThick) /2.0 + 0.001),
         glm::dvec3(scultpTableRadius*3, scultpTableRadius*3, sculptTableHeight+sculptTableTopThick)));
 
     pProp sculptTableProp(new Prop("Sculpture Table"));
     sculptTableProp->addSurface(sculptTableSurf);
     sculptTableProp->addSurface(sculptTopSurf);
-    sculptZone->addProp(sculptTableProp);
+    sculptTableZone->addProp(sculptTableProp);
+
+
+    ///////////////
+    // Sculpture //
+    ///////////////
+    double sculptScale = 0.17;
+    pSurf flowerSurf;
+    for(int i=0; i < 8; ++i)
+    {
+        pSurf outerSurf = Sphere::sphere(glm::dvec3(0, 0, -0.7), 1.0);
+        pSurf innerSurf = Quadric::ellipsoid(0.985 - i/25.0, 2.0, 1.0);
+        pSurf petalSurf = outerSurf & !innerSurf;
+
+        Surface::scale(petalSurf, 1.0 - i / 25.0);
+        Surface::rotate(petalSurf, glm::pi<double>() * i * 3.0 / 8.0, glm::dvec3(0, 0, 1));
+        Surface::translate(petalSurf, glm::dvec3(0, 0, 1.5));
+
+        flowerSurf = flowerSurf | petalSurf;
+    }
+
+    flowerSurf = flowerSurf & !Sphere::sphere(glm::dvec3(0.0, 0.0, 0.9), 0.65);
+    flowerSurf = flowerSurf & Plane::plane(glm::dvec3(0, 0, -1), glm::dvec3(0, 0, 0.001));
+    flowerSurf->setInnerMaterial(material::createInsulator(glm::dvec3(0.95, 0.60, 0.55), 1.2, 0.93, 1.0));
+    flowerSurf->setCoating(coating::createClearCoat(1.0));
+
+    pSurf pearlSurf = Sphere::sphere(glm::dvec3(0.0, 0.0, 0.9), 0.63);
+    pearlSurf->setCoating(coating::createClearPaint(glm::dvec3(1.0), 0.0, 0.8));
+    pearlSurf->setInnerMaterial(material::SILVER);
+
+    pProp sculptProp(new Prop("Sculpture"));
+    sculptProp->addSurface(flowerSurf);
+    sculptProp->addSurface(pearlSurf);
+
+    pZone sculptFlowerZone(new StageZone("Sculpture Flower Zone"));
+    sculptZone->addSubzone(sculptFlowerZone);
+    sculptFlowerZone->setBounds(Sphere::sphere(glm::dvec3(0, 0, 0.8), 1.0));
+    sculptFlowerZone->addProp(sculptProp);
+    sculptFlowerZone->scale(sculptScale);
+    sculptFlowerZone->translate(sculptTablePos);
+    sculptFlowerZone->translate(glm::dvec3(0, 0, sculptTableHeight+sculptTableTopThick+0.001));
+
 
 
     ////////////////////
@@ -815,6 +864,7 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
 
 void TheFruitChoreographer::update(double dt)
 {
+    /*
     //if(_animTime == 0.0 || !_raytracerState->isRendering())
     {
         double t = _animTime;
@@ -825,6 +875,7 @@ void TheFruitChoreographer::update(double dt)
         //_animTime += 1.0 / _animFps;
         _animTime += dt / 7.5;
     }
+    //*/
 }
 
 void TheFruitChoreographer::terminate()

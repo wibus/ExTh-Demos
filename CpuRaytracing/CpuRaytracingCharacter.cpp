@@ -46,7 +46,8 @@ typedef std::shared_ptr<Prop> pProp;
 
 
 CpuRaytracingCharacter::CpuRaytracingCharacter() :
-    Character("CPU Raytracing Character")
+    Character("CPU Raytracing Character"),
+    _camVelocity(4.0)
 {
 }
 
@@ -81,14 +82,25 @@ void CpuRaytracingCharacter::beginStep(const StageTime &time)
     float elapsedtime = time.elapsedTime();
     _ups->setText("UPS: " + toString(floor(1.0 / elapsedtime)));
 
-    float velocity = 4.0f * elapsedtime;
-    const float turnSpeed = 0.004f;
+    float velocity = _camVelocity * elapsedtime;
+    const float turnSpeed = 0.3f * elapsedtime;
 
     SynchronousMouse& syncMouse = *play().synchronousMouse();
     SynchronousKeyboard& syncKeyboard = *play().synchronousKeyboard();
 
-    bool moved = false;
 
+    if(syncKeyboard.isAsciiPressed('q'))
+    {
+        _camVelocity = glm::max(0.1, _camVelocity - 0.1);
+        std::cout << "Camera velocity: " << _camVelocity << "m/s" << std::endl;
+    }
+    if(syncKeyboard.isAsciiPressed('e'))
+    {
+        _camVelocity = glm::min(6.0, _camVelocity + 0.1);
+        std::cout << "Camera velocity: " << _camVelocity << "m/s" << std::endl;
+    }
+
+    bool moved = false;
     if(syncKeyboard.isAsciiPressed('w'))
     {
         _camMan->forward(velocity);
@@ -151,6 +163,15 @@ void CpuRaytracingCharacter::setupTheFruitStageSet()
 {
     std::shared_ptr<Camera> camera = play().view()->camera3D();
     _camMan.reset(new CameraManFree(camera, false));
+
+    glm::dvec3 focusPos = glm::dvec3(0, 0, 1.0);
+    glm::dvec3 camPos = focusPos + glm::dvec3(8, -15, 5) * 1.3;
+    glm::dvec3 dir = glm::normalize(focusPos - camPos);
+    double tilt = glm::atan(dir.z, glm::length(glm::dvec2(dir.x, dir.y)));
+    double pan = glm::atan(dir.y, dir.x);
+
+    _camMan->setOrientation(pan, tilt);
+    _camMan->setPosition(camPos);
 
 
     // Bounding Hierarchy

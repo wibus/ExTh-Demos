@@ -46,6 +46,7 @@ protected:
     virtual void setupCornBoardStageSet();
 
 private:
+    double _camVelocity;
     std::shared_ptr<cellar::CameraManFree> _camMan;
 
     std::shared_ptr<prop2::TextHud> _fps;
