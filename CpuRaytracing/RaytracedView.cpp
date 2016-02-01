@@ -48,5 +48,6 @@ void RaytracedView::setup()
 {
     _artDirector2D->resize(width(), height());
     _cameraManager->setCamera(_raytracerServer->camera());
+    _cameraManager->setRaytracerState(_raytracerServer->raytracerState());
     _postProdManager->setPostProdUnit(_raytracerServer->postProdUnit());
 }

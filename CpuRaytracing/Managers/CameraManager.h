@@ -7,6 +7,8 @@
 
 #include <CellarWorkbench/Camera/Camera.h>
 
+#include <PropRoom3D/Team/ArtDirector/RaytracerState.h>
+
 namespace Ui
 {
     class RaytracerGui;
@@ -21,6 +23,7 @@ public:
 
     virtual void setView(QWidget* view);
     virtual void setCamera(const std::shared_ptr<cellar::Camera>& camera);
+    virtual void setRaytracerState(const std::shared_ptr<prop3::RaytracerState>& raytracerState);
 
 protected slots:
     virtual void captureDimensionsChanged(int unused);
@@ -31,6 +34,8 @@ protected slots:
     virtual void dofApertureChanged(double unused);
     virtual void enterFullscreen();
     virtual void exitFullscreen();
+    virtual void updateEachTileCheckChanged(bool unused);
+    virtual void colorOutputTypeChanged(int unused);
 
 protected:
     virtual void updateCameraProjection();
@@ -41,6 +46,7 @@ private:
     QWidget* _view;
     QWidget* _fullscreenWindow;
     std::shared_ptr<cellar::Camera> _camera;
+    std::shared_ptr<prop3::RaytracerState> _raytracerState;
 };
 
 #endif // CAMERAMANAGER_H

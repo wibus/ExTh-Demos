@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1561</width>
-    <height>727</height>
+    <width>1600</width>
+    <height>800</height>
    </rect>
   </property>
   <property name="mouseTracking">
@@ -261,6 +261,35 @@
          </widget>
         </item>
         <item>
+         <widget class="QGroupBox" name="visualizationGroup">
+          <property name="title">
+           <string>Visualization</string>
+          </property>
+          <layout class="QFormLayout" name="formLayout_2">
+           <item row="0" column="0" colspan="2">
+            <widget class="QCheckBox" name="updateEachTileCheck">
+             <property name="text">
+              <string>Update each tile</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="colorOutputLabel">
+             <property name="text">
+              <string>Color ouput:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QComboBox" name="colorOutputCombo"/>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
          <spacer name="cameraSpacer">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -304,8 +333,8 @@
       <widget class="QWidget" name="raytracedScollViewContents">
        <property name="geometry">
         <rect>
-         <x>0</x>
-         <y>0</y>
+         <x>19</x>
+         <y>33</y>
          <width>978</width>
          <height>660</height>
         </rect>
@@ -771,7 +800,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1561</width>
+     <width>1600</width>
      <height>27</height>
     </rect>
    </property>

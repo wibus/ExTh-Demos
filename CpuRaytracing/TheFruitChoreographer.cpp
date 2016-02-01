@@ -681,7 +681,7 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
     lampLight->translate(glm::dvec3(0, 0, bodyHeight));
     lampLight->translate(lampPos);
     lampZone->addLight(lampLight);
-    lampLight->setIsOn(false);
+    lampLight->setIsOn(true);
 
 
     //Work zone bounds
@@ -838,7 +838,7 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
         lightFixturesProp->addSurface(cordSurf);
         fixtureZone->addProp(lightFixturesProp);
         fixtureZone->addLight(fixtureBulb);
-        fixtureBulb->setIsOn(false);
+        fixtureBulb->setIsOn(true);
     }
 
 

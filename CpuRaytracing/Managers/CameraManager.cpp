@@ -36,6 +36,11 @@ void CameraManager::setView(QWidget* view)
     QPalette background(QPalette::Background, Qt::black);
     _fullscreenWindow->setPalette(background);
 
+    _ui->colorOutputCombo->addItem(prop3::RaytracerState::COLOROUTPUT_ALBEDO.c_str());
+    _ui->colorOutputCombo->addItem(prop3::RaytracerState::COLOROUTPUT_DIVERGENCE.c_str());
+    _ui->colorOutputCombo->addItem(prop3::RaytracerState::COLOROUTPUT_VARIANCE.c_str());
+    _ui->colorOutputCombo->addItem(prop3::RaytracerState::COLOROUTPUT_PRIORITY.c_str());
+
     connect(_ui->customOutputDimensionsRadioBtn, &QRadioButton::toggled,
             _ui->customOutputDimensionsWidget,   &QWidget::setEnabled);
 
@@ -82,6 +87,13 @@ void CameraManager::setView(QWidget* view)
     connect(_ui->fullscreenButton, &QPushButton::clicked,
             this,                  &CameraManager::enterFullscreen);
 
+    connect(_ui->updateEachTileCheck, &QCheckBox::toggled,
+            this, &CameraManager::updateEachTileCheckChanged);
+
+    connect(_ui->colorOutputCombo,
+            static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+            this, &CameraManager::colorOutputTypeChanged);
+
     outputDimensionsChanged(0);
     outputMatchCaptureDimensions(_ui->matchCaptureSizeRadioBtn->isChecked());
 }
@@ -90,6 +102,13 @@ void CameraManager::setCamera(const std::shared_ptr<cellar::Camera>& camera)
 {
     _camera = camera;
     captureDimensionsChanged(0);
+}
+
+void CameraManager::setRaytracerState(const std::shared_ptr<prop3::RaytracerState>& raytracerState)
+{
+    _raytracerState = raytracerState;
+    updateEachTileCheckChanged(true);
+    colorOutputTypeChanged(0);
 }
 
 void CameraManager::captureDimensionsChanged(int)
@@ -151,7 +170,6 @@ void CameraManager::dofApertureChanged(double unused)
     updateCameraProjection();
 }
 
-
 void CameraManager::enterFullscreen()
 {
     _ui->raytracedScrollView->takeWidget();
@@ -167,6 +185,18 @@ void CameraManager::exitFullscreen()
     _fullscreenWindow->layout()->takeAt(0);
 
     _ui->raytracedScrollView->setWidget(_view);
+}
+
+void CameraManager::updateEachTileCheckChanged(bool unused)
+{
+    _raytracerState->setUpdateEachTile(
+        _ui->updateEachTileCheck->isChecked());
+}
+
+void CameraManager::colorOutputTypeChanged(int unused)
+{
+    _raytracerState->setColorOutputType(
+        _ui->colorOutputCombo->currentText().toStdString());
 }
 
 void CameraManager::updateCameraProjection()
