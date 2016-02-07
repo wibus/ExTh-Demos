@@ -1,6 +1,8 @@
 #ifndef THEFRUIT_CHOREOGRAPHER_H
 #define THEFRUIT_CHOREOGRAPHER_H
 
+#include <QObject>
+
 #include <CellarWorkbench/Camera/Camera.h>
 #include <CellarWorkbench/Camera/CameraManFree.h>
 
@@ -23,8 +25,10 @@
 #include <PropRoom3D/Light/LightBulb/SphericalLight.h>
 
 
-class TheFruitChoreographer : public prop3::AbstractChoreographer
+class TheFruitChoreographer : public QObject, public prop3::AbstractChoreographer
 {
+    Q_OBJECT
+
 public:
     TheFruitChoreographer(const std::shared_ptr<cellar::Camera>& camera,
                           const std::shared_ptr<prop3::RaytracerState>& raytracerState);
@@ -34,7 +38,19 @@ public:
     virtual void setup(const std::shared_ptr<prop3::StageSet>& stageSet) override;
     virtual void update(double dt) override;
     virtual void terminate() override;
-    virtual void restart() override;
+
+    virtual int animFrameCount();
+    virtual void setAnimFps(int fps);
+    virtual void setAnimFrame(int frame);
+    virtual void resetAnimation();
+    virtual void playAnimation();
+    virtual void pauseAnimation();
+    virtual void setFastPlay(bool playFast);
+
+
+signals:
+    void animFrameChanged(int frameId);
+    void playStateChanged(bool isPlaying);
 
 
 protected:
@@ -64,8 +80,13 @@ private:
     std::shared_ptr<cellar::AbstractPath<double>> _sunPath;
 
     std::shared_ptr<prop3::RaytracerState> _raytracerState;
+
+    int _animFps;
+    int _animFrame;
     double _animTime;
-    double _animFps;
+    bool _animPlaying;
+    bool _animFastPlay;
+    double _animTotalTime;
 };
 
 #endif // THEFRUIT_CHOREOGRAPHER_H

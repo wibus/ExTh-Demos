@@ -76,14 +76,19 @@ void TheFruitChoreographer::setupAnimation()
             glm::dvec3(-2.5, 2.5, _theFruitPosition.z)}));
 
     _cloudsVelocity = glm::dvec3(0.0, 10.0, 0.0);
+
+    _animTotalTime = 21.0;
 }
 
 void TheFruitChoreographer::update(double dt)
 {
-    //if(!_raytracerState->isRendering())
+    bool forcedUpdate = (dt == 0.0);
+
+    if(forcedUpdate || (_animPlaying && (
+       _animFastPlay || !_raytracerState->isRendering())))
     {
         double t = _animTime;
-/*
+
         const glm::dvec3 camUp(0, 0, 1);
         glm::dvec3 camTo = _cameraToPath->value(t);
         glm::dvec3 camEye = _cameraEyePath->value(t);
@@ -108,15 +113,73 @@ void TheFruitChoreographer::update(double dt)
 
 
         _cloudsZone->translate(_cloudsVelocity * dt);
-*/
 
-        //_animTime += 1.0 / _animFps;
-        _animTime += dt;
+
+        if(!forcedUpdate)
+        {
+            if(_animFastPlay)
+            {
+                _animTime += dt;
+                _animFrame = _animTime * _animFps;
+            }
+            else
+            {
+                ++_animFrame;
+                _animTime = _animFrame / double(_animFps);
+            }
+
+            emit animFrameChanged(_animFrame);
+            if(_animTime >= _animTotalTime)
+            {
+                _animPlaying = false;
+                playStateChanged(_animPlaying);
+            }
+        }
     }
 }
 
-void TheFruitChoreographer::restart()
+int TheFruitChoreographer::animFrameCount()
 {
-    // Time
-    _animTime = 8.0;
+    return glm::ceil(_animTotalTime * _animFps);
+}
+
+void TheFruitChoreographer::setAnimFps(int fps)
+{
+    _animFps = fps;
+}
+
+void TheFruitChoreographer::setAnimFrame(int frame)
+{
+    if(_animFrame != frame)
+    {
+        _animFrame = frame;
+        _animTime = frame / double(_animFps);
+
+        emit animFrameChanged(_animFrame);
+
+        update(0.0);
+    }
+}
+
+void TheFruitChoreographer::resetAnimation()
+{
+    setAnimFrame(0);
+}
+
+void TheFruitChoreographer::playAnimation()
+{
+    _animPlaying = true;
+}
+
+void TheFruitChoreographer::pauseAnimation()
+{
+    _animPlaying = false;
+}
+
+void TheFruitChoreographer::setFastPlay(bool playFast)
+{
+    _animFastPlay = playFast;
+
+    if(_animPlaying)
+        update(0.0);
 }

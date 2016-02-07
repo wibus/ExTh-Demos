@@ -22,8 +22,12 @@ TheFruitChoreographer::TheFruitChoreographer(
     _camMan(new CameraManFree(camera, false)),
     _camAperture(0.4),
     _raytracerState(raytracerState),
+    _animFps(24),
+    _animFrame(0),
     _animTime(0.0),
-    _animFps(24.0)
+    _animPlaying(false),
+    _animFastPlay(false),
+    _animTotalTime(0.0)
 {
     glm::dvec3 focusPos = glm::dvec3(0, 0, 1.0);
     glm::dvec3 camPos = focusPos + glm::dvec3(8, -15, 5) * 1.3;
@@ -666,7 +670,7 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
     double lamLightRad = headRad * 0.5;
     pLight lampLight(new SphericalLight("Lamp Light",
         glm::dvec3(0, 0, headLen/3.0), lamLightRad));
-    lampLight->setRadiantFlux(glm::dvec3(1.00, 0.77, 0.68) * 200.0);
+    lampLight->setRadiantFlux(color::tungsten40W * 40.0);
     lampLight->rotate(glm::pi<double>(), glm::dvec3(0, 1, 0));
     lampLight->rotate(headTwist, glm::dvec3(1, 0, 0));
     lampLight->rotate(headRot, glm::dvec3(0, 1, 0));
@@ -679,7 +683,7 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
     lampLight->translate(glm::dvec3(0, 0, bodyHeight));
     lampLight->translate(lampPos);
     lampZone->addLight(lampLight);
-    lampLight->setIsOn(false);
+    lampLight->setIsOn(true);
 
 
     //Work zone bounds
@@ -838,7 +842,8 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
         fixtureZone->addLight(fixtureBulb);
         fixtureBulb->setIsOn(false);
 
-        if(pos == fixturePositions[4])
+        if(pos == fixturePositions[4] ||
+           pos == fixturePositions[1])
             fixtureBulb->setIsOn(true);
     }
 

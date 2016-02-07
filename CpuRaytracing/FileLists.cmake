@@ -2,6 +2,7 @@ SET(CPURAYTRACING_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/CpuRaytracing)
 
 ## HEADERS ##
 SET(CPURAYTRACING_MANAGERS_HEADERS
+    ${CPURAYTRACING_SRC_DIR}/Managers/AnimationManager.h
     ${CPURAYTRACING_SRC_DIR}/Managers/PostProdManager.h
     ${CPURAYTRACING_SRC_DIR}/Managers/CameraManager.h)
 
@@ -14,6 +15,7 @@ SET(CPURAYTRACING_HEADERS
 
 ## SOURCES ##
 SET(CPURAYTRACING_MANAGERS_SOURCES
+    ${CPURAYTRACING_SRC_DIR}/Managers/AnimationManager.cpp
     ${CPURAYTRACING_SRC_DIR}/Managers/PostProdManager.cpp
     ${CPURAYTRACING_SRC_DIR}/Managers/CameraManager.cpp)
 

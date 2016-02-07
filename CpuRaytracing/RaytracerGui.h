@@ -12,6 +12,7 @@ namespace Ui
 
 class RaytracedView;
 class CameraManager;
+class AnimationManager;
 class PostProdManager;
 
 
@@ -29,6 +30,7 @@ private:
     std::shared_ptr<scaena::Play> _play;
     std::shared_ptr<RaytracedView> _raytracedView;
     std::shared_ptr<CameraManager> _cameraManager;
+    std::shared_ptr<AnimationManager> _animationManager;
     std::shared_ptr<PostProdManager> _postProdManager;
 };
 

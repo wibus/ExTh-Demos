@@ -162,13 +162,6 @@ void CpuRaytracingCharacter::exitStage()
 
 bool CpuRaytracingCharacter::keyPressEvent(const scaena::KeyboardEvent& event)
 {
-    if(event.getAscii() == 'R')
-    {
-        play().propTeam3D()->restart();
-        std::cout << "Animation restarted" << std::endl;
-        return true;
-    }
-
     return false;
 }
 

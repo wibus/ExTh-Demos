@@ -10,14 +10,17 @@
 
 #include "TheFruitChoreographer.h"
 #include "Managers/CameraManager.h"
+#include "Managers/AnimationManager.h"
 #include "Managers/PostProdManager.h"
 
 
 RaytracedView::RaytracedView(
         const std::shared_ptr<CameraManager>& cameraManager,
+        const std::shared_ptr<AnimationManager>& animationManager,
         const std::shared_ptr<PostProdManager>& postProdManager) :
     scaena::QGlWidgetView("Raytraced View"),
     _cameraManager(cameraManager),
+    _animationManager(animationManager),
     _postProdManager(postProdManager)
 {
 }
@@ -37,10 +40,10 @@ void RaytracedView::installArtDirectors(scaena::Play& play)
     _artDirector3D = _raytracerServer;
 
     //*
-    auto choreo = std::make_shared<TheFruitChoreographer>(
+    _choreographer.reset(new TheFruitChoreographer(
                 _raytracerServer->camera(),
-                _raytracerServer->raytracerState());
-    play.propTeam3D()->switchChoreographer( choreo );
+                _raytracerServer->raytracerState()));
+    play.propTeam3D()->switchChoreographer( _choreographer );
     //*/
 }
 
@@ -50,4 +53,5 @@ void RaytracedView::setup()
     _cameraManager->setCamera(_raytracerServer->camera());
     _cameraManager->setRaytracerState(_raytracerServer->raytracerState());
     _postProdManager->setPostProdUnit(_raytracerServer->postProdUnit());
+    _animationManager->setChoreographer(_choreographer);
 }
