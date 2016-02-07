@@ -1,10 +1,7 @@
 #include "TheFruitChoreographer.h"
 
 #include <GLM/gtc/matrix_transform.hpp>
-
-#include <CellarWorkbench/Path/CompositePath.h>
-#include <CellarWorkbench/Path/CubicSplinePath.h>
-#include <CellarWorkbench/Path/LinearPath.h>
+#include <GLM/gtc/random.hpp>
 
 using namespace cellar;
 using namespace prop3;
@@ -23,6 +20,7 @@ TheFruitChoreographer::TheFruitChoreographer(
         const std::shared_ptr<RaytracerState>& raytracerState) :
     _camera(camera),
     _camMan(new CameraManFree(camera, false)),
+    _camAperture(0.4),
     _raytracerState(raytracerState),
     _animTime(0.0),
     _animFps(24.0)
@@ -681,7 +679,7 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
     lampLight->translate(glm::dvec3(0, 0, bodyHeight));
     lampLight->translate(lampPos);
     lampZone->addLight(lampLight);
-    lampLight->setIsOn(true);
+    lampLight->setIsOn(false);
 
 
     //Work zone bounds
@@ -838,44 +836,63 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
         lightFixturesProp->addSurface(cordSurf);
         fixtureZone->addProp(lightFixturesProp);
         fixtureZone->addLight(fixtureBulb);
-        fixtureBulb->setIsOn(true);
+        fixtureBulb->setIsOn(false);
+
+        if(pos == fixturePositions[4])
+            fixtureBulb->setIsOn(true);
     }
 
 
-    // Time
-    _animTime = 0.0;
-
-    // Paths
-    std::vector<glm::dvec3> camEyeCtrlPts;
-    camEyeCtrlPts.push_back(glm::dvec3(4.5-(-5.5-4.5)/1.0, 10.0, 3.5));
-    camEyeCtrlPts.push_back(glm::dvec3(4.5, 10.0, 3.5));
-    camEyeCtrlPts.push_back(glm::dvec3(-5.5, 10.0, 3.5));
-    camEyeCtrlPts.push_back(glm::dvec3(-5.5+(-5.5-4.5)/1.0, 10.0, 3.5));
-    _cameraEyePath.reset(new CubicSplinePath<glm::dvec3>(camEyeCtrlPts));
-
-    std::vector<glm::dvec3> camToCtrlPts;
-    camToCtrlPts.push_back(glm::dvec3(9.0, 5.0, 3.5));
-    camToCtrlPts.push_back(glm::dvec3(4.5, 5.0, 3.5));
-    camToCtrlPts.push_back(glm::dvec3(-4.5, 5.0, 3.5));
-    camToCtrlPts.push_back(glm::dvec3(-9.0, 5.0, 3.5));
-    _cameraToPath.reset(new CubicSplinePath<glm::dvec3>(camToCtrlPts));
-
-}
-
-void TheFruitChoreographer::update(double dt)
-{
-    /*
-    //if(_animTime == 0.0 || !_raytracerState->isRendering())
+    ////////////
+    // Clouds //
+    ////////////
+    srand(3);
+    pSurf cloudSurf;
+    int cloudCount = 50.0;
+    double minCloudRad = 3.0;
+    double maxCloudRad = 12.0;
+    glm::dvec3 cloudsDim = glm::dvec3(30, 60, 25.0);
+    for(int i=0; i < cloudCount; ++i)
     {
-        double t = _animTime;
-        _camera->updateView(glm::lookAt(_cameraEyePath->value(t),
-                                        _cameraToPath->value(t),
-                                        glm::dvec3(0, 0, 1)));
-
-        //_animTime += 1.0 / _animFps;
-        _animTime += dt / 7.5;
+        cloudSurf = cloudSurf | Sphere::sphere(
+                    glm::ballRand(0.5) * cloudsDim,
+                    glm::linearRand(minCloudRad, maxCloudRad));
     }
-    //*/
+    cloudSurf = Surface::translate(cloudSurf, glm::dvec3(0, 0, cloudsDim.z/4.0));
+    cloudSurf = cloudSurf & Plane::plane(glm::dvec3(0, 0, -1), glm::dvec3(0, 0, 0));
+    cloudSurf->setCoating(coating::CLEAR_ROUGH);
+    cloudSurf->setInnerMaterial(material::createInsulator(
+        glm::dvec3(0.93), material::AIR_REFRACTIVE_INDEX, 0.4, 1.0));
+    pProp cloudsProp(new Prop("Clouds"));
+    cloudsProp->addSurface(cloudSurf);
+    _cloudsZone.reset(new StageZone("Clouds Zone"));
+    stageSet->addSubzone(_cloudsZone);
+    _cloudsZone->addProp(cloudsProp);
+
+    _cloudsZone->setBounds(Box::boxCorners(
+        glm::dvec3(-cloudsDim.x/2.0 - maxCloudRad, -cloudsDim.y/2.0 - maxCloudRad, 0.0),
+        glm::dvec3( cloudsDim.x/2.0 + maxCloudRad,  cloudsDim.y/2.0 + maxCloudRad, cloudsDim.z*0.75 + maxCloudRad)));
+    _cloudsZone->translate(glm::dvec3(-200.0, -150.0, 50.0));
+
+
+
+    ///////////////
+    // The Fruit //
+    ///////////////
+    _theFruitPosition = glm::dvec3(6.0, -7.0, 0.8);
+    pSurf theFruitSurf = Sphere::sphere(glm::dvec3(), 0.8);
+    theFruitSurf->setCoating(coating::createClearCoat(0.01));
+    theFruitSurf->setInnerMaterial(material::createInsulator(
+        glm::dvec3(1.0, 0.6, 0.48), 1.3, 0.5, 0.1));
+
+    _theFruitProp.reset(new Prop("The Fruit"));
+    _theFruitProp->addSurface(theFruitSurf);
+    _theFruitProp->transform(glm::scale(glm::dmat4(), glm::dvec3(0.5, 0.5, 1.0)));
+    _theFruitProp->translate(_theFruitPosition);
+    stageSet->addProp(_theFruitProp);
+
+    setupAnimation();
+    //restart();
 }
 
 void TheFruitChoreographer::terminate()

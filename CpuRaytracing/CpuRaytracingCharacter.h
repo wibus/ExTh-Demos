@@ -40,6 +40,8 @@ public:
                       const scaena::StageTime&time) override;
     virtual void exitStage() override;
 
+    virtual bool keyPressEvent(const scaena::KeyboardEvent& event) override;
+
 protected:
     virtual void setupTheFruitStageSet();
     virtual void setupManufacturingStageSet();

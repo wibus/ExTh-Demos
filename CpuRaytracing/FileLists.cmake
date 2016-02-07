@@ -20,6 +20,7 @@ SET(CPURAYTRACING_MANAGERS_SOURCES
 SET(CPURAYTRACING_SOURCES
     ${CPURAYTRACING_SRC_DIR}/CpuRaytracingCharacter.cpp
     ${CPURAYTRACING_SRC_DIR}/TheFruitChoreographer.cpp
+    ${CPURAYTRACING_SRC_DIR}/TheFruitAnimation.cpp
     ${CPURAYTRACING_SRC_DIR}/RaytracedView.cpp
     ${CPURAYTRACING_SRC_DIR}/RaytracerGui.cpp)
 

@@ -30,6 +30,7 @@
 #include <Scaena/StageManagement/Event/StageTime.h>
 #include <Scaena/StageManagement/Event/SynchronousKeyboard.h>
 #include <Scaena/StageManagement/Event/SynchronousMouse.h>
+#include <Scaena/StageManagement/Event/KeyboardEvent.h>
 
 using namespace cellar;
 using namespace prop2;
@@ -47,7 +48,7 @@ typedef std::shared_ptr<Prop> pProp;
 
 CpuRaytracingCharacter::CpuRaytracingCharacter() :
     Character("CPU Raytracing Character"),
-    _camVelocity(4.0)
+    _camVelocity(4.1)
 {
 }
 
@@ -89,14 +90,14 @@ void CpuRaytracingCharacter::beginStep(const StageTime &time)
     SynchronousKeyboard& syncKeyboard = *play().synchronousKeyboard();
 
 
-    if(syncKeyboard.isAsciiPressed('q'))
+    if(syncKeyboard.isAsciiPressed('Q'))
     {
-        _camVelocity = glm::max(0.1, _camVelocity - 0.1);
+        _camVelocity = glm::max(0.1, _camVelocity - 0.2);
         std::cout << "Camera velocity: " << _camVelocity << "m/s" << std::endl;
     }
-    if(syncKeyboard.isAsciiPressed('e'))
+    if(syncKeyboard.isAsciiPressed('E'))
     {
-        _camVelocity = glm::min(6.0, _camVelocity + 0.1);
+        _camVelocity = glm::min(15.0, _camVelocity + 0.2);
         std::cout << "Camera velocity: " << _camVelocity << "m/s" << std::endl;
     }
 
@@ -159,6 +160,18 @@ void CpuRaytracingCharacter::exitStage()
     play().propTeam3D()->terminate();
 }
 
+bool CpuRaytracingCharacter::keyPressEvent(const scaena::KeyboardEvent& event)
+{
+    if(event.getAscii() == 'R')
+    {
+        play().propTeam3D()->restart();
+        std::cout << "Animation restarted" << std::endl;
+        return true;
+    }
+
+    return false;
+}
+
 void CpuRaytracingCharacter::setupTheFruitStageSet()
 {
     std::shared_ptr<Camera> camera = play().view()->camera3D();
@@ -203,35 +216,6 @@ void CpuRaytracingCharacter::setupManufacturingStageSet()
     stageSet->setBackdrop(std::shared_ptr<Backdrop>(_backdrop));
 
 
-    // Sculpture
-    pSurf flowerSurf;
-    for(int i=0; i < 8; ++i)
-    {
-        pSurf outerSurf = Sphere::sphere(glm::dvec3(0, 0, -0.5), 1.0);
-        pSurf innerSurf = Quadric::ellipsoid(0.985 - i/25.0, 2.0, 1.0);
-        pSurf petalSurf = outerSurf & !innerSurf;
-
-        Surface::scale(petalSurf, 1.0 - i / 25.0);
-        Surface::rotate(petalSurf, glm::pi<double>() * i * 3.0 / 8.0, glm::dvec3(0, 0, 1));
-        Surface::translate(petalSurf, glm::dvec3(0, 0, 1.5));
-
-        flowerSurf = flowerSurf | petalSurf;
-    }
-
-    flowerSurf = flowerSurf & !Sphere::sphere(glm::dvec3(0.0, 0.0, 1.10), 0.65);
-    flowerSurf->setInnerMaterial(material::createInsulator(glm::dvec3(0.95, 0.60, 0.55), 1.2, 0.93, 1.0));
-    flowerSurf->setCoating(coating::createClearCoat(1.0));
-
-    pSurf pearlSurf = Sphere::sphere(glm::dvec3(0.0, 0.0, 1.10), 0.63);
-    pearlSurf->setCoating(coating::createClearPaint(glm::dvec3(1.0), 0.0, 0.8));
-    pearlSurf->setInnerMaterial(material::SILVER);
-
-    pProp sculptProp(new Prop("Sculpture"));
-    sculptProp->addSurface(flowerSurf);
-    sculptProp->addSurface(pearlSurf);
-    //stageSet->addProp(sculptProp);
-
-
     // Holes
     pSurf outer1 = Box::boxPosDims(glm::dvec3(0, 1.5, 0.5), glm::dvec3(1, 0.3, 0.99));
     pSurf inner1 = Box::boxPosDims(glm::dvec3(0, 1.5, 0.5), glm::dvec3(0.5, 0.5, 0.5));
@@ -255,13 +239,13 @@ void CpuRaytracingCharacter::setupManufacturingStageSet()
     blocsProp->addSurface(bloc1);
     blocsProp->addSurface(bloc2);
     blocsProp->addSurface(bloc3);
-    stageSet->addProp(blocsProp);
+    //stageSet->addProp(blocsProp);
 
     // Light
     pLight lampLight(new SphericalLight("Lamp Light",
         glm::dvec3(-1.25, 0.75, 0.4), 0.2));
     lampLight->setRadiantFlux(glm::dvec3(16.0));
-    stageSet->addLight(lampLight);
+    //stageSet->addLight(lampLight);
 
     // Box
     pSurf boxSurf = Box::boxPosDims(glm::dvec3(0, 0, -1.0), glm::dvec3(4.0, 4.0, 2.0));
@@ -270,6 +254,14 @@ void CpuRaytracingCharacter::setupManufacturingStageSet()
     pProp boxProp(new Prop("Box"));
     boxProp->addSurface(boxSurf);
     stageSet->addProp(boxProp);
+
+    pSurf fruitSurf = Sphere::sphere(glm::dvec3(), 1.0);
+    Surface::transform(fruitSurf, glm::scale(glm::dmat4(), glm::dvec3(0.3, 0.5, 0.4)));
+    Surface::transform(fruitSurf, glm::rotate(glm::dmat4(), glm::pi<double>()/2.0, glm::dvec3(1.0, 0, 0)));
+    Surface::transform(fruitSurf, glm::translate(glm::dmat4(), glm::dvec3(0.0, 0, 1.0)));
+    pProp fruitProp(new Prop("Fruit"));
+    fruitProp->addSurface(fruitSurf);
+    stageSet->addProp(fruitProp);
 }
 
 void CpuRaytracingCharacter::setupCornBoardStageSet()

@@ -34,9 +34,11 @@ public:
     virtual void setup(const std::shared_ptr<prop3::StageSet>& stageSet) override;
     virtual void update(double dt) override;
     virtual void terminate() override;
+    virtual void restart() override;
 
 
 protected:
+    virtual void setupAnimation();
     virtual std::shared_ptr<prop3::Surface> createHoleStrippedWall(
             const glm::dvec3& size,
             double stripeWidth,
@@ -46,12 +48,22 @@ protected:
 private:
     std::shared_ptr<cellar::Camera> _camera;
     std::shared_ptr<cellar::CameraManFree> _camMan;
-    std::shared_ptr<prop3::RaytracerState> _raytracerState;
-
-    std::shared_ptr<prop3::ProceduralSun> _backdrop;
-
     std::shared_ptr<cellar::AbstractPath<glm::dvec3>> _cameraEyePath;
     std::shared_ptr<cellar::AbstractPath<glm::dvec3>> _cameraToPath;
+    std::shared_ptr<cellar::AbstractPath<double>> _cameraFoV;
+    double _camAperture;
+
+    glm::dvec3 _cloudsVelocity;
+    std::shared_ptr<prop3::StageZone> _cloudsZone;
+
+    glm::dvec3 _theFruitPosition;
+    std::shared_ptr<prop3::Prop> _theFruitProp;
+    std::shared_ptr<cellar::AbstractPath<glm::dvec3>> _theFruitPath;
+
+    std::shared_ptr<prop3::ProceduralSun> _backdrop;
+    std::shared_ptr<cellar::AbstractPath<double>> _sunPath;
+
+    std::shared_ptr<prop3::RaytracerState> _raytracerState;
     double _animTime;
     double _animFps;
 };
