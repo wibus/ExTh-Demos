@@ -683,7 +683,7 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
     lampLight->translate(glm::dvec3(0, 0, bodyHeight));
     lampLight->translate(lampPos);
     lampZone->addLight(lampLight);
-    lampLight->setIsOn(true);
+    lampLight->setIsOn(false);
 
 
     //Work zone bounds
@@ -842,9 +842,9 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
         fixtureZone->addLight(fixtureBulb);
         fixtureBulb->setIsOn(false);
 
-        if(pos == fixturePositions[4] ||
-           pos == fixturePositions[1])
-            fixtureBulb->setIsOn(true);
+        //if(pos == fixturePositions[4] ||
+        //   pos == fixturePositions[1])
+        //    fixtureBulb->setIsOn(true);
     }
 
 
@@ -884,20 +884,56 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
     ///////////////
     // The Fruit //
     ///////////////
-    _theFruitPosition = glm::dvec3(6.0, -7.0, 0.8);
-    pSurf theFruitSurf = Sphere::sphere(glm::dvec3(), 0.8);
+    _theFruitPosition = glm::dvec3(-6.0, -7.0, 0.0);
+    pSurf theFruitSurf = Sphere::sphere(glm::dvec3(0, 0, 0.5), 0.5);
     theFruitSurf->setCoating(coating::createClearCoat(0.01));
     theFruitSurf->setInnerMaterial(material::createInsulator(
         glm::dvec3(1.0, 0.6, 0.48), 1.3, 0.5, 0.1));
 
     _theFruitProp.reset(new Prop("The Fruit"));
     _theFruitProp->addSurface(theFruitSurf);
-    _theFruitProp->transform(glm::scale(glm::dmat4(), glm::dvec3(0.5, 0.5, 1.0)));
+    _theFruitProp->transform(glm::scale(glm::dmat4(), glm::dvec3(0.7, 0.7, 1.6)));
     _theFruitProp->translate(_theFruitPosition);
     stageSet->addProp(_theFruitProp);
 
     setupAnimation();
-    //restart();
+
+/*
+    ////////////////////////////
+    // The rest of the family //
+    ////////////////////////////
+    glm::dvec3 geoffroyPos = glm::dvec3(6.3, 0.5, 0.0);
+    pSurf geoffroySurf = Sphere::sphere(glm::dvec3(0, 0, 0.5), 0.5);
+    geoffroySurf->setCoating(coating::createClearCoat(0.2));
+    geoffroySurf->setInnerMaterial(material::createInsulator(
+        glm::dvec3(0.4, 0.5, 0.9), 1.3, 0.5, 1.0));
+
+    pProp geoffroyProp(new Prop("Geoffroy"));
+    geoffroyProp->addSurface(geoffroySurf);
+    geoffroyProp->transform(glm::scale(glm::dmat4(), glm::dvec3(0.7, 0.7, 1.8)));
+    geoffroyProp->translate(geoffroyPos);
+    stageSet->addProp(geoffroyProp);
+
+
+    glm::dvec3 babyPos = glm::dvec3(7.2, 0.7, 0.5);
+    glm::dvec3 babySize = glm::dvec3(0.5, 0.5, 0.5);
+    pSurf babySurf = Sphere::sphere(glm::dvec3(0.0, 0.0, 0.5), 0.5);
+    babySurf->setCoating(coating::createClearPaint(glm::dvec3(1.0), 0.0, 0.8));
+    babySurf->setInnerMaterial(material::SILVER);
+
+    pSurf pedestalSurf = Quadric::cylinder(babySize.x * 0.6, babySize.y * 0.6)
+            & Plane::plane(glm::dvec3(0, 0, -1), glm::dvec3(0, 0, -babyPos.z))
+            & Plane::plane(glm::dvec3(0, 0, 1), glm::dvec3(0, 0, 0.0));
+    pedestalSurf->setInnerMaterial(material::createInsulator(glm::dvec3(0.4, 0.4, 0.1), 1.5, 1.0, 1.0));
+    pedestalSurf->setCoating(coating::CLEAR_ROUGH);
+
+    pProp babyProp(new Prop("Baby"));
+    babyProp->addSurface(babySurf);
+    babyProp->transform(glm::scale(glm::dmat4(), babySize));
+    babyProp->addSurface(pedestalSurf);
+    babyProp->translate(babyPos);
+    stageSet->addProp(babyProp);
+    */
 }
 
 void TheFruitChoreographer::terminate()

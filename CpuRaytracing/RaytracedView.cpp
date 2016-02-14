@@ -50,8 +50,7 @@ void RaytracedView::installArtDirectors(scaena::Play& play)
 void RaytracedView::setup()
 {
     _artDirector2D->resize(width(), height());
-    _cameraManager->setCamera(_raytracerServer->camera());
-    _cameraManager->setRaytracerState(_raytracerServer->raytracerState());
+    _cameraManager->setRaytracer(_raytracerServer);
     _postProdManager->setPostProdUnit(_raytracerServer->postProdUnit());
     _animationManager->setChoreographer(_choreographer);
 }

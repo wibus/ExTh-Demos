@@ -37,6 +37,7 @@ void CameraManager::setView(QWidget* view)
     _fullscreenWindow->setPalette(background);
 
     _ui->colorOutputCombo->addItem(prop3::RaytracerState::COLOROUTPUT_ALBEDO.c_str());
+    _ui->colorOutputCombo->addItem(prop3::RaytracerState::COLOROUTPUT_WEIGHT.c_str());
     _ui->colorOutputCombo->addItem(prop3::RaytracerState::COLOROUTPUT_DIVERGENCE.c_str());
     _ui->colorOutputCombo->addItem(prop3::RaytracerState::COLOROUTPUT_VARIANCE.c_str());
     _ui->colorOutputCombo->addItem(prop3::RaytracerState::COLOROUTPUT_PRIORITY.c_str());
@@ -98,17 +99,14 @@ void CameraManager::setView(QWidget* view)
     outputMatchCaptureDimensions(_ui->matchCaptureSizeRadioBtn->isChecked());
 }
 
-void CameraManager::setCamera(const std::shared_ptr<cellar::Camera>& camera)
+void CameraManager::setRaytracer(const std::shared_ptr<prop3::ArtDirectorServer>& raytracer)
 {
-    _camera = camera;
-    captureDimensionsChanged(0);
-}
-
-void CameraManager::setRaytracerState(const std::shared_ptr<prop3::RaytracerState>& raytracerState)
-{
-    _raytracerState = raytracerState;
+    _raytracer = raytracer;
     updateEachTileCheckChanged(true);
     colorOutputTypeChanged(0);
+
+    _camera = _raytracer->camera();
+    captureDimensionsChanged(0);
 }
 
 void CameraManager::captureDimensionsChanged(int)
@@ -189,14 +187,17 @@ void CameraManager::exitFullscreen()
 
 void CameraManager::updateEachTileCheckChanged(bool unused)
 {
-    _raytracerState->setUpdateEachTile(
+    _raytracer->raytracerState()->setUpdateEachTile(
         _ui->updateEachTileCheck->isChecked());
 }
 
 void CameraManager::colorOutputTypeChanged(int unused)
 {
-    _raytracerState->setColorOutputType(
+    _raytracer->raytracerState()->setColorOutputType(
         _ui->colorOutputCombo->currentText().toStdString());
+
+    if(_raytracer.get() != nullptr)
+        _raytracer->draw(prop3::ArtDirectorServer::FORCE_REFRESH_DT);
 }
 
 void CameraManager::updateCameraProjection()

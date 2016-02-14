@@ -170,8 +170,13 @@ void CpuRaytracingCharacter::setupTheFruitStageSet()
     std::shared_ptr<Camera> camera = play().view()->camera3D();
     _camMan.reset(new CameraManFree(camera, false));
 
+    //*
     glm::dvec3 focusPos = glm::dvec3(0, 0, 1.0);
     glm::dvec3 camPos = focusPos + glm::dvec3(8, -15, 5) * 1.3;
+    /*/
+    glm::dvec3 focusPos = glm::dvec3(-5, 5, 1.4);
+    glm::dvec3 camPos = glm::dvec3(-0.5, -4, 1.7);
+    //*/
     glm::dvec3 dir = glm::normalize(focusPos - camPos);
     double tilt = glm::atan(dir.z, glm::length(glm::dvec2(dir.x, dir.y)));
     double pan = glm::atan(dir.y, dir.x);
