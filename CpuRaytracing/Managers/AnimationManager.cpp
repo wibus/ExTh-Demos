@@ -1,12 +1,14 @@
 #include "AnimationManager.h"
 
+#include "PathManager.h"
 #include "../TheFruitChoreographer.h"
 
 #include "ui_RaytracerGui.h"
 
 
 AnimationManager::AnimationManager(Ui::RaytracerGui* ui) :
-    _ui(ui)
+    _ui(ui),
+    _pathManager(new PathManager(ui))
 {
     connect(_ui->animFpsSpin, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),
             this, &AnimationManager::animFps);
@@ -71,6 +73,7 @@ void AnimationManager::animFrame(int frame)
 void AnimationManager::resetAnim(bool unsused)
 {
     _choreographer->resetAnimation();
+    _choreographer->displayPaths(*_pathManager);
 }
 
 void AnimationManager::playAnim(bool play)

@@ -6,6 +6,8 @@
 #include <CellarWorkbench/Path/CubicSplinePath.h>
 #include <CellarWorkbench/Path/LinearPath.h>
 
+#include "Managers/PathManager.h"
+
 using namespace cellar;
 
 
@@ -16,11 +18,11 @@ void TheFruitChoreographer::setupAnimation()
         new CompositePath<glm::dvec3>());
     _cameraEyePath = camEyePath;
 
-    camEyePath->addPath(11.0, std::make_shared<LinearPath<glm::dvec3>>(
+    camEyePath->addPath(std::make_shared<LinearPath<glm::dvec3>>(11.0,
             glm::dvec3(4.0, 10.0, 3.60),
             glm::dvec3(-7.0, 10.0, 3.60)));
 
-    camEyePath->addPath(10.0, std::make_shared<CubicSplinePath<glm::dvec3>>(
+    camEyePath->addPath(std::make_shared<CubicSplinePath<glm::dvec3>>(10.0,
         std::vector<glm::dvec3>{
             glm::dvec3(-7.0, 11.0,  3.60),
             glm::dvec3(-7.0, 10.0,  3.60),
@@ -40,10 +42,10 @@ void TheFruitChoreographer::setupAnimation()
         new CompositePath<glm::dvec3>());
     _cameraToPath = camToPath;
 
-    camToPath->addPath(9.0, std::make_shared<LinearPath<glm::dvec3>>(
+    camToPath->addPath(std::make_shared<LinearPath<glm::dvec3>>(9.0,
             glm::dvec3(4.0, 5.0, 3.60),
             glm::dvec3(-5.0, 5.0, 3.60)));
-    camToPath->addPath(2.0, std::make_shared<LinearPath<glm::dvec3>>(
+    camToPath->addPath(std::make_shared<LinearPath<glm::dvec3>>(2.0,
             glm::dvec3(-5.0, 5.0, 3.60),
             glm::dvec3(-5.0, -7.0, 1.60)));
 
@@ -53,9 +55,9 @@ void TheFruitChoreographer::setupAnimation()
         new CompositePath<double>());
     _cameraFoV = cameraFoV;
 
-    cameraFoV->addPath(9.25, std::make_shared<LinearPath<double>>(60.0, 60.0));
-    cameraFoV->addPath(0.75, std::make_shared<LinearPath<double>>(60.0, 35.0));
-    cameraFoV->addPath(4.00, std::make_shared<LinearPath<double>>(35.0, 60.0));
+    cameraFoV->addPath(std::make_shared<LinearPath<double>>(9.25, 60.0, 60.0));
+    cameraFoV->addPath(std::make_shared<LinearPath<double>>(0.75, 60.0, 35.0));
+    cameraFoV->addPath(std::make_shared<LinearPath<double>>(4.00, 35.0, 60.0));
 
 
     // The Fruit Path
@@ -63,11 +65,11 @@ void TheFruitChoreographer::setupAnimation()
         new CompositePath<glm::dvec3>());
     _theFruitPath = theFruitPath;
 
-    theFruitPath->addPath(9.0, std::make_shared<LinearPath<glm::dvec3>>(
+    theFruitPath->addPath(std::make_shared<LinearPath<glm::dvec3>>(9.0,
             _theFruitPosition,
             _theFruitPosition));
 
-    theFruitPath->addPath(10.0, std::make_shared<CubicSplinePath<glm::dvec3>>(
+    theFruitPath->addPath(std::make_shared<CubicSplinePath<glm::dvec3>>(10.0,
         std::vector<glm::dvec3>{
             _theFruitPosition,
             _theFruitPosition,
@@ -75,7 +77,22 @@ void TheFruitChoreographer::setupAnimation()
             glm::dvec3(7.0, 2.5, _theFruitPosition.z),
             glm::dvec3(-2.5, 2.5, _theFruitPosition.z)}));
 
-    _cloudsVelocity = glm::dvec3(0.0, 10.0, 0.0);
+
+    // Clouds
+    std::shared_ptr<CompositePath<glm::dvec3>> cloudsPath(
+        new CompositePath<glm::dvec3>());
+    _cloudsPath = cloudsPath;
+
+    cloudsPath->addPath(std::make_shared<LinearPath<glm::dvec3>>(45.0,
+        _cloudsPosition, _cloudsPosition + glm::dvec3(0, 450.0, 0.0)));
+
+
+    // Sun
+    std::shared_ptr<CompositePath<double>> sunPath(
+        new CompositePath<double>());
+    _sunPath = sunPath;
+
+    sunPath->addPath(std::make_shared<LinearPath<double>>(40.0, 10.0, 18.0));
 
     _animTotalTime = 21.0;
 }
@@ -112,7 +129,10 @@ void TheFruitChoreographer::update(double dt)
         _theFruitPosition = theFruitNewPos;
 
 
-        _cloudsZone->translate(_cloudsVelocity * dt);
+        glm::dvec3 cloudsNewPos = _cloudsPath->value(t);
+        glm::dvec3 cloudsDisplacement = cloudsNewPos - _cloudsPosition;
+        _cloudsZone->translate(cloudsDisplacement);
+        _cloudsPosition = cloudsNewPos;
 
 
         if(!forcedUpdate)
@@ -182,4 +202,19 @@ void TheFruitChoreographer::setFastPlay(bool playFast)
 
     if(_animPlaying)
         update(0.0);
+}
+
+void TheFruitChoreographer::displayPaths(PathManager& pathManager)
+{
+    pathManager.clearPaths();
+
+    pathManager.appendPath(_cameraToPath,   "Camera To");
+    pathManager.appendPath(_cameraEyePath,  "Camera Eye");
+    pathManager.appendPath(_cameraFoV,      "Camera FoV");
+
+    pathManager.appendPath(_theFruitPath,   "The Fruit Position");
+
+    pathManager.appendPath(_cloudsPath,     "Clouds Position");
+
+    pathManager.appendPath(_sunPath,        "Day Time");
 }

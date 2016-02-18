@@ -11,6 +11,7 @@ namespace Ui
 }
 
 class TheFruitChoreographer;
+class PathManager;
 
 
 class AnimationManager : public QObject
@@ -39,6 +40,7 @@ private:
 
 private:
     Ui::RaytracerGui* _ui;
+    std::shared_ptr<PathManager> _pathManager;
     std::shared_ptr<TheFruitChoreographer> _choreographer;
 };
 

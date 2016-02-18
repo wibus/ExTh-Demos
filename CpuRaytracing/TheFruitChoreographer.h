@@ -24,6 +24,8 @@
 #include <PropRoom3D/Light/LightBulb/CircularLight.h>
 #include <PropRoom3D/Light/LightBulb/SphericalLight.h>
 
+class PathManager;
+
 
 class TheFruitChoreographer : public QObject, public prop3::AbstractChoreographer
 {
@@ -47,6 +49,8 @@ public:
     virtual void pauseAnimation();
     virtual void setFastPlay(bool playFast);
 
+    virtual void displayPaths(PathManager& pathManager);
+
 
 signals:
     void animFrameChanged(int frameId);
@@ -64,22 +68,23 @@ protected:
 private:
     std::shared_ptr<cellar::Camera> _camera;
     std::shared_ptr<cellar::CameraManFree> _camMan;
-    std::shared_ptr<cellar::AbstractPath<glm::dvec3>> _cameraEyePath;
-    std::shared_ptr<cellar::AbstractPath<glm::dvec3>> _cameraToPath;
-    std::shared_ptr<cellar::AbstractPath<double>> _cameraFoV;
     double _camAperture;
 
-    glm::dvec3 _cloudsVelocity;
+    glm::dvec3 _cloudsPosition;
     std::shared_ptr<prop3::StageZone> _cloudsZone;
 
     glm::dvec3 _theFruitPosition;
     std::shared_ptr<prop3::Prop> _theFruitProp;
-    std::shared_ptr<cellar::AbstractPath<glm::dvec3>> _theFruitPath;
-
     std::shared_ptr<prop3::ProceduralSun> _backdrop;
-    std::shared_ptr<cellar::AbstractPath<double>> _sunPath;
 
     std::shared_ptr<prop3::RaytracerState> _raytracerState;
+
+    std::shared_ptr<cellar::AbstractPath<glm::dvec3>> _cameraEyePath;
+    std::shared_ptr<cellar::AbstractPath<glm::dvec3>> _cameraToPath;
+    std::shared_ptr<cellar::AbstractPath<double>> _cameraFoV;
+    std::shared_ptr<cellar::AbstractPath<glm::dvec3>> _theFruitPath;
+    std::shared_ptr<cellar::AbstractPath<glm::dvec3>> _cloudsPath;
+    std::shared_ptr<cellar::AbstractPath<double>> _sunPath;
 
     int _animFps;
     int _animFrame;

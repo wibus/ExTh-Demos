@@ -877,7 +877,8 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
     _cloudsZone->setBounds(Box::boxCorners(
         glm::dvec3(-cloudsDim.x/2.0 - maxCloudRad, -cloudsDim.y/2.0 - maxCloudRad, 0.0),
         glm::dvec3( cloudsDim.x/2.0 + maxCloudRad,  cloudsDim.y/2.0 + maxCloudRad, cloudsDim.z*0.75 + maxCloudRad)));
-    _cloudsZone->translate(glm::dvec3(-200.0, -150.0, 50.0));
+    _cloudsPosition = glm::dvec3(-200.0, -150.0, 50.0);
+    _cloudsZone->translate(_cloudsPosition);
 
 
 
