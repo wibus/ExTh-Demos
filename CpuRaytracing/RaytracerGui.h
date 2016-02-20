@@ -14,6 +14,7 @@ class RaytracedView;
 class CameraManager;
 class AnimationManager;
 class PostProdManager;
+class PathManager;
 
 
 class RaytracerGui : public QMainWindow
@@ -32,6 +33,7 @@ private:
     std::shared_ptr<CameraManager> _cameraManager;
     std::shared_ptr<AnimationManager> _animationManager;
     std::shared_ptr<PostProdManager> _postProdManager;
+    std::shared_ptr<PathManager> _pathManager;
 };
 
 #endif // RAYTRACERGUI_H

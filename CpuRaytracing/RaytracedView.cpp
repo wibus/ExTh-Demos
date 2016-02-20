@@ -12,16 +12,19 @@
 #include "Managers/CameraManager.h"
 #include "Managers/AnimationManager.h"
 #include "Managers/PostProdManager.h"
+#include "Managers/PathManager.h"
 
 
 RaytracedView::RaytracedView(
         const std::shared_ptr<CameraManager>& cameraManager,
         const std::shared_ptr<AnimationManager>& animationManager,
-        const std::shared_ptr<PostProdManager>& postProdManager) :
+        const std::shared_ptr<PostProdManager>& postProdManager,
+        const std::shared_ptr<PathManager>& pathManager) :
     scaena::QGlWidgetView("Raytraced View"),
     _cameraManager(cameraManager),
     _animationManager(animationManager),
-    _postProdManager(postProdManager)
+    _postProdManager(postProdManager),
+    _pathManager(pathManager)
 {
 }
 
@@ -53,4 +56,6 @@ void RaytracedView::setup()
     _cameraManager->setRaytracer(_raytracerServer);
     _postProdManager->setPostProdUnit(_raytracerServer->postProdUnit());
     _animationManager->setChoreographer(_choreographer);
+    _animationManager->setRaytracer(_raytracerServer);
+    _pathManager->setChoreographer(_choreographer);
 }

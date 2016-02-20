@@ -4,6 +4,8 @@
 
 #include <QKeyEvent>
 
+#include <PropRoom3D/Team/ArtDirector/RaytracerState.h>
+
 #include "ui_RaytracerGui.h"
 
 

@@ -8,7 +8,6 @@
 #include <CellarWorkbench/Camera/Camera.h>
 
 #include <PropRoom3D/Team/ArtDirector/ArtDirectorServer.h>
-#include <PropRoom3D/Team/ArtDirector/RaytracerState.h>
 
 namespace Ui
 {

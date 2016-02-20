@@ -2,6 +2,10 @@
 
 #include <GLM/gtc/matrix_transform.hpp>
 
+#include <QDir>
+
+#include <CellarWorkbench/Image/Image.h>
+#include <CellarWorkbench/GL/GlToolkit.h>
 #include <CellarWorkbench/Path/CompositePath.h>
 #include <CellarWorkbench/Path/CubicSplinePath.h>
 #include <CellarWorkbench/Path/LinearPath.h>
@@ -137,15 +141,19 @@ void TheFruitChoreographer::update(double dt)
 
         if(!forcedUpdate)
         {
-            if(_animFastPlay)
+            if(!_animFastPlay)
             {
-                _animTime += dt;
-                _animFrame = _animTime * _animFps;
+                if(_isRecording)
+                    saveCurrentFrame();
+
+                ++_animFrame;
+                _animTime = _animFrame / double(_animFps);
+                forceUpdate();
             }
             else
             {
-                ++_animFrame;
-                _animTime = _animFrame / double(_animFps);
+                _animTime += dt;
+                _animFrame = _animTime * _animFps;
             }
 
             emit animFrameChanged(_animFrame);
@@ -156,6 +164,11 @@ void TheFruitChoreographer::update(double dt)
             }
         }
     }
+}
+
+void TheFruitChoreographer::forceUpdate()
+{
+    update(0.0);
 }
 
 int TheFruitChoreographer::animFrameCount()
@@ -177,7 +190,7 @@ void TheFruitChoreographer::setAnimFrame(int frame)
 
         emit animFrameChanged(_animFrame);
 
-        update(0.0);
+        forceUpdate();
     }
 }
 
@@ -186,9 +199,25 @@ void TheFruitChoreographer::resetAnimation()
     setAnimFrame(0);
 }
 
+void TheFruitChoreographer::startRecording()
+{
+    _isRecording = true;
+
+    QString outputDir(("Animations/" + _recordOutput.name).c_str());
+
+    QDir dir = QDir::current();
+    dir.mkpath(outputDir);
+}
+
+void TheFruitChoreographer::stopRecording()
+{
+    _isRecording = false;
+}
+
 void TheFruitChoreographer::playAnimation()
 {
     _animPlaying = true;
+    forceUpdate();
 }
 
 void TheFruitChoreographer::pauseAnimation()
@@ -201,7 +230,7 @@ void TheFruitChoreographer::setFastPlay(bool playFast)
     _animFastPlay = playFast;
 
     if(_animPlaying)
-        update(0.0);
+        forceUpdate();
 }
 
 void TheFruitChoreographer::displayPaths(PathManager& pathManager)
@@ -217,4 +246,26 @@ void TheFruitChoreographer::displayPaths(PathManager& pathManager)
     pathManager.appendPath(_cloudsPath,     "Clouds Position");
 
     pathManager.appendPath(_sunPath,        "Day Time");
+}
+
+RecordOutput& TheFruitChoreographer::recordOutput()
+{
+    return _recordOutput;
+}
+
+void TheFruitChoreographer::saveCurrentFrame()
+{
+    QString fileName = ("Animations/" + _recordOutput.name + "/").c_str();
+    fileName += QString("%1").arg(_animFrame, 4, 10, QChar('0'));
+    if(_recordOutput.includeSampleCount)
+        fileName += QString("_%1f").arg(_raytracerState->sampleCount());
+    if(_recordOutput.includeRenderTime)
+        fileName += QString("_%1s").arg((int)_raytracerState->renderTime());
+    if(_recordOutput.includeDivergence)
+        fileName += "_"+QString::number(_raytracerState->divergence(), 'f', 4)+"div";
+    fileName += _recordOutput.format.c_str();
+
+    cellar::Image screenshot;
+    cellar::GlToolkit::takeFramebufferShot(screenshot);
+    screenshot.save(fileName.toStdString());
 }

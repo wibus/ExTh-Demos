@@ -7,6 +7,7 @@
 #include <CellarWorkbench/Path/CompositePath.h>
 
 #include "ui_RaytracerGui.h"
+#include "../TheFruitChoreographer.h"
 
 using namespace cellar;
 
@@ -242,6 +243,13 @@ PathManager::PathManager(Ui::RaytracerGui* ui) :
 PathManager::~PathManager()
 {
     delete _pathModel;
+}
+
+void PathManager::setChoreographer(
+    const std::shared_ptr<TheFruitChoreographer>& choreographer)
+{
+    _choreographer = choreographer;
+    _choreographer->displayPaths(*this);
 }
 
 void PathManager::clearPaths()

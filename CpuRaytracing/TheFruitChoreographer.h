@@ -27,6 +27,16 @@
 class PathManager;
 
 
+struct RecordOutput
+{
+    std::string name;
+    std::string format;
+    bool includeSampleCount;
+    bool includeRenderTime;
+    bool includeDivergence;
+};
+
+
 class TheFruitChoreographer : public QObject, public prop3::AbstractChoreographer
 {
     Q_OBJECT
@@ -41,16 +51,22 @@ public:
     virtual void update(double dt) override;
     virtual void terminate() override;
 
+    virtual void forceUpdate();
+
     virtual int animFrameCount();
     virtual void setAnimFps(int fps);
     virtual void setAnimFrame(int frame);
     virtual void resetAnimation();
+    virtual void startRecording();
+    virtual void stopRecording();
     virtual void playAnimation();
     virtual void pauseAnimation();
     virtual void setFastPlay(bool playFast);
 
     virtual void displayPaths(PathManager& pathManager);
 
+    virtual RecordOutput& recordOutput();
+    virtual void saveCurrentFrame();
 
 signals:
     void animFrameChanged(int frameId);
@@ -89,9 +105,11 @@ private:
     int _animFps;
     int _animFrame;
     double _animTime;
+    bool _isRecording;
     bool _animPlaying;
     bool _animFastPlay;
     double _animTotalTime;
+    RecordOutput _recordOutput;
 };
 
 #endif // THEFRUIT_CHOREOGRAPHER_H

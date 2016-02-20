@@ -28,7 +28,7 @@
       </property>
       <property name="minimumSize">
        <size>
-        <width>350</width>
+        <width>0</width>
         <height>0</height>
        </size>
       </property>
@@ -316,133 +316,94 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_11">
         <item>
-         <widget class="QGroupBox" name="pathsGroup">
+         <widget class="QGroupBox" name="frameThresholdsGroup">
           <property name="title">
-           <string>Paths</string>
+           <string>Frame thresholds</string>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout_2">
-           <item>
-            <widget class="QTreeView" name="pathsTree">
-             <attribute name="headerVisible">
-              <bool>false</bool>
-             </attribute>
+          <layout class="QFormLayout" name="formLayout_4">
+           <item row="0" column="0">
+            <widget class="QLabel" name="maxSampleLabel">
+             <property name="text">
+              <string>Max sample:</string>
+             </property>
             </widget>
            </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_3">
-             <item>
-              <spacer name="horizontalSpacer">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QPushButton" name="addPathButton">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="baseSize">
-                <size>
-                 <width>0</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>+</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="removePathButton">
-               <property name="text">
-                <string>-</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
+           <item row="0" column="1">
+            <widget class="QSpinBox" name="maxSampleSpin">
+             <property name="minimum">
+              <number>2</number>
+             </property>
+             <property name="maximum">
+              <number>65536</number>
+             </property>
+             <property name="value">
+              <number>4000</number>
+             </property>
+            </widget>
            </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
-         <widget class="QGroupBox" name="segmentGroup">
-          <property name="title">
-           <string>Segment</string>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_4">
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_5">
-             <item>
-              <widget class="QLabel" name="durationLabel">
-               <property name="text">
-                <string>Duration</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QDoubleSpinBox" name="durationSpin">
-               <property name="suffix">
-                <string>s</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
+           <item row="1" column="0">
+            <widget class="QLabel" name="maxTimeLabel">
+             <property name="text">
+              <string>Max render time:</string>
+             </property>
+            </widget>
            </item>
-           <item>
-            <widget class="QTableWidget" name="segmentTable"/>
+           <item row="1" column="1">
+            <widget class="QSpinBox" name="maxTimeSpin">
+             <property name="suffix">
+              <string>s</string>
+             </property>
+             <property name="maximum">
+              <number>3600</number>
+             </property>
+             <property name="value">
+              <number>900</number>
+             </property>
+            </widget>
            </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_4">
-             <item>
-              <spacer name="horizontalSpacer_2">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QPushButton" name="addNodeButton">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="baseSize">
-                <size>
-                 <width>0</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>+</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="removeNodeButton">
-               <property name="text">
-                <string>-</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
+           <item row="2" column="0">
+            <widget class="QLabel" name="divThresholdLabel">
+             <property name="text">
+              <string>Div threshold:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QDoubleSpinBox" name="divThresholdSpin">
+             <property name="decimals">
+              <number>4</number>
+             </property>
+             <property name="maximum">
+              <double>1.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.000100000000000</double>
+             </property>
+             <property name="value">
+              <double>0.003500000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0" colspan="2">
+            <widget class="Line" name="line">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="bankedTimeTitleLabel">
+             <property name="text">
+              <string>Banked time</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QLabel" name="bankedTimeValueLabel">
+             <property name="text">
+              <string>0s</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -453,6 +414,26 @@
            <string>Controls</string>
           </property>
           <layout class="QFormLayout" name="formLayout_3">
+           <item row="0" column="0">
+            <widget class="QLabel" name="animFpsLabel">
+             <property name="text">
+              <string>Anim FPS</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QSpinBox" name="animFpsSpin">
+             <property name="minimum">
+              <number>5</number>
+             </property>
+             <property name="maximum">
+              <number>60</number>
+             </property>
+             <property name="value">
+              <number>24</number>
+             </property>
+            </widget>
+           </item>
            <item row="1" column="0">
             <widget class="QLabel" name="animFrameLabel">
              <property name="text">
@@ -462,6 +443,13 @@
            </item>
            <item row="1" column="1">
             <widget class="QSpinBox" name="animFrameSpin"/>
+           </item>
+           <item row="2" column="0" colspan="2">
+            <widget class="QSlider" name="animFrameSlider">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
            </item>
            <item row="3" column="0" colspan="2">
             <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -486,6 +474,26 @@
               </widget>
              </item>
              <item>
+              <widget class="QPushButton" name="recordAnimButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset resource="resources/CpuRaytracing.qrc">
+                 <normaloff>:/CpuRaytracing/1456006623_Gnome-Media-Record-64.png</normaloff>:/CpuRaytracing/1456006623_Gnome-Media-Record-64.png</iconset>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QPushButton" name="playAnimButton">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
@@ -498,7 +506,8 @@
                </property>
                <property name="icon">
                 <iconset resource="resources/CpuRaytracing.qrc">
-                 <normaloff>:/CpuRaytracing/1454898739_play-circle-outline.png</normaloff>:/CpuRaytracing/1454898739_play-circle-outline.png</iconset>
+                 <normaloff>:/CpuRaytracing/1454898739_play-circle-outline.png</normaloff>
+                 <normalon>:/CpuRaytracing/1456006111_pause-circle-outline.png</normalon>:/CpuRaytracing/1454898739_play-circle-outline.png</iconset>
                </property>
                <property name="checkable">
                 <bool>true</bool>
@@ -527,35 +536,84 @@
              </item>
             </layout>
            </item>
-           <item row="2" column="0" colspan="2">
-            <widget class="QSlider" name="animFrameSlider">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-            </widget>
-           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="animOutputGroup">
+          <property name="title">
+           <string>Output</string>
+          </property>
+          <layout class="QFormLayout" name="formLayout_5">
            <item row="0" column="0">
-            <widget class="QLabel" name="animFpsLabel">
+            <widget class="QLabel" name="animNameLabel">
              <property name="text">
-              <string>Anim FPS</string>
+              <string>Name</string>
              </property>
             </widget>
            </item>
            <item row="0" column="1">
-            <widget class="QSpinBox" name="animFpsSpin">
-             <property name="minimum">
-              <number>5</number>
+            <widget class="QLineEdit" name="animNameEdit">
+             <property name="text">
+              <string>Animation</string>
              </property>
-             <property name="maximum">
-              <number>60</number>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="outputFormatLabel">
+             <property name="text">
+              <string>Format</string>
              </property>
-             <property name="value">
-              <number>24</number>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QComboBox" name="outputFormatCombo"/>
+           </item>
+           <item row="2" column="0" colspan="2">
+            <widget class="QCheckBox" name="animNameSampleCountCheck">
+             <property name="text">
+              <string>Sample count</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0" colspan="2">
+            <widget class="QCheckBox" name="animNameRenderTimeCheck">
+             <property name="text">
+              <string>Render time</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0" colspan="2">
+            <widget class="QCheckBox" name="animNameDivergenceCheck">
+             <property name="text">
+              <string>Divergence</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
           </layout>
          </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </widget>
@@ -578,7 +636,7 @@
       <widget class="QWidget" name="raytracedScollViewContents">
        <property name="geometry">
         <rect>
-         <x>145</x>
+         <x>189</x>
          <y>63</y>
          <width>978</width>
          <height>660</height>
@@ -1033,10 +1091,144 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="inspectorTab">
+      <widget class="QWidget" name="pathTab">
        <attribute name="title">
-        <string>Inspector</string>
+        <string>Path</string>
        </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_9">
+        <item>
+         <widget class="QGroupBox" name="pathsGroup">
+          <property name="title">
+           <string>Paths</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <item>
+            <widget class="QTreeView" name="pathsTree">
+             <attribute name="headerVisible">
+              <bool>false</bool>
+             </attribute>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <item>
+              <spacer name="horizontalSpacer">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="addPathButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="baseSize">
+                <size>
+                 <width>0</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>+</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="removePathButton">
+               <property name="text">
+                <string>-</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="segmentGroup">
+          <property name="title">
+           <string>Segment</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_4">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_5">
+             <item>
+              <widget class="QLabel" name="durationLabel">
+               <property name="text">
+                <string>Duration</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="durationSpin">
+               <property name="suffix">
+                <string>s</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QTableWidget" name="segmentTable"/>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <item>
+              <spacer name="horizontalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="addNodeButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="baseSize">
+                <size>
+                 <width>0</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>+</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="removeNodeButton">
+               <property name="text">
+                <string>-</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>

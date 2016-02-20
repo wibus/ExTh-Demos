@@ -8,6 +8,7 @@
 #include "Managers/CameraManager.h"
 #include "Managers/AnimationManager.h"
 #include "Managers/PostProdManager.h"
+#include "Managers/PathManager.h"
 #include "RaytracedView.h"
 
 using namespace scaena;
@@ -24,10 +25,12 @@ RaytracerGui::RaytracerGui(const std::shared_ptr<Play>& play) :
     _cameraManager.reset(new CameraManager(_ui));
     _postProdManager.reset(new PostProdManager(_ui));
     _animationManager.reset(new AnimationManager(_ui));
+    _pathManager.reset(new PathManager(_ui));
     _raytracedView.reset(new RaytracedView(
          _cameraManager,
          _animationManager,
-         _postProdManager));
+         _postProdManager,
+         _pathManager));
 
     _cameraManager->setView(_raytracedView.get());
     _play->addView(_raytracedView);
