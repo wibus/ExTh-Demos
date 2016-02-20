@@ -33,7 +33,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="cameraTab">
        <attribute name="title">
@@ -249,7 +249,7 @@
               <double>1000.000000000000000</double>
              </property>
              <property name="value">
-              <double>30.000000000000000</double>
+              <double>1.000000000000000</double>
              </property>
             </widget>
            </item>
@@ -380,7 +380,7 @@
               <double>0.000100000000000</double>
              </property>
              <property name="value">
-              <double>0.003500000000000</double>
+              <double>0.001500000000000</double>
              </property>
             </widget>
            </item>

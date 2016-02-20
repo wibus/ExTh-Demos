@@ -205,7 +205,8 @@ void CameraManager::colorOutputTypeChanged(int unused)
 void CameraManager::updateCameraProjection()
 {
     float dofDist = _ui->dofDistanceSpin->value();
-    float dofAper = dofDist + _ui->dofApertureSpin->value() + 1.0;
+    float dofAper = dofDist + _ui->dofApertureSpin->value() +
+            prop3::ArtDirectorServer::IMAGE_DEPTH;
 
     glm::mat4 projection =
         glm::perspectiveFov(

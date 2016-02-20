@@ -12,17 +12,17 @@
 #include <PropRoom3D/Team/Choreographer/AbstractChoreographer.h>
 
 #include <PropRoom3D/Node/StageSet.h>
-#include <PropRoom3D/Prop/Prop.h>
-#include <PropRoom3D/Prop/Surface/Box.h>
-#include <PropRoom3D/Prop/Surface/Sphere.h>
-#include <PropRoom3D/Prop/Surface/Plane.h>
-#include <PropRoom3D/Prop/Surface/Quadric.h>
-#include <PropRoom3D/Prop/Material/UniformStdMaterial.h>
-#include <PropRoom3D/Prop/Coating/UniformStdCoating.h>
-#include <PropRoom3D/Prop/Coating/TexturedStdCoating.h>
-#include <PropRoom3D/Light/Backdrop/ProceduralSun.h>
-#include <PropRoom3D/Light/LightBulb/CircularLight.h>
-#include <PropRoom3D/Light/LightBulb/SphericalLight.h>
+#include <PropRoom3D/Node/Prop/Prop.h>
+#include <PropRoom3D/Node/Prop/Surface/Box.h>
+#include <PropRoom3D/Node/Prop/Surface/Sphere.h>
+#include <PropRoom3D/Node/Prop/Surface/Plane.h>
+#include <PropRoom3D/Node/Prop/Surface/Quadric.h>
+#include <PropRoom3D/Node/Prop/Material/UniformStdMaterial.h>
+#include <PropRoom3D/Node/Prop/Coating/UniformStdCoating.h>
+#include <PropRoom3D/Node/Prop/Coating/TexturedStdCoating.h>
+#include <PropRoom3D/Node/Light/Backdrop/ProceduralSun.h>
+#include <PropRoom3D/Node/Light/LightBulb/CircularLight.h>
+#include <PropRoom3D/Node/Light/LightBulb/SphericalLight.h>
 
 class PathManager;
 
@@ -74,7 +74,7 @@ signals:
 
 
 protected:
-    virtual void setupAnimation();
+    virtual void setupAnimation(const std::shared_ptr<prop3::StageSet>& stageSet);
     virtual std::shared_ptr<prop3::Surface> createHoleStrippedWall(
             const glm::dvec3& size,
             double stripeWidth,

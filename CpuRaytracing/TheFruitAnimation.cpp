@@ -10,12 +10,14 @@
 #include <CellarWorkbench/Path/CubicSplinePath.h>
 #include <CellarWorkbench/Path/LinearPath.h>
 
+#include <PropRoom3D/Node/Debug/DebugLine.h>
+
 #include "Managers/PathManager.h"
 
 using namespace cellar;
 
 
-void TheFruitChoreographer::setupAnimation()
+void TheFruitChoreographer::setupAnimation(const std::shared_ptr<prop3::StageSet>& stageSet)
 {
     // Camera Eye
     std::shared_ptr<CompositePath<glm::dvec3>> camEyePath(
@@ -99,6 +101,17 @@ void TheFruitChoreographer::setupAnimation()
     sunPath->addPath(std::make_shared<LinearPath<double>>(40.0, 10.0, 18.0));
 
     _animTotalTime = 21.0;
+
+    prop3::DebugLine camEyeLine(glm::dvec3(0, 1, 0));
+    prop3::DebugLine camToLine(glm::dvec3(0, 0, 1));
+    int frameCount = animFrameCount();
+    for(double t=0.0; t < _animTotalTime; t+=1.0/_animFps)
+    {
+        camEyeLine.addVertex(_cameraEyePath->value(t));
+        camToLine.addVertex(_cameraToPath->value(t));
+    }
+    stageSet->addDebugLine(camEyeLine);
+    stageSet->addDebugLine(camToLine);
 }
 
 void TheFruitChoreographer::update(double dt)

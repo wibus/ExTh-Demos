@@ -897,7 +897,7 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
     _theFruitProp->translate(_theFruitPosition);
     stageSet->addProp(_theFruitProp);
 
-    setupAnimation();
+    setupAnimation(stageSet);
 
 /*
     ////////////////////////////
