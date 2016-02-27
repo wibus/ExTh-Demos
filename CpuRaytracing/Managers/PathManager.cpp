@@ -6,7 +6,10 @@
 #include <CellarWorkbench/Path/BasisSplinePath.h>
 #include <CellarWorkbench/Path/CompositePath.h>
 
+#include <PropRoom3D/Node/StageSet.h>
+
 #include "ui_RaytracerGui.h"
+#include "../PathModel.h"
 #include "../TheFruitChoreographer.h"
 
 using namespace cellar;
@@ -14,24 +17,28 @@ using namespace cellar;
 Q_DECLARE_METATYPE(AbstractPath<double>*)
 Q_DECLARE_METATYPE(AbstractPath<glm::dvec3>*)
 
-class Spin : public QDoubleSpinBox
+Spin::Spin(double value)
 {
-public:
-    Spin(double value)
-    {
-        setValue(value);
-    }
-};
+    setDecimals(3);
+    setMinimum(-100);
+    setMaximum( 100);
+    setSingleStep(0.01);
+    setValue(value);
+}
 
 template<typename Data>
 class TreeBuilder : public PathVisitor<Data>
 {
 public:
     TreeBuilder(std::vector<std::function<void(void)>>& segmentModels,
+                std::vector<std::string>& segmentParentName,
+                const std::function<void(void)>& refreshCallBack,
                 Ui::RaytracerGui* ui,
                 AbstractPath<Data>* path,
                 const std::string& name) :
         _segmentModels(segmentModels),
+        _segmentParentName(segmentParentName),
+        _refreshCallBack(refreshCallBack),
         _ui(ui),
         _path(path),
         _name(name)
@@ -50,14 +57,22 @@ public:
 
     virtual void visit(BasisSplinePath<Data>& path) override;
 
-    virtual void visit(CompositePath<Data>& path) override;
+    virtual void visit(CompositePath<Data> &path) override;
 
 
 
     QStandardItem* getRoot() {return _root;}
 
+protected:
+    void setupTable(QTableWidget* table, int rowCount);
+    void putValue(QTableWidget* table, int row, Data& value);
+
+    void updatePath();
+
 private:
     std::vector<std::function<void(void)>> &_segmentModels;
+    std::vector<std::string>& _segmentParentName;
+    std::function<void(void)> _refreshCallBack;
     Ui::RaytracerGui* _ui;
     AbstractPath<Data>* _path;
     std::string _name;
@@ -67,154 +82,127 @@ private:
 };
 
 
+
 template<>
-void TreeBuilder<double>::visit(LinearPath<double>& path)
+void TreeBuilder<double>::setupTable(QTableWidget* table, int rowCount)
+{
+    table->clear();
+    table->setColumnCount(1);
+    table->setRowCount(rowCount);
+    table->setHorizontalHeaderLabels({"Value"});
+    table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+}
+
+template<>
+void TreeBuilder<glm::dvec3>::setupTable(QTableWidget* table, int rowCount)
+{
+    table->clear();
+    table->setColumnCount(3);
+    table->setRowCount(rowCount);
+    table->setHorizontalHeaderLabels({"X", "Y", "Z"});
+    table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+}
+
+template<>
+void TreeBuilder<double>::putValue(QTableWidget* table, int row, double& value)
+{
+    Spin* spin =  new Spin(value);
+
+    table->setCellWidget(row, 0, spin);
+
+    QObject::connect(spin, static_cast<void(Spin::*)(double)>(&Spin::valueChanged),
+                     [this, &value](double nv){ value = nv; _refreshCallBack();});
+}
+
+template<>
+void TreeBuilder<glm::dvec3>::putValue(QTableWidget* table, int row, glm::dvec3& value)
+{
+    Spin* spinX =  new Spin(value.x);
+    Spin* spinY =  new Spin(value.y);
+    Spin* spinZ =  new Spin(value.z);
+
+    table->setCellWidget(row, 0, spinX);
+    table->setCellWidget(row, 1, spinY);
+    table->setCellWidget(row, 2, spinZ);
+
+    QObject::connect(spinX, static_cast<void(Spin::*)(double)>(&Spin::valueChanged),
+                     [this, &value](double nv){ value.x = nv; _refreshCallBack();});
+    QObject::connect(spinY, static_cast<void(Spin::*)(double)>(&Spin::valueChanged),
+                     [this, &value](double nv){ value.y = nv; _refreshCallBack();});
+    QObject::connect(spinZ, static_cast<void(Spin::*)(double)>(&Spin::valueChanged),
+                     [this, &value](double nv){ value.z = nv; _refreshCallBack();});
+}
+
+template<typename Data>
+void TreeBuilder<Data>::updatePath()
+{
+
+}
+
+template<typename Data>
+void TreeBuilder<Data>::visit(LinearPath<Data>& path)
 {
     _last = new QStandardItem(QString("Linear [%1s]").arg(path.duration()));
     int callbackIdx = _segmentModels.size();
     _last->setData(QVariant(callbackIdx));
 
-    Ui::RaytracerGui* ui = _ui;
-    _segmentModels.push_back([ui,&path](){
-        ui->durationSpin->setValue(path.duration());
-
-        ui->segmentTable->clear();
-        ui->segmentTable->setRowCount(2);
-        ui->segmentTable->setColumnCount(2);
-        ui->segmentTable->setItem(0, 0, new QTableWidgetItem("Begin"));
-        ui->segmentTable->setCellWidget(0, 1, new Spin(path.begin()));
-        ui->segmentTable->setItem(1, 0, new QTableWidgetItem("End"));
-        ui->segmentTable->setCellWidget(1, 1, new Spin(path.end()));
-    });
-}
-
-template<>
-void TreeBuilder<glm::dvec3>::visit(LinearPath<glm::dvec3>& path)
-{
-    _last = new QStandardItem(QString("Linear [%1s]").arg(path.duration()));
-    int callbackIdx = _segmentModels.size();
-    _last->setData(QVariant(callbackIdx));
+    _segmentParentName.push_back(_name);
 
     Ui::RaytracerGui* ui = _ui;
-    _segmentModels.push_back([ui,&path](){
+    _segmentModels.push_back([this, ui, &path](){
         ui->durationSpin->setValue(path.duration());
 
-        ui->segmentTable->clear();
-        ui->segmentTable->setRowCount(2);
-        ui->segmentTable->setColumnCount(4);
-        ui->segmentTable->setItem(0, 0, new QTableWidgetItem("Begin"));
-        ui->segmentTable->setCellWidget(0, 1, new Spin(path.begin().x));
-        ui->segmentTable->setCellWidget(0, 2, new Spin(path.begin().y));
-        ui->segmentTable->setCellWidget(0, 3, new Spin(path.begin().z));
-        ui->segmentTable->setItem(1, 0, new QTableWidgetItem("End"));
-        ui->segmentTable->setCellWidget(1, 1, new Spin(path.end().x));
-        ui->segmentTable->setCellWidget(1, 2, new Spin(path.end().y));
-        ui->segmentTable->setCellWidget(1, 3, new Spin(path.end().z));
-    });
-}
-
-template<>
-void TreeBuilder<double>::visit(CubicSplinePath<double>& path)
-{
-    _last = new QStandardItem(QString("Cubic Spline [%1s]").arg(path.duration()));
-    int callbackIdx = _segmentModels.size();
-    _last->setData(QVariant(callbackIdx));
-
-    Ui::RaytracerGui* ui = _ui;
-    _segmentModels.push_back([ui,&path](){
-        ui->durationSpin->setValue(path.duration());
-
-        ui->segmentTable->clear();
-        ui->segmentTable->setRowCount(path.ctrlPts().size());
-        ui->segmentTable->setColumnCount(1);
-
-        int row = 0;
-        for(double pt : path.ctrlPts())
-        {
-            ui->segmentTable->setCellWidget(row, 0, new Spin(pt));
-            ++row;
-        }
-    });
-}
-
-template<>
-void TreeBuilder<glm::dvec3>::visit(CubicSplinePath<glm::dvec3>& path)
-{
-    _last = new QStandardItem(QString("Cubic Spline [%1s]").arg(path.duration()));
-    int callbackIdx = _segmentModels.size();
-    _last->setData(QVariant(callbackIdx));
-
-    Ui::RaytracerGui* ui = _ui;
-    _segmentModels.push_back([ui,&path](){
-        ui->durationSpin->setValue(path.duration());
-
-        ui->segmentTable->clear();
-        ui->segmentTable->setRowCount(path.ctrlPts().size());
-        ui->segmentTable->setColumnCount(3);
-
-        int row = 0;
-        for(const glm::dvec3& pt : path.ctrlPts())
-        {
-            ui->segmentTable->setCellWidget(row, 0, new Spin(pt.x));
-            ui->segmentTable->setCellWidget(row, 1, new Spin(pt.y));
-            ui->segmentTable->setCellWidget(row, 2, new Spin(pt.z));
-            ++row;
-        }
-    });
-}
-
-template<>
-void TreeBuilder<double>::visit(BasisSplinePath<double>& path)
-{
-    _last = new QStandardItem(QString("Basis Spline [%1s]").arg(path.duration()));
-    int callbackIdx = _segmentModels.size();
-    _last->setData(QVariant(callbackIdx));
-
-    Ui::RaytracerGui* ui = _ui;
-    _segmentModels.push_back([ui,&path](){
-        ui->durationSpin->setValue(path.duration());
-
-        ui->segmentTable->clear();
-        ui->segmentTable->setRowCount(path.ctrlPts().size());
-        ui->segmentTable->setColumnCount(1);
-
-        int row = 0;
-        for(double pt : path.ctrlPts())
-        {
-            ui->segmentTable->setCellWidget(row, 0, new Spin(pt));
-            ++row;
-        }
-    });
-}
-
-template<>
-void TreeBuilder<glm::dvec3>::visit(BasisSplinePath<glm::dvec3>& path)
-{
-    _last = new QStandardItem(QString("Basis Spline [%1s]").arg(path.duration()));
-    int callbackIdx = _segmentModels.size();
-    _last->setData(QVariant(callbackIdx));
-
-    Ui::RaytracerGui* ui = _ui;
-    _segmentModels.push_back([ui,&path](){
-        ui->durationSpin->setValue(path.duration());
-
-        ui->segmentTable->clear();
-        ui->segmentTable->setRowCount(path.ctrlPts().size());
-        ui->segmentTable->setColumnCount(3);
-
-        int row = 0;
-        for(const glm::dvec3& pt : path.ctrlPts())
-        {
-            ui->segmentTable->setCellWidget(row, 0, new Spin(pt.x));
-            ui->segmentTable->setCellWidget(row, 1, new Spin(pt.y));
-            ui->segmentTable->setCellWidget(row, 2, new Spin(pt.z));
-            ++row;
-        }
+        setupTable(ui->segmentTable, 2);
+        putValue(ui->segmentTable, 0, path.begin());
+        putValue(ui->segmentTable, 1, path.end());
     });
 }
 
 template<typename Data>
-void TreeBuilder<Data>::visit(CompositePath<Data>& path)
+void TreeBuilder<Data>::visit(CubicSplinePath<Data>& path)
+{
+    _last = new QStandardItem(QString("Cubic Spline [%1s]").arg(path.duration()));
+    int callbackIdx = _segmentModels.size();
+    _last->setData(QVariant(callbackIdx));
+
+    _segmentParentName.push_back(_name);
+
+    Ui::RaytracerGui* ui = _ui;
+    _segmentModels.push_back([this, ui, &path](){
+        ui->durationSpin->setValue(path.duration());
+
+        setupTable(ui->segmentTable, path.ctrlPts().size());
+
+        int row = 0;
+        for(Data& pt : path.ctrlPts())
+            putValue(ui->segmentTable, row++, pt);
+    });
+}
+
+template<typename Data>
+void TreeBuilder<Data>::visit(BasisSplinePath<Data>& path)
+{
+    _last = new QStandardItem(QString("Cubic Spline [%1s]").arg(path.duration()));
+    int callbackIdx = _segmentModels.size();
+    _last->setData(QVariant(callbackIdx));
+
+    _segmentParentName.push_back(_name);
+
+    Ui::RaytracerGui* ui = _ui;
+    _segmentModels.push_back([this, ui, &path](){
+        ui->durationSpin->setValue(path.duration());
+
+        setupTable(ui->segmentTable, path.ctrlPts().size());
+
+        int row = 0;
+        for(Data& pt : path.ctrlPts())
+            putValue(ui->segmentTable, row++, pt);
+    });
+}
+
+
+template<typename Data>
+void TreeBuilder<Data>::visit(CompositePath<Data> &path)
 {
     QStandardItem* item = new QStandardItem(QString("Composite [%1s]").arg(path.duration()));
     item->setSelectable(false);
@@ -230,47 +218,81 @@ void TreeBuilder<Data>::visit(CompositePath<Data>& path)
 
 
 PathManager::PathManager(Ui::RaytracerGui* ui) :
-    _ui(ui)
+    _ui(ui),
+    _selectedPathName(),
+    _isSelectedPathVisible(false)
 {
-    _pathModel = new QStandardItemModel();
-    _ui->pathsTree->setModel(_pathModel);
+    _doubleTreeBuilders.reserve(10);
+    _dvec3TreeBuilders.reserve(10);
+
+    _pathTreeModel = new QStandardItemModel();
+    _ui->pathsTree->setModel(_pathTreeModel);
 
     connect(_ui->pathsTree->selectionModel(),
             &QItemSelectionModel::selectionChanged,
             this, &PathManager::selectionChanged);
+
+    connect(_ui->displayDebugCheck, &QCheckBox::toggled,
+            this, &PathManager::displayDebugToggled);
 }
 
 PathManager::~PathManager()
 {
-    delete _pathModel;
+    delete _pathTreeModel;
+}
+
+void PathManager::setStageSet(
+    const std::shared_ptr<prop3::StageSet>& stageSet)
+{
+    _stageSet = stageSet;
 }
 
 void PathManager::setChoreographer(
     const std::shared_ptr<TheFruitChoreographer>& choreographer)
 {
     _choreographer = choreographer;
-    _choreographer->displayPaths(*this);
+
+    clearPaths();
+    PathModel& pathModel = *choreographer->pathModel();
+    appendPath(pathModel.cameraTo,   "Camera To");
+    appendPath(pathModel.cameraEye,  "Camera Eye");
+    appendPath(pathModel.cameraFoV,  "Camera FoV");
+    appendPath(pathModel.theFruit,   "The Fruit");
+    appendPath(pathModel.clouds,     "Clouds");
+    appendPath(pathModel.dayTime,    "Day Time");
 }
 
 void PathManager::clearPaths()
 {
-    _pathModel->clear();
+    _pathTreeModel->clear();
     _ui->segmentTable->clear();
     _segmentModels.clear();
-}
+    _segmentParentName.clear();
 
-void PathManager::appendPath(const std::shared_ptr<AbstractPath<glm::dvec3>>& path, const std::string& name)
-{
-    TreeBuilder<glm::dvec3> builder(_segmentModels, _ui, path.get(), name);
-
-    _pathModel->appendRow(builder.getRoot());
+    _doubleTreeBuilders.clear();
+    _dvec3TreeBuilders.clear();
 }
 
 void PathManager::appendPath(const std::shared_ptr<AbstractPath<double> > &path, const std::string& name)
 {
-    TreeBuilder<double> builder(_segmentModels, _ui, path.get(), name);
+    _doubleTreeBuilders.emplace_back(
+        _segmentModels,
+        _segmentParentName,
+        std::bind(&PathManager::controlPointMoved, this),
+        _ui, path.get(), name);
 
-    _pathModel->appendRow(builder.getRoot());
+    _pathTreeModel->appendRow(_doubleTreeBuilders.back().getRoot());
+}
+
+void PathManager::appendPath(const std::shared_ptr<AbstractPath<glm::dvec3>>& path, const std::string& name)
+{
+    _dvec3TreeBuilders.emplace_back(
+        _segmentModels,
+        _segmentParentName,
+        std::bind(&PathManager::controlPointMoved, this),
+        _ui, path.get(), name);
+
+    _pathTreeModel->appendRow(_dvec3TreeBuilders.back().getRoot());
 }
 
 void PathManager::selectionChanged(const QItemSelection& selected,
@@ -283,6 +305,30 @@ void PathManager::selectionChanged(const QItemSelection& selected,
         {
             QVariant var = model->itemData(id)[Qt::UserRole+1];
             _segmentModels[var.toInt()]();
+
+            _selectedPathName = _segmentParentName[var.toInt()];
+            _isSelectedPathVisible = _choreographer->pathModel()
+                    ->isDebugLineVisible(_selectedPathName);
+            _ui->displayDebugCheck->setChecked(
+                _isSelectedPathVisible);
         }
+    }
+}
+
+void PathManager::displayDebugToggled(bool display)
+{
+    if(!_selectedPathName.empty())
+    {
+        _isSelectedPathVisible = display;
+        _choreographer->pathModel()->setDebugLineVisibility(
+                    _selectedPathName, display);
+    }
+}
+
+void PathManager::controlPointMoved()
+{
+    if(_isSelectedPathVisible)
+    {
+        _choreographer->pathModel()->refreshDebugLines();
     }
 }

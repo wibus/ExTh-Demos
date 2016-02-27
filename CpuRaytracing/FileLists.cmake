@@ -11,7 +11,8 @@ SET(CPURAYTRACING_HEADERS
     ${CPURAYTRACING_SRC_DIR}/CpuRaytracingCharacter.h
     ${CPURAYTRACING_SRC_DIR}/TheFruitChoreographer.h
     ${CPURAYTRACING_SRC_DIR}/RaytracedView.h
-    ${CPURAYTRACING_SRC_DIR}/RaytracerGui.h)
+    ${CPURAYTRACING_SRC_DIR}/RaytracerGui.h
+    ${CPURAYTRACING_SRC_DIR}/PathModel.h)
     
 
 ## SOURCES ##
@@ -26,7 +27,8 @@ SET(CPURAYTRACING_SOURCES
     ${CPURAYTRACING_SRC_DIR}/TheFruitChoreographer.cpp
     ${CPURAYTRACING_SRC_DIR}/TheFruitAnimation.cpp
     ${CPURAYTRACING_SRC_DIR}/RaytracedView.cpp
-    ${CPURAYTRACING_SRC_DIR}/RaytracerGui.cpp)
+    ${CPURAYTRACING_SRC_DIR}/RaytracerGui.cpp
+    ${CPURAYTRACING_SRC_DIR}/PathModel.cpp)
 
 
 ## Resources ##
@@ -34,6 +36,7 @@ SET(CPURAYTRACING_IMAGES
     ${CPURAYTRACING_SRC_DIR}/resources/Bathroom_Tiles_albedo.png
     ${CPURAYTRACING_SRC_DIR}/resources/Bathroom_Tiles_gloss.png
     ${CPURAYTRACING_SRC_DIR}/resources/Fusion_Albums.png)
+
 QT5_ADD_RESOURCES(CPURAYTRACING_RESOURCES
     ${CPURAYTRACING_SRC_DIR}/resources/CpuRaytracing.qrc)
 

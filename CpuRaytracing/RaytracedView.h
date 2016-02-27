@@ -6,6 +6,7 @@
 
 namespace prop3
 {
+    class StageSet;
     class ArtDirectorServer;
 }
 
@@ -40,6 +41,7 @@ private:
     std::shared_ptr<PostProdManager> _postProdManager;
     std::shared_ptr<PathManager> _pathManager;
 
+    std::shared_ptr<prop3::StageSet> _stageSet;
     std::shared_ptr<TheFruitChoreographer> _choreographer;
     std::shared_ptr<prop3::ArtDirectorServer> _raytracerServer;
 };

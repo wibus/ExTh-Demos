@@ -3,6 +3,21 @@
 #include <GLM/gtc/matrix_transform.hpp>
 #include <GLM/gtc/random.hpp>
 
+#include <PropRoom3D/Node/StageSet.h>
+#include <PropRoom3D/Node/Prop/Prop.h>
+#include <PropRoom3D/Node/Prop/Surface/Box.h>
+#include <PropRoom3D/Node/Prop/Surface/Sphere.h>
+#include <PropRoom3D/Node/Prop/Surface/Plane.h>
+#include <PropRoom3D/Node/Prop/Surface/Quadric.h>
+#include <PropRoom3D/Node/Prop/Material/UniformStdMaterial.h>
+#include <PropRoom3D/Node/Prop/Coating/UniformStdCoating.h>
+#include <PropRoom3D/Node/Prop/Coating/TexturedStdCoating.h>
+#include <PropRoom3D/Node/Light/Backdrop/ProceduralSun.h>
+#include <PropRoom3D/Node/Light/LightBulb/CircularLight.h>
+#include <PropRoom3D/Node/Light/LightBulb/SphericalLight.h>
+
+#include "PathModel.h"
+
 using namespace cellar;
 using namespace prop3;
 
@@ -22,12 +37,12 @@ TheFruitChoreographer::TheFruitChoreographer(
     _camMan(new CameraManFree(camera, false)),
     _camAperture(0.4),
     _raytracerState(raytracerState),
+    _pathModel(new PathModel()),
     _animFps(24),
     _animFrame(0),
     _animTime(0.0),
     _animPlaying(false),
-    _animFastPlay(false),
-    _animTotalTime(0.0)
+    _animFastPlay(false)
 {
     glm::dvec3 focusPos = glm::dvec3(0, 0, 1.0);
     glm::dvec3 camPos = focusPos + glm::dvec3(8, -15, 5) * 1.3;
@@ -897,8 +912,6 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
     _theFruitProp->translate(_theFruitPosition);
     stageSet->addProp(_theFruitProp);
 
-    setupAnimation(stageSet);
-
 /*
     ////////////////////////////
     // The rest of the family //
@@ -935,6 +948,8 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
     babyProp->translate(babyPos);
     stageSet->addProp(babyProp);
     */
+
+    _pathModel->init(stageSet);
 }
 
 void TheFruitChoreographer::terminate()
