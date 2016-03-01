@@ -31,6 +31,11 @@ public:
     virtual void setRaytracer(
             const std::shared_ptr<prop3::ArtDirectorServer>& raytracer);
 
+
+public slots:
+    virtual void onPathChanged();
+
+
 private slots:
     virtual void divThreshold(double div);
     virtual void maxSampleThreshold(int sampleCount);
@@ -51,8 +56,6 @@ private slots:
     virtual void includeSampleCount(bool include);
     virtual void includeRenderTime(bool include);
     virtual void includeDivergence(bool include);
-
-private:
 
 
 private:

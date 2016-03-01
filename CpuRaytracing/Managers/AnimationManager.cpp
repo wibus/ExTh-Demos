@@ -204,3 +204,10 @@ void AnimationManager::includeDivergence(bool include)
 {
     _choreographer->recordOutput().includeDivergence = include;
 }
+
+void AnimationManager::onPathChanged()
+{
+    int frameCount = _choreographer->animFrameCount();
+    _ui->animFrameSpin->setMaximum(frameCount);
+    _ui->animFrameSlider->setMaximum(frameCount);
+}

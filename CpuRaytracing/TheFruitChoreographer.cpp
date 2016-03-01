@@ -16,7 +16,7 @@
 #include <PropRoom3D/Node/Light/LightBulb/CircularLight.h>
 #include <PropRoom3D/Node/Light/LightBulb/SphericalLight.h>
 
-#include "PathModel.h"
+#include "Paths/PathModel.h"
 
 using namespace cellar;
 using namespace prop3;

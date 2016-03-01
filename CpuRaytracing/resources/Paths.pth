@@ -1,0 +1,248 @@
+[
+    {
+        "Data": "dvec3",
+        "Name": "Camera Eye",
+        "Paths": [
+            {
+                "CtrlPts": [
+                    [
+                        4,
+                        10,
+                        3.6000000000000001
+                    ],
+                    [
+                        -7,
+                        10,
+                        3.6000000000000001
+                    ]
+                ],
+                "Duration": 11,
+                "Type": "LinearPath"
+            },
+            {
+                "CtrlPts": [
+                    [
+                        -7,
+                        11,
+                        3.6000000000000001
+                    ],
+                    [
+                        -7,
+                        10,
+                        3.6000000000000001
+                    ],
+                    [
+                        -7,
+                        0,
+                        1.7
+                    ],
+                    [
+                        -10,
+                        -7,
+                        2.6000000000000001
+                    ],
+                    [
+                        -15,
+                        -12,
+                        5
+                    ],
+                    [
+                        -15,
+                        -18,
+                        8
+                    ],
+                    [
+                        -10,
+                        -12,
+                        5
+                    ],
+                    [
+                        -6,
+                        -8,
+                        2
+                    ],
+                    [
+                        -4,
+                        -6.5,
+                        1.7
+                    ],
+                    [
+                        1,
+                        -6,
+                        1.7
+                    ],
+                    [
+                        5,
+                        -6,
+                        1.7
+                    ]
+                ],
+                "Duration": 10,
+                "Type": "CubicSplinePath"
+            }
+        ],
+        "Type": "CompositePath"
+    },
+    {
+        "Data": "dvec3",
+        "Name": "Camera To",
+        "Paths": [
+            {
+                "CtrlPts": [
+                    [
+                        4,
+                        5,
+                        3.6000000000000001
+                    ],
+                    [
+                        -5,
+                        5,
+                        3.6000000000000001
+                    ]
+                ],
+                "Duration": 9,
+                "Type": "LinearPath"
+            },
+            {
+                "CtrlPts": [
+                    [
+                        -5,
+                        5,
+                        3.6000000000000001
+                    ],
+                    [
+                        -5,
+                        -7,
+                        1.6000000000000001
+                    ]
+                ],
+                "Duration": 2,
+                "Type": "LinearPath"
+            }
+        ],
+        "Type": "CompositePath"
+    },
+    {
+        "Data": "double",
+        "Name": "Camera Fov",
+        "Paths": [
+            {
+                "CtrlPts": [
+                    60,
+                    60
+                ],
+                "Duration": 9.25,
+                "Type": "LinearPath"
+            },
+            {
+                "CtrlPts": [
+                    60,
+                    35
+                ],
+                "Duration": 0.75,
+                "Type": "LinearPath"
+            },
+            {
+                "CtrlPts": [
+                    35,
+                    60
+                ],
+                "Duration": 4,
+                "Type": "LinearPath"
+            }
+        ],
+        "Type": "CompositePath"
+    },
+    {
+        "Data": "dvec3",
+        "Name": "The Fruit",
+        "Paths": [
+            {
+                "CtrlPts": [
+                    [
+                        -6,
+                        -7,
+                        0
+                    ],
+                    [
+                        -6,
+                        -7,
+                        0
+                    ]
+                ],
+                "Duration": 9,
+                "Type": "LinearPath"
+            },
+            {
+                "CtrlPts": [
+                    [
+                        -6,
+                        -7,
+                        0
+                    ],
+                    [
+                        -6,
+                        -7,
+                        0
+                    ],
+                    [
+                        7,
+                        -7,
+                        0
+                    ],
+                    [
+                        7,
+                        2.5,
+                        0
+                    ],
+                    [
+                        -2.5,
+                        2.5,
+                        0
+                    ]
+                ],
+                "Duration": 10,
+                "Type": "CubicSplinePath"
+            }
+        ],
+        "Type": "CompositePath"
+    },
+    {
+        "Data": "double",
+        "Name": "Day Time",
+        "Paths": [
+            {
+                "CtrlPts": [
+                    10,
+                    18
+                ],
+                "Duration": 40,
+                "Type": "LinearPath"
+            }
+        ],
+        "Type": "CompositePath"
+    },
+    {
+        "Data": "dvec3",
+        "Name": "Clouds",
+        "Paths": [
+            {
+                "CtrlPts": [
+                    [
+                        -200,
+                        -150,
+                        50
+                    ],
+                    [
+                        -200,
+                        300,
+                        50
+                    ]
+                ],
+                "Duration": 45,
+                "Type": "LinearPath"
+            }
+        ],
+        "Type": "CompositePath"
+    }
+]

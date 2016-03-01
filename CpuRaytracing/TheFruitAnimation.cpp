@@ -4,6 +4,7 @@
 
 #include <QDir>
 
+#include <CellarWorkbench/Misc/Log.h>
 #include <CellarWorkbench/Image/Image.h>
 #include <CellarWorkbench/GL/GlToolkit.h>
 
@@ -11,11 +12,12 @@
 #include <PropRoom3D/Node/Prop/Prop.h>
 #include <PropRoom3D/Node/Debug/DebugLine.h>
 
-#include "PathModel.h"
+#include "Paths/PathModel.h"
 #include "Managers/PathManager.h"
 
 using namespace cellar;
 
+const std::string RECORD_OUPUT_PREFIX = "CpuRaytracing/Animations/";
 
 void TheFruitChoreographer::update(double dt)
 {
@@ -119,7 +121,7 @@ void TheFruitChoreographer::startRecording()
 {
     _isRecording = true;
 
-    QString outputDir(("Animations/" + _recordOutput.name).c_str());
+    QString outputDir((RECORD_OUPUT_PREFIX + _recordOutput.name).c_str());
 
     QDir dir = QDir::current();
     dir.mkpath(outputDir);
@@ -161,7 +163,7 @@ RecordOutput& TheFruitChoreographer::recordOutput()
 
 void TheFruitChoreographer::saveCurrentFrame()
 {
-    QString fileName = ("Animations/" + _recordOutput.name + "/").c_str();
+    QString fileName = (RECORD_OUPUT_PREFIX + _recordOutput.name + "/").c_str();
     fileName += QString("%1").arg(_animFrame, 4, 10, QChar('0'));
     if(_recordOutput.includeSampleCount)
         fileName += QString("_%1f").arg(_raytracerState->sampleCount());
@@ -170,8 +172,12 @@ void TheFruitChoreographer::saveCurrentFrame()
     if(_recordOutput.includeDivergence)
         fileName += "_"+QString::number(_raytracerState->divergence(), 'f', 4)+"div";
     fileName += _recordOutput.format.c_str();
+    std::string stdFileName = fileName.toStdString();
 
     cellar::Image screenshot;
     cellar::GlToolkit::takeFramebufferShot(screenshot);
-    screenshot.save(fileName.toStdString());
+    screenshot.save(stdFileName);
+
+    getLog().postMessage(new Message('I', false,
+        stdFileName + " successfully recorded", "TheFruitChoreographer"));
 }

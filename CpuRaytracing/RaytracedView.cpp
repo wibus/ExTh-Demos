@@ -57,9 +57,11 @@ void RaytracedView::setup()
     _artDirector2D->resize(width(), height());
     _cameraManager->setRaytracer(_raytracerServer);
     _postProdManager->setPostProdUnit(_raytracerServer->postProdUnit());
+
+    connect(_pathManager.get(), &PathManager::pathChanged,
+            _animationManager.get(), &AnimationManager::onPathChanged);
     _animationManager->setChoreographer(_choreographer);
     _animationManager->setRaytracer(_raytracerServer);
-
     _pathManager->setStageSet(_stageSet);
     _pathManager->setChoreographer(_choreographer);
 }

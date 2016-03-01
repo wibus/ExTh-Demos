@@ -30,6 +30,11 @@ public:
     void setDebugLineVisibility(const std::string& name, bool isVisible);
 
 
+    std::string serialize() const;
+
+    bool deserialize(const std::string& stream);
+
+
     std::shared_ptr<cellar::AbstractPath<glm::dvec3>> cameraEye;
     std::shared_ptr<cellar::AbstractPath<glm::dvec3>> cameraTo;
     std::shared_ptr<cellar::AbstractPath<double>> cameraFoV;

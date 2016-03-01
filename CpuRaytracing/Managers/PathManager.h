@@ -41,16 +41,24 @@ public:
         const std::shared_ptr<TheFruitChoreographer>& choreographer);
 
     virtual void clearPaths();
+    virtual void displayPaths();
     virtual void appendPath(const std::shared_ptr<cellar::AbstractPath<glm::dvec3>>& path, const std::string& name);
     virtual void appendPath(const std::shared_ptr<cellar::AbstractPath<double>>& path, const std::string& name);
 
+signals:
+    void pathChanged();
 
 private slots:
     virtual void selectionChanged(const QItemSelection& selected,
                                  const QItemSelection& deselected);
     virtual void displayDebugToggled(bool display);
+    virtual void durationChanged(double duration);
 
     virtual void controlPointMoved();
+
+    virtual void editPaths();
+    virtual void savePaths();
+    virtual void loadPaths();
 
 private:
     Ui::RaytracerGui* _ui;
@@ -61,10 +69,10 @@ private:
     std::vector<TreeBuilder<double>> _doubleTreeBuilders;
     std::vector<TreeBuilder<glm::dvec3>> _dvec3TreeBuilders;
 
-    std::vector<std::function<void(void)>> _segmentModels;
-    std::vector<std::string> _segmentParentName;
-    std::string _selectedPathName;
-    bool _isSelectedPathVisible;
+    std::vector<std::function<void(void)>> _displayPathCallback;
+    std::vector<std::function<void(double)>> _durationChangedCallback;
+    std::vector<std::string> _pathParentName;
+    int _selectedPathId;
 };
 
 class Spin : public QDoubleSpinBox
