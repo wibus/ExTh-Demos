@@ -109,6 +109,11 @@ int TheFruitChoreographer::animFrameCount()
     return glm::ceil(_pathModel->animationLength() * _animFps);
 }
 
+void TheFruitChoreographer::setAnimTimeOffset(double offset)
+{
+
+}
+
 void TheFruitChoreographer::setAnimFps(int fps)
 {
     _animFps = fps;

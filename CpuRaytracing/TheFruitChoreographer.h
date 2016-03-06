@@ -48,6 +48,7 @@ public:
     virtual void forceUpdate();
 
     virtual int animFrameCount();
+    virtual void setAnimTimeOffset(double offset);
     virtual void setAnimFps(int fps);
     virtual void setAnimFrame(int frame);
     virtual void resetAnimation();

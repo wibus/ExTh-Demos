@@ -41,6 +41,7 @@ private slots:
     virtual void maxSampleThreshold(int sampleCount);
     virtual void maxRenderTimeThreshold(int maxSeconds);
 
+    virtual void animTimeOffset(double offset);
     virtual void animFps(int fps);
     virtual void animFrame(int frame);
     virtual void resetAnim(bool unsused);
@@ -57,6 +58,10 @@ private slots:
     virtual void includeRenderTime(bool include);
     virtual void includeDivergence(bool include);
 
+protected:
+    virtual void updateTimeMeter();
+    virtual double computeTimeOffset();
+    virtual QString timeToString(double time);
 
 private:
     Ui::RaytracerGui* _ui;

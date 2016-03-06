@@ -22,6 +22,11 @@ AnimationManager::AnimationManager(Ui::RaytracerGui* ui) :
             this, &AnimationManager::divThreshold);
 
 
+    connect(_ui->animTimeOffsetMinSpin, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+            this, &AnimationManager::animTimeOffset);
+    connect(_ui->animTimeOffsetSecSpin, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+            this, &AnimationManager::animTimeOffset);
+
     connect(_ui->animFpsSpin, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),
             this, &AnimationManager::animFps);
 
@@ -119,6 +124,13 @@ void AnimationManager::divThreshold(double div)
     _raytracer->raytracerState()->setDivergenceThreshold(div);
 }
 
+void AnimationManager::animTimeOffset(double offset)
+{
+    _choreographer->setAnimTimeOffset(
+        computeTimeOffset());
+    updateTimeMeter();
+}
+
 void AnimationManager::animFps(int fps)
 {
     _choreographer->setAnimFps(fps);
@@ -133,8 +145,7 @@ void AnimationManager::animFrame(int frame)
     _choreographer->setAnimFrame(frame);
     _ui->animFrameSpin->setValue(frame);
     _ui->animFrameSlider->setValue(frame);
-    _ui->animTimeValue->setText(QString("%1").arg(
-        double(frame) / _ui->animFpsSpin->value(), 0, 'f', 2));
+    updateTimeMeter();
 }
 
 void AnimationManager::resetAnim(bool unsused)
@@ -176,8 +187,7 @@ void AnimationManager::animFrameFromChoreographer(int frame)
 {
     _ui->animFrameSpin->setValue(frame);
     _ui->animFrameSlider->setValue(frame);
-    _ui->animTimeValue->setText(QString("%1").arg(
-        double(frame) / _ui->animFpsSpin->value(), 0, 'f', 2));
+    updateTimeMeter();
 }
 
 void AnimationManager::animPlayFromChoreographer(bool play)
@@ -210,12 +220,44 @@ void AnimationManager::includeDivergence(bool include)
     _choreographer->recordOutput().includeDivergence = include;
 }
 
+void AnimationManager::updateTimeMeter()
+{
+    double offset = computeTimeOffset();
+    int frame = _ui->animFrameSpin->value();
+    _ui->animTimeValue->setText(
+        timeToString(offset + double(frame) / _ui->animFpsSpin->value()));
+    _ui->animTimeSuffix->setText(QString(" / %1")
+        .arg(timeToString(offset + _choreographer->pathModel()->animationLength())));
+}
+
+const double SEC_IN_MIN = 60.0;
+const double MIL_IN_SEC = 1000.0;
+double AnimationManager::computeTimeOffset()
+{
+    double offsetMin = _ui->animTimeOffsetMinSpin->value();
+    double offsetSec = _ui->animTimeOffsetSecSpin->value();
+    double offsetSecTot = offsetMin * SEC_IN_MIN + offsetSec;
+    return offsetSecTot;
+}
+
+QString AnimationManager::timeToString(double time)
+{
+    int minutes = int(time / SEC_IN_MIN);
+    double minToSec = minutes * SEC_IN_MIN;
+    int seconds = int(time - minToSec);
+    int millisec = int((time - minToSec - seconds)*MIL_IN_SEC);
+    QString str = QString("%1m%2s%3l")
+            .arg(minutes, 2, 10, QChar('0'))
+            .arg(seconds, 2, 10, QChar('0'))
+            .arg(millisec, 3, 10, QChar('0'));
+    return str;
+}
+
 void AnimationManager::onPathChanged()
 {
     int frameCount = _choreographer->animFrameCount();
     _ui->animFrameSpin->setMaximum(frameCount);
     _ui->animFrameSpin->setSuffix(QString("/ %1").arg(frameCount));
     _ui->animFrameSlider->setMaximum(frameCount);
-    _ui->animTimeSuffix->setText(QString(" / %1 s")
-        .arg(_choreographer->pathModel()->animationLength()));
+    updateTimeMeter();
 }
