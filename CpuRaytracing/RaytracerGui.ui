@@ -401,7 +401,7 @@
            <item row="4" column="1">
             <widget class="QLabel" name="bankedTimeValueLabel">
              <property name="text">
-              <string>0s</string>
+              <string>0 s</string>
              </property>
             </widget>
            </item>
@@ -442,7 +442,11 @@
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QSpinBox" name="animFrameSpin"/>
+            <widget class="QSpinBox" name="animFrameSpin">
+             <property name="suffix">
+              <string>/ 0</string>
+             </property>
+            </widget>
            </item>
            <item row="2" column="0" colspan="2">
             <widget class="QSlider" name="animFrameSlider">
@@ -451,7 +455,7 @@
              </property>
             </widget>
            </item>
-           <item row="3" column="0" colspan="2">
+           <item row="4" column="0" colspan="2">
             <layout class="QHBoxLayout" name="horizontalLayout_2">
              <item>
               <widget class="QPushButton" name="resetAnimButton">
@@ -531,6 +535,31 @@
                </property>
                <property name="checkable">
                 <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="animeTimeLabel">
+             <property name="text">
+              <string>Time</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <item>
+              <widget class="QLabel" name="animTimeValue">
+               <property name="text">
+                <string>0 s</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="animTimeSuffix">
+               <property name="text">
+                <string>/ 0 s</string>
                </property>
               </widget>
              </item>

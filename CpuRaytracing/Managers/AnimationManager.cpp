@@ -3,6 +3,7 @@
 #include <PropRoom3D/Team/ArtDirector/RaytracerState.h>
 
 #include "PathManager.h"
+#include "../Paths/PathModel.h"
 #include "../TheFruitChoreographer.h"
 
 #include "ui_RaytracerGui.h"
@@ -132,6 +133,8 @@ void AnimationManager::animFrame(int frame)
     _choreographer->setAnimFrame(frame);
     _ui->animFrameSpin->setValue(frame);
     _ui->animFrameSlider->setValue(frame);
+    _ui->animTimeValue->setText(QString("%1").arg(
+        double(frame) / _ui->animFpsSpin->value(), 0, 'f', 2));
 }
 
 void AnimationManager::resetAnim(bool unsused)
@@ -173,6 +176,8 @@ void AnimationManager::animFrameFromChoreographer(int frame)
 {
     _ui->animFrameSpin->setValue(frame);
     _ui->animFrameSlider->setValue(frame);
+    _ui->animTimeValue->setText(QString("%1").arg(
+        double(frame) / _ui->animFpsSpin->value(), 0, 'f', 2));
 }
 
 void AnimationManager::animPlayFromChoreographer(bool play)
@@ -209,5 +214,8 @@ void AnimationManager::onPathChanged()
 {
     int frameCount = _choreographer->animFrameCount();
     _ui->animFrameSpin->setMaximum(frameCount);
+    _ui->animFrameSpin->setSuffix(QString("/ %1").arg(frameCount));
     _ui->animFrameSlider->setMaximum(frameCount);
+    _ui->animTimeSuffix->setText(QString(" / %1 s")
+        .arg(_choreographer->pathModel()->animationLength()));
 }
