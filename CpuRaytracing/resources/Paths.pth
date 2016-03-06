@@ -154,7 +154,7 @@
     },
     {
         "Data": "dvec3",
-        "Name": "The Fruit",
+        "Name": "The Fruit Pos",
         "Paths": [
             {
                 "CtrlPts": [
@@ -196,6 +196,27 @@
                     ]
                 ],
                 "Duration": 10,
+                "Type": "CubicSplinePath"
+            }
+        ],
+        "Type": "CompositePath"
+    },
+    {
+        "Data": "double",
+        "Name": "The Fruit Height",
+        "Paths": [
+            {
+                "CtrlPts": [
+                    1.6000000000000001,
+                    0.80000000000000016,
+                    1.6000000000000001,
+                    0.80000000000000016,
+                    1.6000000000000001,
+                    0.80000000000000016,
+                    1.6000000000000001,
+                    0.80000000000000016
+                ],
+                "Duration": 12,
                 "Type": "CubicSplinePath"
             }
         ],

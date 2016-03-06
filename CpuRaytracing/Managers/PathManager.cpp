@@ -267,6 +267,9 @@ PathManager::PathManager(Ui::RaytracerGui* ui) :
     _pathTreeModel = new QStandardItemModel();
     _ui->pathsTree->setModel(_pathTreeModel);
 
+    connect(_ui->bindCameraToPathCheck, &QCheckBox::toggled,
+            this, &PathManager::bindCameraToPath);
+
     connect(_ui->pathsTree->selectionModel(),
             &QItemSelectionModel::selectionChanged,
             this, &PathManager::selectionChanged);
@@ -303,6 +306,8 @@ void PathManager::setChoreographer(
 {
     _choreographer = choreographer;
     loadPaths();
+
+    bindCameraToPath(_ui->bindCameraToPathCheck->isChecked());
 }
 
 void PathManager::clearPaths()
@@ -326,14 +331,15 @@ void PathManager::displayPaths()
 {
     clearPaths();
     PathModel& pathModel = *_choreographer->pathModel();
-    appendPath(pathModel.cameraTo,   PathModel::CAMERA_TO_PATH_NAME);
-    appendPath(pathModel.cameraEye,  PathModel::CAMERA_EYE_PATH_NAME);
-    appendPath(pathModel.cameraFoV,  PathModel::CAMERA_FOV_PATH_NAME);
-    appendPath(pathModel.theFruit,   PathModel::THE_FRUIT_PATH_NAME);
-    appendPath(pathModel.clouds,     PathModel::CLOUDS_PATH_NAME);
-    appendPath(pathModel.dayTime,    PathModel::DAY_TIME_PATH_NAME);
-    appendPath(pathModel.hallLight,  PathModel::HALL_LIGHT_PATH_NAME);
-    appendPath(pathModel.roomLight,  PathModel::ROOM_LIGHT_PATH_NAME);
+    appendPath(pathModel.cameraTo,          PathModel::CAMERA_TO_PATH_NAME);
+    appendPath(pathModel.cameraEye,         PathModel::CAMERA_EYE_PATH_NAME);
+    appendPath(pathModel.cameraFoV,         PathModel::CAMERA_FOV_PATH_NAME);
+    appendPath(pathModel.theFruitPos,       PathModel::THE_FRUIT_POS_PATH_NAME);
+    appendPath(pathModel.theFruitHeight,    PathModel::THE_FRUIT_HEIGHT_PATH_NAME);
+    appendPath(pathModel.clouds,            PathModel::CLOUDS_PATH_NAME);
+    appendPath(pathModel.dayTime,           PathModel::DAY_TIME_PATH_NAME);
+    appendPath(pathModel.hallLight,         PathModel::HALL_LIGHT_PATH_NAME);
+    appendPath(pathModel.roomLight,         PathModel::ROOM_LIGHT_PATH_NAME);
 
     emit pathChanged();
 }
@@ -360,6 +366,14 @@ void PathManager::appendPath(const std::shared_ptr<AbstractPath<glm::dvec3>>& pa
         _ui, path.get(), name);
 
     _pathTreeModel->appendRow(_dvec3TreeBuilders.back().getRoot());
+}
+
+void PathManager::bindCameraToPath(bool bind)
+{
+    if(bind)
+        _choreographer->bindCameraToPath();
+    else
+        _choreographer->freeCameraFromPath();
 }
 
 void PathManager::selectionChanged(const QItemSelection& selected,

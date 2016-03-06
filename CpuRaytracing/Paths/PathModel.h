@@ -38,7 +38,8 @@ public:
     std::shared_ptr<cellar::AbstractPath<glm::dvec3>> cameraEye;
     std::shared_ptr<cellar::AbstractPath<glm::dvec3>> cameraTo;
     std::shared_ptr<cellar::AbstractPath<double>> cameraFoV;
-    std::shared_ptr<cellar::AbstractPath<glm::dvec3>> theFruit;
+    std::shared_ptr<cellar::AbstractPath<glm::dvec3>> theFruitPos;
+    std::shared_ptr<cellar::AbstractPath<double>> theFruitHeight;
     std::shared_ptr<cellar::AbstractPath<glm::dvec3>> clouds;
     std::shared_ptr<cellar::AbstractPath<double>> dayTime;
     std::shared_ptr<cellar::AbstractPath<double>> hallLight;
@@ -48,7 +49,8 @@ public:
     static const std::string CAMERA_EYE_PATH_NAME;
     static const std::string CAMERA_TO_PATH_NAME;
     static const std::string CAMERA_FOV_PATH_NAME;
-    static const std::string THE_FRUIT_PATH_NAME;
+    static const std::string THE_FRUIT_POS_PATH_NAME;
+    static const std::string THE_FRUIT_HEIGHT_PATH_NAME;
     static const std::string CLOUDS_PATH_NAME;
     static const std::string DAY_TIME_PATH_NAME;
     static const std::string HALL_LIGHT_PATH_NAME;

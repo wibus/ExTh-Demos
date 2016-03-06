@@ -57,6 +57,9 @@ public:
     virtual void pauseAnimation();
     virtual void setFastPlay(bool playFast);
 
+    virtual void bindCameraToPath();
+    virtual void freeCameraFromPath();
+
     virtual std::shared_ptr<PathModel> pathModel() const;
 
     virtual RecordOutput& recordOutput();
@@ -82,8 +85,10 @@ private:
     glm::dvec3 _cloudsPosition;
     std::shared_ptr<prop3::StageZone> _cloudsZone;
 
+    double _theFruitHeight;
     glm::dvec3 _theFruitPosition;
-    std::shared_ptr<prop3::Prop> _theFruitProp;
+    std::shared_ptr<prop3::Surface> _theFruitSurf;
+    std::shared_ptr<prop3::StageZone> _theFruitZone;
     std::shared_ptr<prop3::ProceduralSun> _backdrop;
 
     std::shared_ptr<prop3::RaytracerState> _raytracerState;
@@ -95,6 +100,7 @@ private:
     bool _isRecording;
     bool _animPlaying;
     bool _animFastPlay;
+    bool _cameraIsFree;
     RecordOutput _recordOutput;
 };
 

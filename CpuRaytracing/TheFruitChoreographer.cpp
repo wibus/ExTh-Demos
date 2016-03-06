@@ -42,7 +42,8 @@ TheFruitChoreographer::TheFruitChoreographer(
     _animFrame(0),
     _animTime(0.0),
     _animPlaying(false),
-    _animFastPlay(false)
+    _animFastPlay(false),
+    _cameraIsFree(false)
 {
 }
 
@@ -900,17 +901,21 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
     ///////////////
     // The Fruit //
     ///////////////
+    _theFruitHeight = 1.6;
     _theFruitPosition = glm::dvec3(-6.0, -7.0, 0.0);
     pSurf theFruitSurf = Sphere::sphere(glm::dvec3(0, 0, 0.5), 0.5);
     theFruitSurf->setCoating(coating::createClearCoat(0.01));
     theFruitSurf->setInnerMaterial(material::createInsulator(
         glm::dvec3(1.0, 0.6, 0.48), 1.3, 0.5, 0.1));
 
-    _theFruitProp.reset(new Prop("The Fruit"));
-    _theFruitProp->addSurface(theFruitSurf);
-    _theFruitProp->transform(glm::scale(glm::dmat4(), glm::dvec3(0.7, 0.7, 1.6)));
-    _theFruitProp->translate(_theFruitPosition);
-    stageSet->addProp(_theFruitProp);
+    _theFruitSurf = Surface::shell(theFruitSurf);
+    pProp theFruiProp(new Prop("The Fruit"));
+    theFruiProp->addSurface(Surface::shell(_theFruitSurf));
+    theFruiProp->transform(glm::scale(glm::dmat4(), glm::dvec3(0.7, 0.7, _theFruitHeight)));
+    _theFruitZone.reset(new StageZone("The Fruit Zone"));
+    _theFruitZone->addProp(theFruiProp);
+    _theFruitZone->transform(glm::translate(glm::dmat4(), _theFruitPosition));
+    stageSet->addSubzone(_theFruitZone);
 
 /*
     ////////////////////////////

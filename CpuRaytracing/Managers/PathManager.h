@@ -49,6 +49,7 @@ signals:
     void pathChanged();
 
 private slots:
+    virtual void bindCameraToPath(bool bind);
     virtual void selectionChanged(const QItemSelection& selected,
                                  const QItemSelection& deselected);
     virtual void displayDebugToggled(bool display);

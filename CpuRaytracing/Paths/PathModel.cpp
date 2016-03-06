@@ -18,14 +18,15 @@ using namespace cellar;
 using namespace prop3;
 
 
-const std::string PathModel::CAMERA_EYE_PATH_NAME   = "Camera Eye";
-const std::string PathModel::CAMERA_TO_PATH_NAME    = "Camera To";
-const std::string PathModel::CAMERA_FOV_PATH_NAME   = "Camera Fov";
-const std::string PathModel::THE_FRUIT_PATH_NAME    = "The Fruit";
-const std::string PathModel::CLOUDS_PATH_NAME       = "Clouds";
-const std::string PathModel::DAY_TIME_PATH_NAME     = "Day Time";
-const std::string PathModel::HALL_LIGHT_PATH_NAME   = "Hall Light";
-const std::string PathModel::ROOM_LIGHT_PATH_NAME   = "Room Light";
+const std::string PathModel::CAMERA_EYE_PATH_NAME           = "Camera Eye";
+const std::string PathModel::CAMERA_TO_PATH_NAME            = "Camera To";
+const std::string PathModel::CAMERA_FOV_PATH_NAME           = "Camera Fov";
+const std::string PathModel::THE_FRUIT_POS_PATH_NAME        = "The Fruit Pos";
+const std::string PathModel::THE_FRUIT_HEIGHT_PATH_NAME     = "The Fruit Height";
+const std::string PathModel::CLOUDS_PATH_NAME               = "Clouds";
+const std::string PathModel::DAY_TIME_PATH_NAME             = "Day Time";
+const std::string PathModel::HALL_LIGHT_PATH_NAME           = "Hall Light";
+const std::string PathModel::ROOM_LIGHT_PATH_NAME           = "Room Light";
 
 
 class CtrlPtDrawer : public PathVisitor<glm::dvec3>
@@ -129,7 +130,8 @@ void PathModel::init(const std::shared_ptr<StageSet>& stageSet)
     cameraTo.reset(new CompositePath<glm::dvec3>());
     cameraEye.reset(new CompositePath<glm::dvec3>());
     cameraFoV.reset(new CompositePath<double>());
-    theFruit.reset(new CompositePath<glm::dvec3>());
+    theFruitPos.reset(new CompositePath<glm::dvec3>());
+    theFruitHeight.reset(new CompositePath<double>());
     clouds.reset(new CompositePath<glm::dvec3>());
     dayTime.reset(new CompositePath<double>());
     hallLight.reset(new CompositePath<double>());
@@ -142,7 +144,8 @@ double PathModel::animationLength() const
     maxLength = glm::max(maxLength, cameraEye->duration());
     maxLength = glm::max(maxLength, cameraTo->duration());
     maxLength = glm::max(maxLength, cameraFoV->duration());
-    maxLength = glm::max(maxLength, theFruit->duration());
+    maxLength = glm::max(maxLength, theFruitPos->duration());
+    maxLength = glm::max(maxLength, theFruitHeight->duration());
     maxLength = glm::max(maxLength, clouds->duration());
     maxLength = glm::max(maxLength, dayTime->duration());
     maxLength = glm::max(maxLength, hallLight->duration());
@@ -187,16 +190,16 @@ void PathModel::refreshDebugLines()
         cameraTo->accept(drawer);
     }
 
-    if(_lineVisibility[THE_FRUIT_PATH_NAME])
+    if(_lineVisibility[THE_FRUIT_POS_PATH_NAME])
     {
-        double duration = theFruit->duration();
+        double duration = theFruitPos->duration();
         DebugLineStrip theFruitLine(LINE_COLOR);
         for(double t=0.0; t < duration; t+=1.0/DEBUG_FPS)
-            theFruitLine.addVertex(theFruit->value(t) + THE_FRUIT_OFFSET);
+            theFruitLine.addVertex(theFruitPos->value(t) + THE_FRUIT_OFFSET);
         _stageSet->addDebugLine(theFruitLine);
 
         drawer.setOffset(THE_FRUIT_OFFSET);
-        theFruit->accept(drawer);
+        theFruitPos->accept(drawer);
         drawer.setOffset(glm::dvec3());
     }
 
@@ -230,14 +233,15 @@ std::string PathModel::serialize() const
     PathWriter<glm::dvec3> dvec3Writer;
 
     QJsonArray pathArray;
-    pathArray.append( dvec3Writer.write(CAMERA_EYE_PATH_NAME,  *cameraEye) );
-    pathArray.append( dvec3Writer.write(CAMERA_TO_PATH_NAME,   *cameraTo) );
-    pathArray.append( doubleWriter.write(CAMERA_FOV_PATH_NAME, *cameraFoV) );
-    pathArray.append( dvec3Writer.write(THE_FRUIT_PATH_NAME,   *theFruit) );
-    pathArray.append( dvec3Writer.write(CLOUDS_PATH_NAME,      *clouds) );
-    pathArray.append( doubleWriter.write(DAY_TIME_PATH_NAME,   *dayTime) );
-    pathArray.append( doubleWriter.write(HALL_LIGHT_PATH_NAME,  *hallLight) );
-    pathArray.append( doubleWriter.write(ROOM_LIGHT_PATH_NAME,  *roomLight) );
+    pathArray.append( dvec3Writer.write( CAMERA_EYE_PATH_NAME,          *cameraEye) );
+    pathArray.append( dvec3Writer.write( CAMERA_TO_PATH_NAME,           *cameraTo) );
+    pathArray.append( doubleWriter.write(CAMERA_FOV_PATH_NAME,          *cameraFoV) );
+    pathArray.append( dvec3Writer.write( THE_FRUIT_POS_PATH_NAME,       *theFruitPos) );
+    pathArray.append( doubleWriter.write(THE_FRUIT_HEIGHT_PATH_NAME,    *theFruitHeight) );
+    pathArray.append( dvec3Writer.write( CLOUDS_PATH_NAME,              *clouds) );
+    pathArray.append( doubleWriter.write(DAY_TIME_PATH_NAME,            *dayTime) );
+    pathArray.append( doubleWriter.write(HALL_LIGHT_PATH_NAME,          *hallLight) );
+    pathArray.append( doubleWriter.write(ROOM_LIGHT_PATH_NAME,          *roomLight) );
 
     QJsonDocument jsonDoc(pathArray);
     return jsonDoc.toJson(QJsonDocument::Indented).toStdString();
@@ -248,20 +252,22 @@ bool PathModel::deserialize(const std::string& stream)
     PathReader reader;
     if(reader.read(QJsonDocument::fromJson(stream.c_str())))
     {
-        if(reader.dvec3Path(CAMERA_EYE_PATH_NAME).get()  != nullptr &&
-           reader.dvec3Path(CAMERA_TO_PATH_NAME).get()   != nullptr &&
-           reader.doublePath(CAMERA_FOV_PATH_NAME).get() != nullptr &&
-           reader.dvec3Path(THE_FRUIT_PATH_NAME).get()   != nullptr &&
-           reader.dvec3Path(CLOUDS_PATH_NAME).get()      != nullptr &&
-           reader.doublePath(DAY_TIME_PATH_NAME).get()   != nullptr &&
-           reader.doublePath(HALL_LIGHT_PATH_NAME).get() != nullptr &&
-           reader.doublePath(ROOM_LIGHT_PATH_NAME).get() != nullptr)
+        if(reader.dvec3Path( CAMERA_EYE_PATH_NAME).get()        != nullptr &&
+           reader.dvec3Path( CAMERA_TO_PATH_NAME).get()         != nullptr &&
+           reader.doublePath(CAMERA_FOV_PATH_NAME).get()        != nullptr &&
+           reader.dvec3Path( THE_FRUIT_POS_PATH_NAME).get()     != nullptr &&
+           reader.doublePath(THE_FRUIT_HEIGHT_PATH_NAME).get()  != nullptr &&
+           reader.dvec3Path( CLOUDS_PATH_NAME).get()            != nullptr &&
+           reader.doublePath(DAY_TIME_PATH_NAME).get()          != nullptr &&
+           reader.doublePath(HALL_LIGHT_PATH_NAME).get()        != nullptr &&
+           reader.doublePath(ROOM_LIGHT_PATH_NAME).get()        != nullptr)
         {
 
             cameraEye = reader.dvec3Path(CAMERA_EYE_PATH_NAME);
             cameraTo = reader.dvec3Path(CAMERA_TO_PATH_NAME);
             cameraFoV = reader.doublePath(CAMERA_FOV_PATH_NAME);
-            theFruit = reader.dvec3Path(THE_FRUIT_PATH_NAME);
+            theFruitPos = reader.dvec3Path(THE_FRUIT_POS_PATH_NAME);
+            theFruitHeight = reader.doublePath(THE_FRUIT_HEIGHT_PATH_NAME);
             clouds = reader.dvec3Path(CLOUDS_PATH_NAME);
             dayTime = reader.doublePath(DAY_TIME_PATH_NAME);
             hallLight = reader.doublePath(HALL_LIGHT_PATH_NAME);

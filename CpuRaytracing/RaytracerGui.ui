@@ -33,7 +33,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="cameraTab">
        <attribute name="title">
@@ -1096,6 +1096,16 @@
         <string>Path</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_9">
+        <item>
+         <widget class="QCheckBox" name="bindCameraToPathCheck">
+          <property name="text">
+           <string>Bind Camera to Path</string>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
         <item>
          <widget class="QGroupBox" name="pathsGroup">
           <property name="title">

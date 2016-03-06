@@ -10,12 +10,14 @@
 
 #include <PropRoom3D/Node/StageZone.h>
 #include <PropRoom3D/Node/Prop/Prop.h>
+#include <PropRoom3D/Node/Prop/Surface/Surface.h>
 #include <PropRoom3D/Node/Debug/DebugLineStrip.h>
 
 #include "Paths/PathModel.h"
 #include "Managers/PathManager.h"
 
 using namespace cellar;
+using namespace prop3;
 
 const std::string RECORD_OUPUT_PREFIX = "CpuRaytracing/Animations/";
 
@@ -28,29 +30,42 @@ void TheFruitChoreographer::update(double dt)
     {
         double t = _animTime;
 
-        const glm::dvec3 camUp(0, 0, 1);
-        glm::dvec3 camTo = _pathModel->cameraTo->value(t);
-        glm::dvec3 camEye = _pathModel->cameraEye->value(t);
-        _camera->updateView(glm::lookAt(camEye, camTo, camUp));
+        if(!_cameraIsFree)
+        {
+            // Camera position
+            const glm::dvec3 camUp(0, 0, 1);
+            glm::dvec3 camTo = _pathModel->cameraTo->value(t);
+            glm::dvec3 camEye = _pathModel->cameraEye->value(t);
+            _camera->updateView(glm::lookAt(camEye, camTo, camUp));
 
+            // Camera focus
+            float dofDist = glm::length(camTo - camEye);
+            float dofAper = dofDist + _camAperture + 1.0;
+            glm::mat4 projection =
+                glm::perspectiveFov(
+                    glm::radians((float)_pathModel->cameraFoV->value(t))/2,
+                    (float) _camera->viewport().x,
+                    (float) _camera->viewport().y,
+                    dofDist, dofAper);
+            _camera->updateProjection(projection);
+        }
 
-        float dofDist = glm::length(camTo - camEye);
-        float dofAper = dofDist + _camAperture + 1.0;
-
-        glm::mat4 projection =
-            glm::perspectiveFov(
-                glm::radians((float)_pathModel->cameraFoV->value(t))/2,
-                (float) _camera->viewport().x,
-                (float) _camera->viewport().y,
-                dofDist, dofAper);
-        _camera->updateProjection(projection);
-
-        glm::dvec3 theFruitNewPos = _pathModel->theFruit->value(t);
+        // The Fruit's position
+        glm::dvec3 theFruitNewPos = _pathModel->theFruitPos->value(t);
         glm::dvec3 theFruitDisplacement = theFruitNewPos - _theFruitPosition;
-        _theFruitProp->translate(theFruitDisplacement);
+        _theFruitZone->translate(theFruitDisplacement);
         _theFruitPosition = theFruitNewPos;
 
+        // The Fruit's size
+        double theFruitNewHeight = _pathModel->theFruitHeight->value(t);
+        double theFruitDHeight = theFruitNewHeight / _theFruitHeight;
+        double theFruitDWidth = 1.0 / glm::sqrt(theFruitDHeight);
+        Surface::transform(_theFruitSurf, glm::scale(glm::dmat4(), glm::dvec3(
+            theFruitDWidth, theFruitDWidth, theFruitDHeight)));
+        _theFruitHeight = theFruitNewHeight;
 
+
+        // Clouds position
         glm::dvec3 cloudsNewPos = _pathModel->clouds->value(t);
         glm::dvec3 cloudsDisplacement = cloudsNewPos - _cloudsPosition;
         _cloudsZone->translate(cloudsDisplacement);
@@ -149,6 +164,17 @@ void TheFruitChoreographer::setFastPlay(bool playFast)
 
     if(_animPlaying)
         forceUpdate();
+}
+
+void TheFruitChoreographer::bindCameraToPath()
+{
+    _cameraIsFree = false;
+    forceUpdate();
+}
+
+void TheFruitChoreographer::freeCameraFromPath()
+{
+    _cameraIsFree = true;
 }
 
 std::shared_ptr<PathModel> TheFruitChoreographer::pathModel() const
