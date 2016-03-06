@@ -5,10 +5,11 @@
 
 #include <CellarWorkbench/Misc/Log.h>
 
+#include <CellarWorkbench/Path/LinearPath.h>
+#include <CellarWorkbench/Path/PointPath.h>
 #include <CellarWorkbench/Path/CompositePath.h>
 #include <CellarWorkbench/Path/CubicSplinePath.h>
 #include <CellarWorkbench/Path/BasisSplinePath.h>
-#include <CellarWorkbench/Path/LinearPath.h>
 
 using namespace cellar;
 
@@ -94,7 +95,24 @@ bool PathReader::read(const QJsonDocument& jsonDoc)
             QJsonObject pathObj = pathVal.toObject();
             double duration = pathObj["Duration"].toDouble();
             QJsonArray ctrlPts = pathObj["CtrlPts"].toArray();
-            if(pathObj["Type"] == "LinearPath")
+            if(pathObj["Type"] == "PointPath")
+            {
+                if(doubleComposite)
+                {
+                    double value = readValue<double>(ctrlPts[0], ok);
+                    doubleComposite->addPath(
+                        std::make_shared<cellar::PointPath<double>>(
+                            duration, value));
+                }
+                else
+                {
+                    glm::dvec3 value = readValue<glm::dvec3>(ctrlPts[0], ok);
+                    dvec3Composite->addPath(
+                        std::make_shared<cellar::PointPath<glm::dvec3>>(
+                            duration, value));
+                }
+            }
+            else if(pathObj["Type"] == "LinearPath")
             {
                 if(doubleComposite)
                 {

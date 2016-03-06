@@ -10,7 +10,7 @@
 
 #include <PropRoom3D/Node/StageZone.h>
 #include <PropRoom3D/Node/Prop/Prop.h>
-#include <PropRoom3D/Node/Debug/DebugLine.h>
+#include <PropRoom3D/Node/Debug/DebugLineStrip.h>
 
 #include "Paths/PathModel.h"
 #include "Managers/PathManager.h"

@@ -44,14 +44,6 @@ TheFruitChoreographer::TheFruitChoreographer(
     _animPlaying(false),
     _animFastPlay(false)
 {
-    glm::dvec3 focusPos = glm::dvec3(0, 0, 1.0);
-    glm::dvec3 camPos = focusPos + glm::dvec3(8, -15, 5) * 1.3;
-    glm::dvec3 dir = glm::normalize(focusPos - camPos);
-    double tilt = glm::atan(dir.z, glm::length(glm::dvec2(dir.x, dir.y)));
-    double pan = glm::atan(dir.y, dir.x);
-
-    _camMan->setOrientation(pan, tilt);
-    _camMan->setPosition(camPos);
 }
 
 TheFruitChoreographer::~TheFruitChoreographer()
@@ -66,6 +58,14 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
     _backdrop.reset( new ProceduralSun() );
     stageSet->setBackdrop(std::shared_ptr<Backdrop>(_backdrop));
 
+    glm::dvec3 focusPos = glm::dvec3(0, 0, 1.0);
+    glm::dvec3 camPos = focusPos + glm::dvec3(8, -15, 5) * 1.3;
+    glm::dvec3 dir = glm::normalize(focusPos - camPos);
+    double tilt = glm::atan(dir.z, glm::length(glm::dvec2(dir.x, dir.y)));
+    double pan = glm::atan(dir.y, dir.x);
+
+    _camMan->setOrientation(pan, tilt);
+    _camMan->setPosition(camPos);
 
 
     ///////////

@@ -128,11 +128,10 @@
         "Paths": [
             {
                 "CtrlPts": [
-                    60,
                     60
                 ],
                 "Duration": 9.25,
-                "Type": "LinearPath"
+                "Type": "PointPath"
             },
             {
                 "CtrlPts": [
@@ -163,15 +162,10 @@
                         -6,
                         -7,
                         0
-                    ],
-                    [
-                        -6,
-                        -7,
-                        0
                     ]
                 ],
                 "Duration": 9,
-                "Type": "LinearPath"
+                "Type": "PointPath"
             },
             {
                 "CtrlPts": [
@@ -208,21 +202,6 @@
         "Type": "CompositePath"
     },
     {
-        "Data": "double",
-        "Name": "Day Time",
-        "Paths": [
-            {
-                "CtrlPts": [
-                    10,
-                    18
-                ],
-                "Duration": 40,
-                "Type": "LinearPath"
-            }
-        ],
-        "Type": "CompositePath"
-    },
-    {
         "Data": "dvec3",
         "Name": "Clouds",
         "Paths": [
@@ -241,6 +220,49 @@
                 ],
                 "Duration": 45,
                 "Type": "LinearPath"
+            }
+        ],
+        "Type": "CompositePath"
+    },
+    {
+        "Data": "double",
+        "Name": "Day Time",
+        "Paths": [
+            {
+                "CtrlPts": [
+                    10,
+                    18
+                ],
+                "Duration": 40,
+                "Type": "LinearPath"
+            }
+        ],
+        "Type": "CompositePath"
+    },
+    {
+        "Data": "double",
+        "Name": "Hall Light",
+        "Paths": [
+            {
+                "CtrlPts": [
+                    0
+                ],
+                "Duration": 40,
+                "Type": "PointPath"
+            }
+        ],
+        "Type": "CompositePath"
+    },
+    {
+        "Data": "double",
+        "Name": "Room Light",
+        "Paths": [
+            {
+                "CtrlPts": [
+                    0
+                ],
+                "Duration": 40,
+                "Type": "PointPath"
             }
         ],
         "Type": "CompositePath"

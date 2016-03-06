@@ -8,6 +8,7 @@
 #include <CellarWorkbench/Misc/StringUtils.h>
 
 #include <CellarWorkbench/Path/PathVisitor.h>
+#include <CellarWorkbench/Path/PointPath.h>
 #include <CellarWorkbench/Path/LinearPath.h>
 #include <CellarWorkbench/Path/CubicSplinePath.h>
 #include <CellarWorkbench/Path/BasisSplinePath.h>
@@ -50,6 +51,8 @@ public:
     virtual ~TreeBuilder() {}
 
 
+    virtual void visit(PointPath<Data>& path) override;
+
     virtual void visit(LinearPath<Data>& path) override;
 
     virtual void visit(CubicSplinePath<Data>& path) override;
@@ -64,7 +67,7 @@ public:
 
 protected:
     void setupTable(QTableWidget* table, int rowCount);
-    void putValue(QTableWidget* table, int row, Data& value);
+    void putValue(QTableWidget* table, int row, Data& value, AbstractPath<Data>& path);
 
 private:
     std::vector<std::function<void(void)>> & _displayPathCallback;
@@ -121,18 +124,18 @@ void TreeBuilder<glm::dvec3>::setupTable(QTableWidget* table, int rowCount)
 }
 
 template<>
-void TreeBuilder<double>::putValue(QTableWidget* table, int row, double& value)
+void TreeBuilder<double>::putValue(QTableWidget* table, int row, double& value, AbstractPath<double>& path)
 {
     Spin* spin =  new Spin(value);
 
     table->setCellWidget(row, 0, spin);
 
     QObject::connect(spin, static_cast<void(Spin::*)(double)>(&Spin::valueChanged),
-                     [this, &value](double nv){ value = nv; _refreshCallBack();});
+                     [this, &value, &path](double nv){ value = nv; path.update(); _refreshCallBack();});
 }
 
 template<>
-void TreeBuilder<glm::dvec3>::putValue(QTableWidget* table, int row, glm::dvec3& value)
+void TreeBuilder<glm::dvec3>::putValue(QTableWidget* table, int row, glm::dvec3& value, AbstractPath<glm::dvec3>& path)
 {
     Spin* spinX =  new Spin(value.x);
     Spin* spinY =  new Spin(value.y);
@@ -143,11 +146,31 @@ void TreeBuilder<glm::dvec3>::putValue(QTableWidget* table, int row, glm::dvec3&
     table->setCellWidget(row, 2, spinZ);
 
     QObject::connect(spinX, static_cast<void(Spin::*)(double)>(&Spin::valueChanged),
-                     [this, &value](double nv){ value.x = nv; _refreshCallBack();});
+                     [this, &value, &path](double nv){ value.x = nv; path.update(); _refreshCallBack();});
     QObject::connect(spinY, static_cast<void(Spin::*)(double)>(&Spin::valueChanged),
-                     [this, &value](double nv){ value.y = nv; _refreshCallBack();});
+                     [this, &value, &path](double nv){ value.y = nv; path.update(); _refreshCallBack();});
     QObject::connect(spinZ, static_cast<void(Spin::*)(double)>(&Spin::valueChanged),
-                     [this, &value](double nv){ value.z = nv; _refreshCallBack();});
+                     [this, &value, &path](double nv){ value.z = nv; path.update(); _refreshCallBack();});
+}
+
+template<typename Data>
+void TreeBuilder<Data>::visit(PointPath<Data>& path)
+{
+    _last = new QStandardItem(QString("Point [%1s]").arg(path.duration()));
+    int callbackIdx = _displayPathCallback.size();
+    _last->setData(QVariant(callbackIdx));
+
+    _pathParentName.push_back(_name);
+    _displayPathCallback.push_back([this, &path](){
+        _ui->durationSpin->setValue(path.duration());
+
+        setupTable(_ui->segmentTable, 1);
+        putValue(_ui->segmentTable, 0, path.value(), path);
+    });
+
+    _durationChangedCallback.push_back([&path](double duration){
+        path.setDuration(duration);
+    });
 }
 
 template<typename Data>
@@ -162,8 +185,8 @@ void TreeBuilder<Data>::visit(LinearPath<Data>& path)
         _ui->durationSpin->setValue(path.duration());
 
         setupTable(_ui->segmentTable, 2);
-        putValue(_ui->segmentTable, 0, path.begin());
-        putValue(_ui->segmentTable, 1, path.end());
+        putValue(_ui->segmentTable, 0, path.begin(), path);
+        putValue(_ui->segmentTable, 1, path.end(), path);
     });
 
     _durationChangedCallback.push_back([&path](double duration){
@@ -186,7 +209,7 @@ void TreeBuilder<Data>::visit(CubicSplinePath<Data>& path)
 
         int row = 0;
         for(Data& pt : path.ctrlPts())
-            putValue(_ui->segmentTable, row++, pt);
+            putValue(_ui->segmentTable, row++, pt, path);
     });
 
     _durationChangedCallback.push_back([&path](double duration){
@@ -209,7 +232,7 @@ void TreeBuilder<Data>::visit(BasisSplinePath<Data>& path)
 
         int row = 0;
         for(Data& pt : path.ctrlPts())
-            putValue(_ui->segmentTable, row++, pt);
+            putValue(_ui->segmentTable, row++, pt, path);
     });
 
     _durationChangedCallback.push_back([&path](double duration){
@@ -309,6 +332,8 @@ void PathManager::displayPaths()
     appendPath(pathModel.theFruit,   PathModel::THE_FRUIT_PATH_NAME);
     appendPath(pathModel.clouds,     PathModel::CLOUDS_PATH_NAME);
     appendPath(pathModel.dayTime,    PathModel::DAY_TIME_PATH_NAME);
+    appendPath(pathModel.hallLight,  PathModel::HALL_LIGHT_PATH_NAME);
+    appendPath(pathModel.roomLight,  PathModel::ROOM_LIGHT_PATH_NAME);
 
     emit pathChanged();
 }

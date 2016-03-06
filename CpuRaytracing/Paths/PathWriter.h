@@ -26,6 +26,8 @@ public:
                              cellar::AbstractPath<Data>& path);
 
 
+    virtual void visit(cellar::PointPath<Data>& path) override;
+
     virtual void visit(cellar::LinearPath<Data>& path) override;
 
     virtual void visit(cellar::CubicSplinePath<Data>& path) override;
@@ -69,6 +71,20 @@ QJsonValue PathWriter<Data>::write(const std::string& name, cellar::AbstractPath
         _lastObj["Data"] = "dvec3";
 
     return _lastObj;
+}
+
+template<typename Data>
+void PathWriter<Data>::visit(cellar::PointPath<Data>& path)
+{
+    QJsonObject obj;
+    obj["Type"] = "PointPath";
+    obj["Duration"] = path.duration();
+
+    QJsonArray ctrlPts;
+    ctrlPts.append(printValue(path.value()));
+    obj["CtrlPts"] = ctrlPts;
+
+    _lastObj = obj;
 }
 
 template<typename Data>
