@@ -29,7 +29,7 @@ const std::string DEFAULT_PATH_FILE = "CpuRaytracing/resources/Paths.pth";
 
 Spin::Spin(double value)
 {
-    setDecimals(3);
+    setDecimals(2);
     setMinimum(-400);
     setMaximum( 400);
     setSingleStep(0.1);
@@ -66,8 +66,9 @@ public:
     QStandardItem* getRoot() {return _last;}
 
 protected:
-    void setupTable(QTableWidget* table, int rowCount);
-    void putValue(QTableWidget* table, int row, Data& value, AbstractPath<Data>& path);
+    void putValue(QTableWidget* table, int row, double& value, AbstractPath<Data>& path, int column = 0);
+    void putValue(QTableWidget* table, int row, glm::dvec3& value, AbstractPath<Data>& path);
+    void setupTable(QTableWidget* table, int rowCount, bool isWeighted);
 
 private:
     std::vector<std::function<void(void)>> & _displayPathCallback;
@@ -104,38 +105,55 @@ TreeBuilder<Data>::TreeBuilder(
 }
 
 template<>
-void TreeBuilder<double>::setupTable(QTableWidget* table, int rowCount)
+void TreeBuilder<double>::setupTable(QTableWidget* table, int rowCount, bool isWeighted)
 {
     table->clear();
-    table->setColumnCount(1);
     table->setRowCount(rowCount);
-    table->setHorizontalHeaderLabels({"Value"});
+    if(isWeighted)
+    {
+        table->setColumnCount(2);
+        table->setHorizontalHeaderLabels({"Value", "Weight"});
+    }
+    else
+    {
+        table->setColumnCount(1);
+        table->setHorizontalHeaderLabels({"Value"});
+    }
     table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 }
 
 template<>
-void TreeBuilder<glm::dvec3>::setupTable(QTableWidget* table, int rowCount)
+void TreeBuilder<glm::dvec3>::setupTable(QTableWidget* table, int rowCount, bool isWeighted)
 {
     table->clear();
-    table->setColumnCount(3);
+    if(isWeighted)
+    {
+        table->setColumnCount(4);
+        table->setHorizontalHeaderLabels({"X", "Y", "Z", "Weight"});
+    }
+    else
+    {
+        table->setColumnCount(3);
+        table->setHorizontalHeaderLabels({"Value"});
+    }
     table->setRowCount(rowCount);
-    table->setHorizontalHeaderLabels({"X", "Y", "Z"});
+    table->setHorizontalHeaderLabels({});
     table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 }
 
-template<>
-void TreeBuilder<double>::putValue(QTableWidget* table, int row, double& value, AbstractPath<double>& path)
+template<typename Data>
+void TreeBuilder<Data>::putValue(QTableWidget* table, int row, double& value, AbstractPath<Data>& path, int column)
 {
     Spin* spin =  new Spin(value);
 
-    table->setCellWidget(row, 0, spin);
+    table->setCellWidget(row, column, spin);
 
     QObject::connect(spin, static_cast<void(Spin::*)(double)>(&Spin::valueChanged),
-                     [this, &value, &path](double nv){ value = nv; path.update(); _refreshCallBack();});
+        [this, &value, &path](double nv){ value = nv; path.update(); _refreshCallBack();});
 }
 
-template<>
-void TreeBuilder<glm::dvec3>::putValue(QTableWidget* table, int row, glm::dvec3& value, AbstractPath<glm::dvec3>& path)
+template<typename Data>
+void TreeBuilder<Data>::putValue(QTableWidget* table, int row, glm::dvec3& value, AbstractPath<Data>& path)
 {
     Spin* spinX =  new Spin(value.x);
     Spin* spinY =  new Spin(value.y);
@@ -146,11 +164,11 @@ void TreeBuilder<glm::dvec3>::putValue(QTableWidget* table, int row, glm::dvec3&
     table->setCellWidget(row, 2, spinZ);
 
     QObject::connect(spinX, static_cast<void(Spin::*)(double)>(&Spin::valueChanged),
-                     [this, &value, &path](double nv){ value.x = nv; path.update(); _refreshCallBack();});
+        [this, &value, &path](double nv){ value.x = nv; path.update(); _refreshCallBack();});
     QObject::connect(spinY, static_cast<void(Spin::*)(double)>(&Spin::valueChanged),
-                     [this, &value, &path](double nv){ value.y = nv; path.update(); _refreshCallBack();});
+        [this, &value, &path](double nv){ value.y = nv; path.update(); _refreshCallBack();});
     QObject::connect(spinZ, static_cast<void(Spin::*)(double)>(&Spin::valueChanged),
-                     [this, &value, &path](double nv){ value.z = nv; path.update(); _refreshCallBack();});
+        [this, &value, &path](double nv){ value.z = nv; path.update(); _refreshCallBack();});
 }
 
 template<typename Data>
@@ -164,7 +182,7 @@ void TreeBuilder<Data>::visit(PointPath<Data>& path)
     _displayPathCallback.push_back([this, &path](){
         _ui->durationSpin->setValue(path.duration());
 
-        setupTable(_ui->segmentTable, 1);
+        setupTable(_ui->segmentTable, 1, false);
         putValue(_ui->segmentTable, 0, path.value(), path);
     });
 
@@ -184,7 +202,7 @@ void TreeBuilder<Data>::visit(LinearPath<Data>& path)
     _displayPathCallback.push_back([this, &path](){
         _ui->durationSpin->setValue(path.duration());
 
-        setupTable(_ui->segmentTable, 2);
+        setupTable(_ui->segmentTable, 2, false);
         putValue(_ui->segmentTable, 0, path.begin(), path);
         putValue(_ui->segmentTable, 1, path.end(), path);
     });
@@ -205,11 +223,15 @@ void TreeBuilder<Data>::visit(CubicSplinePath<Data>& path)
     _displayPathCallback.push_back([this, &path](){
         _ui->durationSpin->setValue(path.duration());
 
-        setupTable(_ui->segmentTable, path.ctrlPts().size());
+        setupTable(_ui->segmentTable, path.ctrlPts().size(), true);
 
         int row = 0;
         for(Data& pt : path.ctrlPts())
             putValue(_ui->segmentTable, row++, pt, path);
+
+        row = 0;
+        for(double& w : path.weights())
+            putValue(_ui->segmentTable, row++, w, path, sizeof(Data)/sizeof(double));
     });
 
     _durationChangedCallback.push_back([&path](double duration){
@@ -228,7 +250,7 @@ void TreeBuilder<Data>::visit(BasisSplinePath<Data>& path)
     _displayPathCallback.push_back([this, &path](){
         _ui->durationSpin->setValue(path.duration());
 
-        setupTable(_ui->segmentTable, path.ctrlPts().size());
+        setupTable(_ui->segmentTable, path.ctrlPts().size(), false);
 
         int row = 0;
         for(Data& pt : path.ctrlPts())

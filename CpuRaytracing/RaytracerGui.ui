@@ -697,7 +697,7 @@
       <widget class="QWidget" name="raytracedScollViewContents">
        <property name="geometry">
         <rect>
-         <x>174</x>
+         <x>149</x>
          <y>63</y>
          <width>978</width>
          <height>660</height>
@@ -716,7 +716,7 @@
       </property>
       <property name="minimumSize">
        <size>
-        <width>350</width>
+        <width>400</width>
         <height>0</height>
        </size>
       </property>

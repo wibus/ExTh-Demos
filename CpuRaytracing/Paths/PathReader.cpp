@@ -133,6 +133,19 @@ bool PathReader::read(const QJsonDocument& jsonDoc)
             }
             else if(pathObj["Type"] == "CubicSplinePath")
             {
+                std::vector<double> weights;
+                if(pathObj["Weights"].isArray())
+                {
+                    for(QJsonValue w : pathObj["Weights"].toArray())
+                        weights.push_back(readValue<double>(w, ok));
+                }
+
+                if(weights.empty())
+                {
+                    weights = std::vector<double>(
+                        pathObj["CtrlPts"].toArray().size(), 1.0);
+                }
+
                 if(doubleComposite)
                 {
                     std::vector<double> ctrlPts;
@@ -141,7 +154,7 @@ bool PathReader::read(const QJsonDocument& jsonDoc)
 
                     doubleComposite->addPath(
                         std::make_shared<cellar::CubicSplinePath<double>>(
-                            duration, ctrlPts));
+                            duration, ctrlPts, weights));
                 }
                 else
                 {
@@ -151,7 +164,7 @@ bool PathReader::read(const QJsonDocument& jsonDoc)
 
                     dvec3Composite->addPath(
                         std::make_shared<cellar::CubicSplinePath<glm::dvec3>>(
-                            duration, ctrlPts));
+                            duration, ctrlPts, weights));
                 }
             }
             else if(pathObj["Type"] == "BasisSplinePath")

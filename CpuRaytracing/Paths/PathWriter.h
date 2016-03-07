@@ -109,6 +109,11 @@ void PathWriter<Data>::visit(cellar::CubicSplinePath<Data>& path)
     obj["Type"] = "CubicSplinePath";
     obj["Duration"] = path.duration();
 
+    QJsonArray weights;
+    for(const double& weight : path.weights())
+        weights.append(QJsonValue(weight));
+    obj["Weights"] = weights;
+
     QJsonArray ctrlPts;
     for(const Data& value : path.ctrlPts())
         ctrlPts.append(printValue(value));
