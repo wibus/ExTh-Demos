@@ -30,9 +30,9 @@ const std::string DEFAULT_PATH_FILE = "CpuRaytracing/resources/Paths.pth";
 Spin::Spin(double value)
 {
     setDecimals(3);
-    setMinimum(-100);
-    setMaximum( 100);
-    setSingleStep(0.01);
+    setMinimum(-400);
+    setMaximum( 400);
+    setSingleStep(0.1);
     setValue(value);
 }
 
@@ -220,7 +220,7 @@ void TreeBuilder<Data>::visit(CubicSplinePath<Data>& path)
 template<typename Data>
 void TreeBuilder<Data>::visit(BasisSplinePath<Data>& path)
 {
-    _last = new QStandardItem(QString("Cubic Spline [%1s]").arg(path.duration()));
+    _last = new QStandardItem(QString("Basis Spline [%1s]").arg(path.duration()));
     int callbackIdx = _displayPathCallback.size();
     _last->setData(QVariant(callbackIdx));
 
@@ -340,6 +340,7 @@ void PathManager::displayPaths()
     appendPath(pathModel.dayTime,           PathModel::DAY_TIME_PATH_NAME);
     appendPath(pathModel.hallLight,         PathModel::HALL_LIGHT_PATH_NAME);
     appendPath(pathModel.roomLight,         PathModel::ROOM_LIGHT_PATH_NAME);
+    _ui->pathsTree->expandAll();
 
     emit pathChanged();
 }
@@ -374,6 +375,8 @@ void PathManager::bindCameraToPath(bool bind)
         _choreographer->bindCameraToPath();
     else
         _choreographer->freeCameraFromPath();
+
+    emit freeCamera(!bind);
 }
 
 void PathManager::selectionChanged(const QItemSelection& selected,

@@ -81,6 +81,7 @@ void AnimationManager::setChoreographer(
 {
     _choreographer = choreographer;
 
+    animTimeOffset(0 /*unused*/);
     animFps(_ui->animFpsSpin->value());
     animFrame(_ui->animFrameSpin->value());
     fastPlay(_ui->fastAnimButton->isChecked());

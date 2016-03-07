@@ -47,6 +47,7 @@ public:
 
 signals:
     void pathChanged();
+    void freeCamera(bool isFree);
 
 private slots:
     virtual void bindCameraToPath(bool bind);

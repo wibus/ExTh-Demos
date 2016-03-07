@@ -123,6 +123,7 @@ void PathWriter<Data>::visit(cellar::BasisSplinePath<Data>& path)
     QJsonObject obj;
     obj["Type"] = "BasisSplinePath";
     obj["Duration"] = path.duration();
+    obj["Degree"] = path.degree();
 
     QJsonArray ctrlPts;
     for(const Data& value : path.ctrlPts())

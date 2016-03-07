@@ -60,8 +60,12 @@ void RaytracedView::setup()
 
     connect(_pathManager.get(), &PathManager::pathChanged,
             _animationManager.get(), &AnimationManager::onPathChanged);
+    connect(_pathManager.get(), &PathManager::freeCamera,
+            _cameraManager.get(), &CameraManager::onFreeCamera);
     _animationManager->setChoreographer(_choreographer);
     _animationManager->setRaytracer(_raytracerServer);
+
     _pathManager->setStageSet(_stageSet);
     _pathManager->setChoreographer(_choreographer);
+
 }

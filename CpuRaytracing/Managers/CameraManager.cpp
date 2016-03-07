@@ -239,3 +239,9 @@ bool CameraManager::eventFilter(QObject* obj, QEvent* event)
         return QObject::eventFilter(obj, event);
     }
 }
+
+void CameraManager::onFreeCamera(bool isFree)
+{
+    if(isFree)
+        dofDistanceChanged(0.0);
+}

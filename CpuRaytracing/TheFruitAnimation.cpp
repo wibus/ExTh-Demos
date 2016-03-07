@@ -12,6 +12,7 @@
 #include <PropRoom3D/Node/Prop/Prop.h>
 #include <PropRoom3D/Node/Prop/Surface/Surface.h>
 #include <PropRoom3D/Node/Debug/DebugLineStrip.h>
+#include <PropRoom3D/Team/ArtDirector/ArtDirectorServer.h>
 
 #include "Paths/PathModel.h"
 #include "Managers/PathManager.h"
@@ -40,7 +41,7 @@ void TheFruitChoreographer::update(double dt)
 
             // Camera focus
             float dofDist = glm::length(camTo - camEye);
-            float dofAper = dofDist + _camAperture + 1.0;
+            float dofAper = dofDist + _camAperture + ArtDirectorServer::IMAGE_DEPTH;
             glm::mat4 projection =
                 glm::perspectiveFov(
                     glm::radians((float)_pathModel->cameraFoV->value(t))/2,

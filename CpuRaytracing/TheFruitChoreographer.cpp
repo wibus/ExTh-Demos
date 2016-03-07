@@ -35,7 +35,7 @@ TheFruitChoreographer::TheFruitChoreographer(
         const std::shared_ptr<RaytracerState>& raytracerState) :
     _camera(camera),
     _camMan(new CameraManFree(camera, false)),
-    _camAperture(0.4),
+    _camAperture(0.8),
     _raytracerState(raytracerState),
     _pathModel(new PathModel()),
     _animFps(24),

@@ -66,7 +66,7 @@
                    <number>3840</number>
                   </property>
                   <property name="value">
-                   <number>854</number>
+                   <number>1280</number>
                   </property>
                  </widget>
                 </item>
@@ -82,7 +82,7 @@
                    <number>2160</number>
                   </property>
                   <property name="value">
-                   <number>480</number>
+                   <number>720</number>
                   </property>
                  </widget>
                 </item>
@@ -261,7 +261,11 @@
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QDoubleSpinBox" name="dofApertureSpin"/>
+            <widget class="QDoubleSpinBox" name="dofApertureSpin">
+             <property name="value">
+              <double>0.000000000000000</double>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -278,7 +282,7 @@
               <string>Update each tile</string>
              </property>
              <property name="checked">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -585,6 +589,9 @@
               <widget class="QDoubleSpinBox" name="animTimeOffsetSecSpin">
                <property name="suffix">
                 <string>s</string>
+               </property>
+               <property name="value">
+                <double>37.000000000000000</double>
                </property>
               </widget>
              </item>

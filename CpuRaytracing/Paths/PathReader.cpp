@@ -156,25 +156,37 @@ bool PathReader::read(const QJsonDocument& jsonDoc)
             }
             else if(pathObj["Type"] == "BasisSplinePath")
             {
-                if(doubleComposite)
+                if(pathObj["Degree"].isDouble())
                 {
-                    std::vector<double> ctrlPts;
-                    for(QJsonValue cp : pathObj["CtrlPts"].toArray())
-                        ctrlPts.push_back(readValue<double>(cp, ok));
+                    int degree = pathObj["Degree"].toInt();
 
-                    doubleComposite->addPath(
-                        std::make_shared<cellar::BasisSplinePath<double>>(
-                            duration, ctrlPts));
+                    if(doubleComposite)
+                    {
+                        std::vector<double> ctrlPts;
+                        for(QJsonValue cp : pathObj["CtrlPts"].toArray())
+                            ctrlPts.push_back(readValue<double>(cp, ok));
+
+                        doubleComposite->addPath(
+                            std::make_shared<cellar::BasisSplinePath<double>>(
+                                duration, degree, ctrlPts));
+                    }
+                    else
+                    {
+                        std::vector<glm::dvec3> ctrlPts;
+                        for(QJsonValue cp : pathObj["CtrlPts"].toArray())
+                            ctrlPts.push_back(readValue<glm::dvec3>(cp, ok));
+
+                        dvec3Composite->addPath(
+                            std::make_shared<cellar::BasisSplinePath<glm::dvec3>>(
+                                duration, degree, ctrlPts));
+                    }
                 }
                 else
                 {
-                    std::vector<glm::dvec3> ctrlPts;
-                    for(QJsonValue cp : pathObj["CtrlPts"].toArray())
-                        ctrlPts.push_back(readValue<glm::dvec3>(cp, ok));
-
-                    dvec3Composite->addPath(
-                        std::make_shared<cellar::BasisSplinePath<glm::dvec3>>(
-                            duration, ctrlPts));
+                    getLog().postMessage(new Message('E', false,
+                        "Basis spline's degree is missing",
+                        "PathReader"));
+                    return false;
                 }
             }
             else

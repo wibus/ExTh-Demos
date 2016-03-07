@@ -24,6 +24,9 @@ public:
     virtual void setView(QWidget* view);
     virtual void setRaytracer(const std::shared_ptr<prop3::ArtDirectorServer>& raytracer);
 
+public slots:
+    virtual void onFreeCamera(bool isFree);
+
 protected slots:
     virtual void captureDimensionsChanged(int unused);
     virtual void outputDimensionsChanged(int unused);
