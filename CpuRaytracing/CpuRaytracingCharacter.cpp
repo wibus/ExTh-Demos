@@ -32,6 +32,8 @@
 #include <Scaena/StageManagement/Event/SynchronousMouse.h>
 #include <Scaena/StageManagement/Event/KeyboardEvent.h>
 
+#include "Model/SceneDocument.h"
+
 using namespace cellar;
 using namespace prop2;
 using namespace prop3;
@@ -75,7 +77,8 @@ void CpuRaytracingCharacter::enterStage()
     //setupManufacturingStageSet();
     //setupCornBoardStageSet();
 
-    play().propTeam3D()->saveScene("StageSet.prop3");
+    play().propTeam3D()->saveScene(
+        getSceneDocument().getStageSetFilePath());
 }
 
 void CpuRaytracingCharacter::beginStep(const StageTime &time)

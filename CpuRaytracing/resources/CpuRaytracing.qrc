@@ -1,9 +1,5 @@
 <RCC>
     <qresource prefix="/CpuRaytracing">
-        <file>Fusion_Albums.png</file>
-        <file>Bathroom_Tiles_albedo.png</file>
-        <file>Bathroom_Tiles_gloss.png</file>
-        <file>Dessin_Coco.png</file>
         <file>1454898739_play-circle-outline.png</file>
         <file>1454898768_replay.png</file>
         <file>1454898776_fast-forward.png</file>

@@ -17,7 +17,8 @@
 #include <PropRoom3D/Node/StageSet.h>
 
 #include "ui_RaytracerGui.h"
-#include "../Paths/PathModel.h"
+#include "../Model/PathModel.h"
+#include "../Model/SceneDocument.h"
 #include "../TheFruitChoreographer.h"
 
 using namespace cellar;
@@ -25,7 +26,6 @@ using namespace cellar;
 Q_DECLARE_METATYPE(AbstractPath<double>*)
 Q_DECLARE_METATYPE(AbstractPath<glm::dvec3>*)
 
-const std::string DEFAULT_PATH_FILE = "CpuRaytracing/resources/Paths.pth";
 
 Spin::Spin(double value)
 {
@@ -480,43 +480,47 @@ void PathManager::savePaths()
     std::string output = _choreographer->pathModel()->serialize();
 
     std::ofstream fileStream;
-    fileStream.open(DEFAULT_PATH_FILE, std::ios_base::trunc);
+    std::string pathsFile = getSceneDocument().getAnimationPathsFilePath();
+    fileStream.open(pathsFile, std::ios_base::trunc);
+
     if(fileStream.is_open())
     {
         fileStream << output;
         fileStream.close();
 
         getLog().postMessage(new Message('I', false,
-            DEFAULT_PATH_FILE + " successfully saved", "PathManager"));
+            pathsFile + " successfully saved", "PathManager"));
     }
     else
     {
         getLog().postMessage(new Message('E', false,
-            "Could not save to " + DEFAULT_PATH_FILE, "PathManager"));
+            "Could not save to " + pathsFile, "PathManager"));
     }
 }
 
 void PathManager::loadPaths()
 {
     bool ok = false;
-    std::string stream = cellar::fileToString(DEFAULT_PATH_FILE, &ok);
+    std::string pathsFile = getSceneDocument().getAnimationPathsFilePath();
+    std::string stream = cellar::fileToString(pathsFile, &ok);
+
     if(ok)
     {
         if(_choreographer->pathModel()->deserialize(stream))
         {
             getLog().postMessage(new Message('I', false,
-                DEFAULT_PATH_FILE + " successfully loaded", "PathManager"));
+                pathsFile + " successfully loaded", "PathManager"));
             displayPaths();
         }
         else
         {
             getLog().postMessage(new Message('E', false,
-                "Could not load path from " + DEFAULT_PATH_FILE, "PathManager"));
+                "Could not load path from " + pathsFile, "PathManager"));
         }
     }
     else
     {
         getLog().postMessage(new Message('E', false,
-            DEFAULT_PATH_FILE + " is unreadable. Does it even exist?", "PathManager"));
+            pathsFile + " is unreadable. Does it even exist?", "PathManager"));
     }
 }

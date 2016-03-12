@@ -16,7 +16,8 @@
 #include <PropRoom3D/Node/Light/LightBulb/CircularLight.h>
 #include <PropRoom3D/Node/Light/LightBulb/SphericalLight.h>
 
-#include "Paths/PathModel.h"
+#include "Model/PathModel.h"
+#include "Model/SceneDocument.h"
 
 using namespace cellar;
 using namespace prop3;
@@ -49,12 +50,14 @@ TheFruitChoreographer::TheFruitChoreographer(
 
 TheFruitChoreographer::~TheFruitChoreographer()
 {
-
 }
-
 
 void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
 {
+    getSceneDocument().setSceneName("The Fruit");
+    getSceneDocument().setStageSetName("StageSet");
+    std::string textureRoot = getSceneDocument().getTextureRootDirectory();
+
     // Environment
     _backdrop.reset( new ProceduralSun() );
     stageSet->setBackdrop(std::shared_ptr<Backdrop>(_backdrop));
@@ -84,9 +87,9 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
             true);
 
     auto socleCoat = new TexturedStdCoating();
-    socleCoat->setRoughnessTexName(":/CpuRaytracing/Bathroom_Tiles_gloss.png");
+    socleCoat->setRoughnessTexName(textureRoot + "Bathroom_Tiles_gloss.png");
     socleCoat->setDefaultRoughness(0.0);
-    socleCoat->setPaintColorTexName(":/CpuRaytracing/Bathroom_Tiles_albedo.png");
+    socleCoat->setPaintColorTexName(textureRoot + "Bathroom_Tiles_albedo.png");
     socleCoat->setDefaultPaintColor(glm::dvec4(color::white, 1.0));
     socleCoat->setPaintRefractiveIndex(1.55);
     socleCoat->setTexFilter(ESamplerFilter::LINEAR);
@@ -323,7 +326,7 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
         boxMin.x / 2.0,  boxMin.y + wallThickness.y + posterEpsilon * 10.0,  boxMax.z * 0.72));
 
     auto pPosterCoat = new TexturedStdCoating();
-    pPosterCoat->setPaintColorTexName(":/CpuRaytracing/Fusion_Albums.png");
+    pPosterCoat->setPaintColorTexName(textureRoot + "Fusion_Albums.png");
     pPosterCoat->setDefaultPaintColor(glm::dvec4(0.2, 0.2, 0.2, 1.0));
     pPosterCoat->setTexFilter(ESamplerFilter::LINEAR);
     pPosterCoat->setTexWrapper(ESamplerWrapper::CLAMP);
@@ -331,7 +334,7 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
     pCoat posterCoat = pCoat(pPosterCoat);
 
     auto pDessinCocoCoat = new TexturedStdCoating();
-    pDessinCocoCoat->setPaintColorTexName(":/CpuRaytracing/Dessin_Coco.png");
+    pDessinCocoCoat->setPaintColorTexName(textureRoot + "Dessin_Coco.png");
     pDessinCocoCoat->setDefaultPaintColor(glm::dvec4(0.2, 0.2, 0.2, 1.0));
     pDessinCocoCoat->setTexFilter(ESamplerFilter::LINEAR);
     pDessinCocoCoat->setTexWrapper(ESamplerWrapper::CLAMP);

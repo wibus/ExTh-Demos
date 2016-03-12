@@ -61,7 +61,6 @@ private slots:
 protected:
     virtual void updateTimeMeter();
     virtual double computeTimeOffset();
-    virtual QString timeToString(double time);
 
 private:
     Ui::RaytracerGui* _ui;

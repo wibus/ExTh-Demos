@@ -3,7 +3,8 @@
 #include <PropRoom3D/Team/ArtDirector/RaytracerState.h>
 
 #include "PathManager.h"
-#include "../Paths/PathModel.h"
+#include "../Model/PathModel.h"
+#include "../Model/SceneDocument.h"
 #include "../TheFruitChoreographer.h"
 
 #include "ui_RaytracerGui.h"
@@ -198,27 +199,27 @@ void AnimationManager::animPlayFromChoreographer(bool play)
 
 void AnimationManager::outputName(const QString& name)
 {
-    _choreographer->recordOutput().name = name.toStdString();
+    getSceneDocument().setOutputFrameDirectory(name.toStdString());
 }
 
 void AnimationManager::outputFormat(const QString& format)
 {
-    _choreographer->recordOutput().format = format.toStdString();
+    getSceneDocument().setOutputFrameFormat(format.toStdString());
 }
 
 void AnimationManager::includeSampleCount(bool include)
 {
-    _choreographer->recordOutput().includeSampleCount = include;
+    getSceneDocument().setIncludeSampleCountInFrame(include);
 }
 
 void AnimationManager::includeRenderTime(bool include)
 {
-    _choreographer->recordOutput().includeRenderTime = include;
+    getSceneDocument().setIncludeRenderTimeInFrame(include);
 }
 
 void AnimationManager::includeDivergence(bool include)
 {
-    _choreographer->recordOutput().includeDivergence = include;
+    getSceneDocument().setIncludeDivergenceInFrame(include);
 }
 
 void AnimationManager::updateTimeMeter()
@@ -226,32 +227,17 @@ void AnimationManager::updateTimeMeter()
     double offset = computeTimeOffset();
     int frame = _ui->animFrameSpin->value();
     _ui->animTimeValue->setText(
-        timeToString(offset + double(frame) / _ui->animFpsSpin->value()));
+        SceneDocument::timeToString(offset + double(frame) / _ui->animFpsSpin->value()).c_str());
     _ui->animTimeSuffix->setText(QString(" / %1")
-        .arg(timeToString(offset + _choreographer->pathModel()->animationLength())));
+        .arg(SceneDocument::timeToString(offset + _choreographer->pathModel()->animationLength()).c_str()));
 }
 
-const double SEC_IN_MIN = 60.0;
-const double MIL_IN_SEC = 1000.0;
 double AnimationManager::computeTimeOffset()
 {
     double offsetMin = _ui->animTimeOffsetMinSpin->value();
     double offsetSec = _ui->animTimeOffsetSecSpin->value();
-    double offsetSecTot = offsetMin * SEC_IN_MIN + offsetSec;
+    double offsetSecTot = offsetMin * 60.0 + offsetSec;
     return offsetSecTot;
-}
-
-QString AnimationManager::timeToString(double time)
-{
-    int minutes = int(time / SEC_IN_MIN);
-    double minToSec = minutes * SEC_IN_MIN;
-    int seconds = int(time - minToSec);
-    int millisec = int((time - minToSec - seconds)*MIL_IN_SEC);
-    QString str = QString("%1m%2s%3l")
-            .arg(minutes, 2, 10, QChar('0'))
-            .arg(seconds, 2, 10, QChar('0'))
-            .arg(millisec, 3, 10, QChar('0'));
-    return str;
 }
 
 void AnimationManager::onPathChanged()

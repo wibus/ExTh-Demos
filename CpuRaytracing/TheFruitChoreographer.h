@@ -21,16 +21,6 @@ class PathModel;
 class PathManager;
 
 
-struct RecordOutput
-{
-    std::string name;
-    std::string format;
-    bool includeSampleCount;
-    bool includeRenderTime;
-    bool includeDivergence;
-};
-
-
 class TheFruitChoreographer : public QObject, public prop3::AbstractChoreographer
 {
     Q_OBJECT
@@ -63,7 +53,6 @@ public:
 
     virtual std::shared_ptr<PathModel> pathModel() const;
 
-    virtual RecordOutput& recordOutput();
     virtual void saveCurrentFrame();
 
 signals:
@@ -102,7 +91,6 @@ private:
     bool _animPlaying;
     bool _animFastPlay;
     bool _cameraIsFree;
-    RecordOutput _recordOutput;
 };
 
 #endif // THEFRUIT_CHOREOGRAPHER_H

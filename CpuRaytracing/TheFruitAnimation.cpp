@@ -14,7 +14,8 @@
 #include <PropRoom3D/Node/Debug/DebugLineStrip.h>
 #include <PropRoom3D/Team/ArtDirector/ArtDirectorServer.h>
 
-#include "Paths/PathModel.h"
+#include "Model/PathModel.h"
+#include "Model/SceneDocument.h"
 #include "Managers/PathManager.h"
 
 using namespace cellar;
@@ -29,6 +30,9 @@ void TheFruitChoreographer::update(double dt)
     if(forcedUpdate || (_animPlaying && (
        _animFastPlay || !_raytracerState->isRendering())))
     {
+        if(_isRecording && !forcedUpdate && !_animFastPlay)
+            saveCurrentFrame();
+
         double t = _animTime;
 
         if(!_cameraIsFree)
@@ -77,9 +81,6 @@ void TheFruitChoreographer::update(double dt)
         {
             if(!_animFastPlay)
             {
-                if(_isRecording)
-                    saveCurrentFrame();
-
                 ++_animFrame;
                 _animTime = _animFrame / double(_animFps);
                 forceUpdate();
@@ -112,7 +113,7 @@ int TheFruitChoreographer::animFrameCount()
 
 void TheFruitChoreographer::setAnimTimeOffset(double offset)
 {
-
+    // Anim time offset doesn't affect frame timings
 }
 
 void TheFruitChoreographer::setAnimFps(int fps)
@@ -142,7 +143,9 @@ void TheFruitChoreographer::startRecording()
 {
     _isRecording = true;
 
-    QString outputDir((RECORD_OUPUT_PREFIX + _recordOutput.name).c_str());
+    QString outputDir((RECORD_OUPUT_PREFIX +
+       getSceneDocument().sceneName() + "/" +
+       getSceneDocument().outputFrameDirectory()).c_str());
 
     QDir dir = QDir::current();
     dir.mkpath(outputDir);
@@ -188,22 +191,21 @@ std::shared_ptr<PathModel> TheFruitChoreographer::pathModel() const
     return _pathModel;
 }
 
-RecordOutput& TheFruitChoreographer::recordOutput()
-{
-    return _recordOutput;
-}
-
 void TheFruitChoreographer::saveCurrentFrame()
 {
-    QString fileName = (RECORD_OUPUT_PREFIX + _recordOutput.name + "/").c_str();
+    std::string animDir =
+            getSceneDocument().sceneName() + "/" +
+            getSceneDocument().outputFrameDirectory() + "/";
+    QString fileName = (RECORD_OUPUT_PREFIX + animDir).c_str();
+
     fileName += QString("%1").arg(_animFrame, 4, 10, QChar('0'));
-    if(_recordOutput.includeSampleCount)
+    if(getSceneDocument().includeSampleCountInFrame())
         fileName += QString("_%1f").arg(_raytracerState->sampleCount());
-    if(_recordOutput.includeRenderTime)
-        fileName += QString("_%1s").arg((int)_raytracerState->renderTime());
-    if(_recordOutput.includeDivergence)
+    if(getSceneDocument().includeRenderTimeInFrame())
+        fileName += QString("_%1").arg(SceneDocument::timeToString(_raytracerState->renderTime()).c_str());
+    if(getSceneDocument().includeDivergenceInFrame())
         fileName += "_"+QString::number(_raytracerState->divergence(), 'f', 4)+"div";
-    fileName += _recordOutput.format.c_str();
+    fileName += getSceneDocument().outputFrameFormat().c_str();
     std::string stdFileName = fileName.toStdString();
 
     cellar::Image screenshot;
