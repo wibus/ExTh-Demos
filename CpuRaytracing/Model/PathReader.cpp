@@ -10,6 +10,7 @@
 #include <CellarWorkbench/Path/CompositePath.h>
 #include <CellarWorkbench/Path/CubicSplinePath.h>
 #include <CellarWorkbench/Path/BasisSplinePath.h>
+#include <CellarWorkbench/Path/PolynomialPath.h>
 
 using namespace cellar;
 
@@ -200,6 +201,42 @@ bool PathReader::read(const QJsonDocument& jsonDoc)
                         "Basis spline's degree is missing",
                         "PathReader"));
                     return false;
+                }
+            }
+            else if(pathObj["Type"] == "PolynomialPath")
+            {
+                std::vector<double> weights;
+                if(pathObj["Weights"].isArray())
+                {
+                    for(QJsonValue w : pathObj["Weights"].toArray())
+                        weights.push_back(readValue<double>(w, ok));
+                }
+
+                if(weights.empty())
+                {
+                    weights = std::vector<double>(
+                        pathObj["CtrlPts"].toArray().size(), 1.0);
+                }
+
+                if(doubleComposite)
+                {
+                    std::vector<double> ctrlPts;
+                    for(QJsonValue cp : pathObj["CtrlPts"].toArray())
+                        ctrlPts.push_back(readValue<double>(cp, ok));
+
+                    doubleComposite->addPath(
+                        std::make_shared<cellar::PolynomialPath<double>>(
+                            duration, ctrlPts, weights));
+                }
+                else
+                {
+                    std::vector<glm::dvec3> ctrlPts;
+                    for(QJsonValue cp : pathObj["CtrlPts"].toArray())
+                        ctrlPts.push_back(readValue<glm::dvec3>(cp, ok));
+
+                    dvec3Composite->addPath(
+                        std::make_shared<cellar::PolynomialPath<glm::dvec3>>(
+                            duration, ctrlPts, weights));
                 }
             }
             else

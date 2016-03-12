@@ -1,11 +1,14 @@
 #include "PathModel.h"
 
+#include <fstream>
+
 #include <CellarWorkbench/Misc/Log.h>
 
 #include <CellarWorkbench/Path/LinearPath.h>
 #include <CellarWorkbench/Path/PointPath.h>
 #include <CellarWorkbench/Path/CompositePath.h>
 #include <CellarWorkbench/Path/CubicSplinePath.h>
+#include <CellarWorkbench/Path/PolynomialPath.h>
 
 #include <PropRoom3D/Node/StageSet.h>
 #include <PropRoom3D/Node/Debug/DebugLineStrip.h>
@@ -95,6 +98,25 @@ public:
         }
     }
 
+    virtual void visit(PolynomialPath<glm::dvec3>& path) override
+    {
+        DebugPointCloud outer(_outerColor);
+        outer.setVertices({
+            path.ctrlPts().front() + _offset,
+            path.ctrlPts().back() + _offset});
+        _stageSet->addDebugPoints(outer);
+
+        if(path.ctrlPts().size() > 2)
+        {
+            DebugPointCloud inner(_innerColor);
+            auto end = --path.ctrlPts().end();
+            auto it = path.ctrlPts().begin();
+            while((it++) != end)
+                inner.addVertex(*it  + _offset);
+            _stageSet->addDebugPoints(inner);
+        }
+    }
+
     virtual void visit(CompositePath<glm::dvec3>& path) override
     {
         for(auto child : path.paths())
@@ -111,6 +133,57 @@ private:
     glm::dvec3 _outerColor;
     glm::dvec3 _innerColor;
     glm::dvec3 _offset;
+};
+
+
+class PathGraher : public PathVisitor<glm::dvec3>
+{
+public:
+    PathGraher(const std::string& outFile) :
+        _visitedPath(0),
+        _outFile(outFile)
+    {}
+
+    virtual void visit(PointPath<glm::dvec3>& path) override
+    {
+    }
+
+    virtual void visit(LinearPath<glm::dvec3>& path) override
+    {
+    }
+
+    virtual void visit(CubicSplinePath<glm::dvec3>& path) override
+    {
+    }
+
+    virtual void visit(BasisSplinePath<glm::dvec3>& path) override
+    {
+    }
+
+    virtual void visit(PolynomialPath<glm::dvec3>& path) override
+    {
+        std::string csvData = path.csv(0.001);
+        std::string fileName = _outFile + std::to_string(_visitedPath) + ".csv";
+        std::ofstream ofs;
+
+        ofs.open(fileName, std::ios_base::trunc);
+        if(ofs.is_open())
+        {
+            ofs << csvData;
+            ofs.close();
+            ++_visitedPath;
+        }
+    }
+
+    virtual void visit(CompositePath<glm::dvec3>& path) override
+    {
+        for(auto child : path.paths())
+            child->accept(*this);
+    }
+
+private:
+    int _visitedPath;
+    std::string _outFile;
 };
 
 PathModel::PathModel()
@@ -274,6 +347,9 @@ bool PathModel::deserialize(const std::string& stream)
             roomLight = reader.doublePath(ROOM_LIGHT_PATH_NAME);
 
             refreshDebugLines();
+
+            //PathGraher grapher("Polynomial");
+            //cameraEye->accept(grapher);
 
             return true;
         }

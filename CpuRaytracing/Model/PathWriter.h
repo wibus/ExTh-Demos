@@ -11,6 +11,7 @@
 #include <CellarWorkbench/Path/CompositePath.h>
 #include <CellarWorkbench/Path/CubicSplinePath.h>
 #include <CellarWorkbench/Path/BasisSplinePath.h>
+#include <CellarWorkbench/Path/PolynomialPath.h>
 #include <CellarWorkbench/Path/LinearPath.h>
 
 
@@ -33,6 +34,8 @@ public:
     virtual void visit(cellar::CubicSplinePath<Data>& path) override;
 
     virtual void visit(cellar::BasisSplinePath<Data>& path) override;
+
+    virtual void visit(cellar::PolynomialPath<Data>& path) override;
 
     virtual void visit(cellar::CompositePath<Data>& path) override;
 
@@ -129,6 +132,26 @@ void PathWriter<Data>::visit(cellar::BasisSplinePath<Data>& path)
     obj["Type"] = "BasisSplinePath";
     obj["Duration"] = path.duration();
     obj["Degree"] = path.degree();
+
+    QJsonArray ctrlPts;
+    for(const Data& value : path.ctrlPts())
+        ctrlPts.append(printValue(value));
+    obj["CtrlPts"] = ctrlPts;
+
+    _lastObj = obj;
+}
+
+template<typename Data>
+void PathWriter<Data>::visit(cellar::PolynomialPath<Data>& path)
+{
+    QJsonObject obj;
+    obj["Type"] = "PolynomialPath";
+    obj["Duration"] = path.duration();
+
+    QJsonArray weights;
+    for(const double& weight : path.weights())
+        weights.append(QJsonValue(weight));
+    obj["Weights"] = weights;
 
     QJsonArray ctrlPts;
     for(const Data& value : path.ctrlPts())

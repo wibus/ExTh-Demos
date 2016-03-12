@@ -12,6 +12,7 @@
 #include <CellarWorkbench/Path/LinearPath.h>
 #include <CellarWorkbench/Path/CubicSplinePath.h>
 #include <CellarWorkbench/Path/BasisSplinePath.h>
+#include <CellarWorkbench/Path/PolynomialPath.h>
 #include <CellarWorkbench/Path/CompositePath.h>
 
 #include <PropRoom3D/Node/StageSet.h>
@@ -58,6 +59,8 @@ public:
     virtual void visit(CubicSplinePath<Data>& path) override;
 
     virtual void visit(BasisSplinePath<Data>& path) override;
+
+    virtual void visit(PolynomialPath<Data>& path) override;
 
     virtual void visit(CompositePath<Data> &path) override;
 
@@ -255,6 +258,33 @@ void TreeBuilder<Data>::visit(BasisSplinePath<Data>& path)
         int row = 0;
         for(Data& pt : path.ctrlPts())
             putValue(_ui->segmentTable, row++, pt, path);
+    });
+
+    _durationChangedCallback.push_back([&path](double duration){
+        path.setDuration(duration);
+    });
+}
+
+template<typename Data>
+void TreeBuilder<Data>::visit(PolynomialPath<Data>& path)
+{
+    _last = new QStandardItem(QString("Polynomial [%1s]").arg(path.duration()));
+    int callbackIdx = _displayPathCallback.size();
+    _last->setData(QVariant(callbackIdx));
+
+    _pathParentName.push_back(_name);
+    _displayPathCallback.push_back([this, &path](){
+        _ui->durationSpin->setValue(path.duration());
+
+        setupTable(_ui->segmentTable, path.ctrlPts().size(), true);
+
+        int row = 0;
+        for(Data& pt : path.ctrlPts())
+            putValue(_ui->segmentTable, row++, pt, path);
+
+        row = 0;
+        for(double& w : path.weights())
+            putValue(_ui->segmentTable, row++, w, path, sizeof(Data)/sizeof(double));
     });
 
     _durationChangedCallback.push_back([&path](double duration){
