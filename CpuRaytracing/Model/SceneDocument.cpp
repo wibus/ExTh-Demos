@@ -41,6 +41,11 @@ void SceneDocument::setStageSetName(const std::string& name)
     _stageSetName = name;
 }
 
+void SceneDocument::setSoundtrackName(const std::string& name)
+{
+    _soundtrackName = name;
+}
+
 void SceneDocument::setOutputFrameDirectory(const std::string& directory)
 {
     _outputFrameDirectory = directory;
@@ -74,6 +79,11 @@ std::string SceneDocument::getStageSetFilePath() const
 std::string SceneDocument::getAnimationPathsFilePath() const
 {
     return _rootDir + _sceneName + "/Paths.pth";
+}
+
+std::string SceneDocument::getSoundtrackFilePath() const
+{
+    return _rootDir + _sceneName + "/" + _soundtrackName;
 }
 
 std::string SceneDocument::getTextureRootDirectory() const

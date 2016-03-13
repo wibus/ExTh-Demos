@@ -601,6 +601,49 @@
          </widget>
         </item>
         <item>
+         <widget class="QGroupBox" name="soundtrackGroup">
+          <property name="title">
+           <string>Soundtrack</string>
+          </property>
+          <layout class="QFormLayout" name="formLayout_6">
+           <item row="0" column="0">
+            <widget class="QLabel" name="soundtrackNameLabel">
+             <property name="text">
+              <string>Name</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="soundtrackNameEdit">
+             <property name="text">
+              <string>TheFruit_Soundtrack.mp3</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="soundtrackVolumeLabel">
+             <property name="text">
+              <string>Volume</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QSlider" name="soundtrackVolumeSlider">
+             <property name="maximum">
+              <number>100</number>
+             </property>
+             <property name="value">
+              <number>75</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
          <widget class="QGroupBox" name="animOutputGroup">
           <property name="title">
            <string>Output</string>

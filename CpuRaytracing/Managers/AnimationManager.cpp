@@ -1,5 +1,7 @@
 #include "AnimationManager.h"
 
+#include <QFileInfo>
+
 #include <PropRoom3D/Team/ArtDirector/RaytracerState.h>
 
 #include "PathManager.h"
@@ -52,6 +54,11 @@ AnimationManager::AnimationManager(Ui::RaytracerGui* ui) :
     _ui->animFrameSlider->setValue(
         _ui->animFrameSpin->value());
 
+    connect(_ui->soundtrackNameEdit, &QLineEdit::textChanged,
+            this, &AnimationManager::soundtrackName);
+
+    connect(_ui->soundtrackVolumeSlider, &QSlider::valueChanged,
+            this, &AnimationManager::soundtrackVolume);
 
     _ui->outputFormatCombo->addItem(".png");
     _ui->outputFormatCombo->addItem(".jpg");
@@ -87,6 +94,8 @@ void AnimationManager::setChoreographer(
     animFrame(_ui->animFrameSpin->value());
     fastPlay(_ui->fastAnimButton->isChecked());
     playAnim(_ui->playAnimButton->isChecked());
+    soundtrackName(_ui->soundtrackNameEdit->text());
+    soundtrackVolume(_ui->soundtrackVolumeSlider->value());
 
     connect(_choreographer.get(), &TheFruitChoreographer::animFrameChanged,
             this, &AnimationManager::animFrameFromChoreographer);
@@ -169,11 +178,16 @@ void AnimationManager::recordAnim(bool record)
 void AnimationManager::playAnim(bool play)
 {
     if(play)
+    {
         _choreographer->playAnimation();
+        if(_ui->fastAnimButton->isChecked())
+            startSoundtrack();
+    }
     else
     {
         _choreographer->pauseAnimation();
         _ui->recordAnimButton->setChecked(false);
+        _ui->fastAnimButton->setChecked(false);
     }
 }
 
@@ -183,6 +197,12 @@ void AnimationManager::fastPlay(bool fast)
 
     _ui->animFrameSpin->setEnabled(!fast);
     _ui->animFrameSlider->setEnabled(!fast);
+    _ui->soundtrackNameEdit->setEnabled(!fast);
+
+    if(fast && _ui->playAnimButton->isChecked())
+        startSoundtrack();
+    else
+        _mediaPlayer.pause();
 }
 
 void AnimationManager::animFrameFromChoreographer(int frame)
@@ -195,6 +215,19 @@ void AnimationManager::animFrameFromChoreographer(int frame)
 void AnimationManager::animPlayFromChoreographer(bool play)
 {
     _ui->playAnimButton->setChecked(play);
+}
+
+void AnimationManager::soundtrackName(QString name)
+{
+    getSceneDocument().setSoundtrackName(name.toStdString());
+    std::string relative = getSceneDocument().getSoundtrackFilePath();
+    QString absolute = QFileInfo(relative.c_str()).absoluteFilePath();
+    _mediaPlayer.setMedia(QUrl::fromLocalFile(absolute));
+}
+
+void AnimationManager::soundtrackVolume(int volume)
+{
+    _mediaPlayer.setVolume(volume);
 }
 
 void AnimationManager::outputName(const QString& name)
@@ -222,14 +255,24 @@ void AnimationManager::includeDivergence(bool include)
     getSceneDocument().setIncludeDivergenceInFrame(include);
 }
 
+void AnimationManager::startSoundtrack()
+{
+    double time = computeCurrentTime();
+    qint64 pos = time * 1000.0;
+    _mediaPlayer.setPosition(pos);
+    _mediaPlayer.play();
+}
+
 void AnimationManager::updateTimeMeter()
 {
+    double current = computeCurrentTime();
     double offset = computeTimeOffset();
-    int frame = _ui->animFrameSpin->value();
+    double endTime = offset + _choreographer->pathModel()->animationLength();
+
     _ui->animTimeValue->setText(
-        SceneDocument::timeToString(offset + double(frame) / _ui->animFpsSpin->value()).c_str());
+        SceneDocument::timeToString(current).c_str());
     _ui->animTimeSuffix->setText(QString(" / %1")
-        .arg(SceneDocument::timeToString(offset + _choreographer->pathModel()->animationLength()).c_str()));
+        .arg(SceneDocument::timeToString(endTime).c_str()));
 }
 
 double AnimationManager::computeTimeOffset()
@@ -238,6 +281,14 @@ double AnimationManager::computeTimeOffset()
     double offsetSec = _ui->animTimeOffsetSecSpin->value();
     double offsetSecTot = offsetMin * 60.0 + offsetSec;
     return offsetSecTot;
+}
+
+double AnimationManager::computeCurrentTime()
+{
+    double offset = computeTimeOffset();
+    double frame = _ui->animFrameSpin->value();
+    double fps = _ui->animFpsSpin->value();
+    return offset + frame/fps;
 }
 
 void AnimationManager::onPathChanged()

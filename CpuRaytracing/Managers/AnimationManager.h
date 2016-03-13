@@ -4,6 +4,7 @@
 #include <memory>
 
 #include <QWidget>
+#include <QMediaPlayer>
 
 #include <CellarWorkbench/Camera/Camera.h>
 
@@ -52,6 +53,9 @@ private slots:
     virtual void animFrameFromChoreographer(int frame);
     virtual void animPlayFromChoreographer(bool play);
 
+    virtual void soundtrackName(QString name);
+    virtual void soundtrackVolume(int volume);
+
     virtual void outputName(const QString& name);
     virtual void outputFormat(const QString& format);
     virtual void includeSampleCount(bool include);
@@ -59,13 +63,17 @@ private slots:
     virtual void includeDivergence(bool include);
 
 protected:
+    virtual void startSoundtrack();
     virtual void updateTimeMeter();
     virtual double computeTimeOffset();
+    virtual double computeCurrentTime();
 
 private:
     Ui::RaytracerGui* _ui;
     std::shared_ptr<prop3::ArtDirectorServer> _raytracer;
     std::shared_ptr<TheFruitChoreographer> _choreographer;
+    QMediaPlayer _mediaPlayer;
+
 };
 
 #endif // ANIMATIONMANAGER_H

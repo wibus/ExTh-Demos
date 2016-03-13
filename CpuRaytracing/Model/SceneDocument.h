@@ -23,6 +23,9 @@ public:
     std::string stageSetName() const;
     void setStageSetName(const std::string& name);
 
+    std::string soundtrackName() const;
+    void setSoundtrackName(const std::string& name);
+
     std::string outputFrameDirectory() const;
     void setOutputFrameDirectory(const std::string& directory);
 
@@ -40,6 +43,7 @@ public:
 
     std::string getStageSetFilePath() const;
     std::string getAnimationPathsFilePath() const;
+    std::string getSoundtrackFilePath() const;
     std::string getTextureRootDirectory() const;
     std::string getAnimationFramesDirectory() const;
 
@@ -49,6 +53,7 @@ private:
     std::string _rootDir;
     std::string _sceneName;
     std::string _stageSetName;
+    std::string _soundtrackName;
     std::string _outputFrameDirectory;
     std::string _outputFrameFormat;
     bool _includeSampleCountInFrame;
@@ -73,6 +78,11 @@ inline std::string SceneDocument::sceneName() const
 inline std::string SceneDocument::stageSetName() const
 {
     return _stageSetName;
+}
+
+inline std::string SceneDocument::soundtrackName() const
+{
+    return _soundtrackName;
 }
 
 inline std::string SceneDocument::outputFrameDirectory() const
