@@ -134,8 +134,6 @@ std::shared_ptr<Play> buildPhysics2D()
 
 int main(int argc, char* argv[])
 {
-    getLog().setOuput(cout);
-
     // Init application
     Application& app = getApplication();
     app.init(argc, argv);

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>2000</width>
-    <height>860</height>
+    <height>862</height>
    </rect>
   </property>
   <property name="mouseTracking">
@@ -579,9 +579,12 @@
            <item row="0" column="1">
             <layout class="QHBoxLayout" name="horizontalLayout_7">
              <item>
-              <widget class="QDoubleSpinBox" name="animTimeOffsetMinSpin">
+              <widget class="QSpinBox" name="animTimeOffsetMinSpin">
                <property name="suffix">
                 <string>m</string>
+               </property>
+               <property name="maximum">
+                <number>59</number>
                </property>
               </widget>
              </item>
@@ -590,8 +593,14 @@
                <property name="suffix">
                 <string>s</string>
                </property>
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="maximum">
+                <double>59.999000000000002</double>
+               </property>
                <property name="value">
-                <double>37.000000000000000</double>
+                <double>37.079999999999998</double>
                </property>
               </widget>
              </item>
@@ -740,8 +749,8 @@
       <widget class="QWidget" name="raytracedScollViewContents">
        <property name="geometry">
         <rect>
-         <x>149</x>
-         <y>63</y>
+         <x>156</x>
+         <y>64</y>
          <width>978</width>
          <height>660</height>
         </rect>

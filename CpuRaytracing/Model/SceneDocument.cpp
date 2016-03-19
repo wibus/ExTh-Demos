@@ -16,7 +16,8 @@ SceneDocument::SceneDocument() :
     _outputFrameFormat(".png"),
     _includeSampleCountInFrame(true),
     _includeRenderTimeInFrame(true),
-    _includeDivergenceInFrame(true)
+    _includeDivergenceInFrame(true),
+    _animationTimeOffset(0.0)
 {
 
 }
@@ -71,6 +72,11 @@ void SceneDocument::setIncludeDivergenceInFrame(bool include)
     _includeDivergenceInFrame = include;
 }
 
+void SceneDocument::setAnimationTimeOffset(double offset)
+{
+    _animationTimeOffset = offset;
+}
+
 std::string SceneDocument::getStageSetFilePath() const
 {
     return _rootDir + _sceneName + "/" + _stageSetName + ".prop3";
@@ -103,7 +109,7 @@ std::string SceneDocument::timeToString(double time)
     int minutes = int(time / SEC_IN_MIN);
     double minToSec = minutes * SEC_IN_MIN;
     int seconds = int(time - minToSec);
-    int millisec = int((time - minToSec - seconds)*MIL_IN_SEC);
+    int millisec = round((time - minToSec - seconds)*MIL_IN_SEC);
     QString str = QString("%1m%2s%3l")
         .arg(minutes, 2, 10, QChar('0'))
         .arg(seconds, 2, 10, QChar('0'))

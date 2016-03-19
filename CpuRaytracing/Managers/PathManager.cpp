@@ -47,7 +47,8 @@ public:
                 const std::function<void(void)>& refreshCallBack,
                 Ui::RaytracerGui* ui,
                 AbstractPath<Data>* path,
-                const std::string& name);
+                const std::string& name,
+                double beginTime);
 
     virtual ~TreeBuilder() {}
 
@@ -81,6 +82,7 @@ private:
     Ui::RaytracerGui* _ui;
     AbstractPath<Data>* _path;
     std::string _name;
+    double _beginTime;
 
     QStandardItem* _last;
 };
@@ -94,17 +96,20 @@ TreeBuilder<Data>::TreeBuilder(
         const std::function<void(void)>& refreshCallBack,
         Ui::RaytracerGui* ui,
         AbstractPath<Data>* path,
-        const std::string& name) :
+        const std::string& name,
+        double beginTime) :
     _displayPathCallback(displayPathCallback),
     _durationChangedCallback(durationChangedCallback),
     _pathParentName(pathParentName),
     _refreshCallBack(refreshCallBack),
     _ui(ui),
     _path(path),
-    _name(name)
+    _name(name),
+    _beginTime(beginTime)
 {
     _path->accept(*this);
-    _last->setText(QString((name +" [%1s]").c_str()).arg(path->duration()));
+    _last->setText((QString(name.c_str()) +" [%1]").arg(
+        SceneDocument::timeToString(_beginTime).c_str()));
 }
 
 template<>
@@ -177,7 +182,8 @@ void TreeBuilder<Data>::putValue(QTableWidget* table, int row, glm::dvec3& value
 template<typename Data>
 void TreeBuilder<Data>::visit(PointPath<Data>& path)
 {
-    _last = new QStandardItem(QString("Point [%1s]").arg(path.duration()));
+    _last = new QStandardItem(QString("Point [%1]").arg(
+        SceneDocument::timeToString(_beginTime + path.duration()).c_str()));
     int callbackIdx = _displayPathCallback.size();
     _last->setData(QVariant(callbackIdx));
 
@@ -192,12 +198,15 @@ void TreeBuilder<Data>::visit(PointPath<Data>& path)
     _durationChangedCallback.push_back([&path](double duration){
         path.setDuration(duration);
     });
+
+    _beginTime += path.duration();
 }
 
 template<typename Data>
 void TreeBuilder<Data>::visit(LinearPath<Data>& path)
 {
-    _last = new QStandardItem(QString("Linear [%1s]").arg(path.duration()));
+    _last = new QStandardItem(QString("Linear [%1]").arg(
+        SceneDocument::timeToString(_beginTime + path.duration()).c_str()));
     int callbackIdx = _displayPathCallback.size();
     _last->setData(QVariant(callbackIdx));
 
@@ -213,12 +222,15 @@ void TreeBuilder<Data>::visit(LinearPath<Data>& path)
     _durationChangedCallback.push_back([&path](double duration){
         path.setDuration(duration);
     });
+
+    _beginTime += path.duration();
 }
 
 template<typename Data>
 void TreeBuilder<Data>::visit(CubicSplinePath<Data>& path)
 {
-    _last = new QStandardItem(QString("Cubic Spline [%1s]").arg(path.duration()));
+    _last = new QStandardItem(QString("Cubic Spline [%1]").arg(
+        SceneDocument::timeToString(_beginTime + path.duration()).c_str()));
     int callbackIdx = _displayPathCallback.size();
     _last->setData(QVariant(callbackIdx));
 
@@ -240,12 +252,15 @@ void TreeBuilder<Data>::visit(CubicSplinePath<Data>& path)
     _durationChangedCallback.push_back([&path](double duration){
         path.setDuration(duration);
     });
+
+    _beginTime += path.duration();
 }
 
 template<typename Data>
 void TreeBuilder<Data>::visit(BasisSplinePath<Data>& path)
 {
-    _last = new QStandardItem(QString("Basis Spline [%1s]").arg(path.duration()));
+    _last = new QStandardItem(QString("Basis Spline [%1]").arg(
+        SceneDocument::timeToString(_beginTime + path.duration()).c_str()));
     int callbackIdx = _displayPathCallback.size();
     _last->setData(QVariant(callbackIdx));
 
@@ -263,12 +278,15 @@ void TreeBuilder<Data>::visit(BasisSplinePath<Data>& path)
     _durationChangedCallback.push_back([&path](double duration){
         path.setDuration(duration);
     });
+
+    _beginTime += path.duration();
 }
 
 template<typename Data>
 void TreeBuilder<Data>::visit(PolynomialPath<Data>& path)
 {
-    _last = new QStandardItem(QString("Polynomial [%1s]").arg(path.duration()));
+    _last = new QStandardItem(QString("Polynomial [%1]").arg(
+        SceneDocument::timeToString(_beginTime + path.duration()).c_str()));
     int callbackIdx = _displayPathCallback.size();
     _last->setData(QVariant(callbackIdx));
 
@@ -290,13 +308,16 @@ void TreeBuilder<Data>::visit(PolynomialPath<Data>& path)
     _durationChangedCallback.push_back([&path](double duration){
         path.setDuration(duration);
     });
+
+    _beginTime += path.duration();
 }
 
 
 template<typename Data>
 void TreeBuilder<Data>::visit(CompositePath<Data> &path)
 {
-    QStandardItem* item = new QStandardItem(QString("Composite [%1s]").arg(path.duration()));
+    QStandardItem* item = new QStandardItem(QString("Composite [%1]").arg(
+        SceneDocument::timeToString(_beginTime + path.duration()).c_str()));
     item->setSelectable(false);
 
     for(const auto& sub : path.paths())
@@ -404,7 +425,7 @@ void PathManager::appendPath(const std::shared_ptr<AbstractPath<double> > &path,
         _durationChangedCallback,
         _pathParentName,
         std::bind(&PathManager::controlPointMoved, this),
-        _ui, path.get(), name);
+        _ui, path.get(), name, getSceneDocument().animationTimeOffset());
 
     _pathTreeModel->appendRow(_doubleTreeBuilders.back().getRoot());
 }
@@ -416,7 +437,7 @@ void PathManager::appendPath(const std::shared_ptr<AbstractPath<glm::dvec3>>& pa
         _durationChangedCallback,
         _pathParentName,
         std::bind(&PathManager::controlPointMoved, this),
-        _ui, path.get(), name);
+        _ui, path.get(), name, getSceneDocument().animationTimeOffset());
 
     _pathTreeModel->appendRow(_dvec3TreeBuilders.back().getRoot());
 }

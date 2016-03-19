@@ -41,6 +41,9 @@ public:
     bool includeDivergenceInFrame() const;
     void setIncludeDivergenceInFrame(bool include);
 
+    double animationTimeOffset() const;
+    void setAnimationTimeOffset(double offset);
+
     std::string getStageSetFilePath() const;
     std::string getAnimationPathsFilePath() const;
     std::string getSoundtrackFilePath() const;
@@ -59,6 +62,7 @@ private:
     bool _includeSampleCountInFrame;
     bool _includeRenderTimeInFrame;
     bool _includeDivergenceInFrame;
+    double _animationTimeOffset;
 };
 
 SceneDocument& getSceneDocument();
@@ -108,6 +112,11 @@ inline bool SceneDocument::includeRenderTimeInFrame() const
 inline bool SceneDocument::includeDivergenceInFrame() const
 {
     return _includeDivergenceInFrame;
+}
+
+inline double SceneDocument::animationTimeOffset() const
+{
+    return _animationTimeOffset;
 }
 
 #endif // SCENEDOCUMENT_H

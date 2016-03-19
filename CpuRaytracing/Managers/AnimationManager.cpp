@@ -25,7 +25,7 @@ AnimationManager::AnimationManager(Ui::RaytracerGui* ui) :
             this, &AnimationManager::divThreshold);
 
 
-    connect(_ui->animTimeOffsetMinSpin, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+    connect(_ui->animTimeOffsetMinSpin, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),
             this, &AnimationManager::animTimeOffset);
     connect(_ui->animTimeOffsetSecSpin, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
             this, &AnimationManager::animTimeOffset);
@@ -135,10 +135,11 @@ void AnimationManager::divThreshold(double div)
     _raytracer->raytracerState()->setDivergenceThreshold(div);
 }
 
-void AnimationManager::animTimeOffset(double offset)
+void AnimationManager::animTimeOffset(double)
 {
-    _choreographer->setAnimTimeOffset(
-        computeTimeOffset());
+    double offset = computeTimeOffset();
+    getSceneDocument().setAnimationTimeOffset(offset);
+    _choreographer->setAnimTimeOffset(offset);
     updateTimeMeter();
 }
 
@@ -162,6 +163,12 @@ void AnimationManager::animFrame(int frame)
 void AnimationManager::resetAnim(bool unsused)
 {
     _choreographer->resetAnimation();
+
+    if(_ui->playAnimButton->isChecked() &&
+       _ui->fastAnimButton->isChecked())
+    {
+        startSoundtrack();
+    }
 }
 
 void AnimationManager::recordAnim(bool record)
