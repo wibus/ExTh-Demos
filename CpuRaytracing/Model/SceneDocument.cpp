@@ -110,7 +110,7 @@ std::string SceneDocument::timeToString(double time)
     double minToSec = minutes * SEC_IN_MIN;
     int seconds = int(time - minToSec);
     int centisec = round((time - minToSec - seconds)*CEN_IN_SEC);
-    seconds -= centisec / int(CEN_IN_SEC);
+    seconds += centisec / int(CEN_IN_SEC);
     centisec -= (centisec / int(CEN_IN_SEC)) * CEN_IN_SEC;
 
     QString str = QString("%1m%2s%3l")
