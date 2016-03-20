@@ -103,16 +103,19 @@ std::string SceneDocument::getAnimationFramesDirectory() const
 }
 
 const double SEC_IN_MIN = 60.0;
-const double MIL_IN_SEC = 1000.0;
+const double CEN_IN_SEC = 100.0;
 std::string SceneDocument::timeToString(double time)
 {
     int minutes = int(time / SEC_IN_MIN);
     double minToSec = minutes * SEC_IN_MIN;
     int seconds = int(time - minToSec);
-    int millisec = round((time - minToSec - seconds)*MIL_IN_SEC);
+    int centisec = round((time - minToSec - seconds)*CEN_IN_SEC);
+    seconds -= centisec / int(CEN_IN_SEC);
+    centisec -= (centisec / int(CEN_IN_SEC)) * CEN_IN_SEC;
+
     QString str = QString("%1m%2s%3l")
         .arg(minutes, 2, 10, QChar('0'))
         .arg(seconds, 2, 10, QChar('0'))
-        .arg(millisec, 3, 10, QChar('0'));
+        .arg(centisec, 2, 10, QChar('0'));
     return str.toStdString();
 }

@@ -404,8 +404,8 @@ void PathManager::displayPaths()
 {
     clearPaths();
     PathModel& pathModel = *_choreographer->pathModel();
-    appendPath(pathModel.cameraTo,          PathModel::CAMERA_TO_PATH_NAME);
     appendPath(pathModel.cameraEye,         PathModel::CAMERA_EYE_PATH_NAME);
+    appendPath(pathModel.cameraTo,          PathModel::CAMERA_TO_PATH_NAME);
     appendPath(pathModel.cameraFoV,         PathModel::CAMERA_FOV_PATH_NAME);
     appendPath(pathModel.theFruitPos,       PathModel::THE_FRUIT_POS_PATH_NAME);
     appendPath(pathModel.theFruitHeight,    PathModel::THE_FRUIT_HEIGHT_PATH_NAME);
