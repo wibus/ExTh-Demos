@@ -12,6 +12,7 @@
 #include <PropRoom3D/Node/Prop/Prop.h>
 #include <PropRoom3D/Node/Prop/Surface/Surface.h>
 #include <PropRoom3D/Node/Debug/DebugLineStrip.h>
+#include <PropRoom3D/Node/Light/Backdrop/ProceduralSun.h>
 #include <PropRoom3D/Team/ArtDirector/ArtDirectorServer.h>
 
 #include "Model/PathModel.h"
@@ -75,6 +76,17 @@ void TheFruitChoreographer::update(double dt)
         glm::dvec3 cloudsDisplacement = cloudsNewPos - _cloudsPosition;
         _cloudsZone->translate(cloudsDisplacement);
         _cloudsPosition = cloudsNewPos;
+
+
+        // Sin direction
+        glm::dvec3 lastPos(-2.4, -1.4, 0.8);
+        glm::dvec3 lastHole(5.0, -4.0, 2.5);
+        glm::dvec3 sunAxis = glm::normalize(glm::dvec3(1, 3, 0.2));
+        glm::dvec4 lastDir(glm::normalize(lastPos - lastHole), 0.0);
+        double lastHour = _pathModel->dayTime->value(_pathModel->dayTime->duration());
+        double sunRot = (_pathModel->dayTime->value(t) - lastHour) * glm::pi<double>() / 12.0;
+        glm::dvec3 sunDir = glm::dvec3(glm::rotate(glm::dmat4(), sunRot, sunAxis) * lastDir);
+        _backdrop->setSunDirection( -sunDir );
 
 
         if(!forcedUpdate)

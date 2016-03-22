@@ -720,8 +720,8 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
     // Sculpture table //
     /////////////////////
     double scultpTableRadius = 0.30;
-    double sculptTableHeight = 1.20;
-    glm::dvec3 sculptTablePos(boxMin.x/2.0, boxMin.y/1.5, 0);
+    double sculptTableHeight = 1.00;
+    glm::dvec3 sculptTablePos(boxMin.x/2.0, 3*boxMin.y/4.0, 0);
 
     double sculptTableTopThick = 0.02;
     double sculptTableTopRadius = scultpTableRadius + sculptTableTopThick;
