@@ -317,10 +317,10 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
         boxMin.x / 2.0,  boxMin.y - posterEpsilon * 10.0,  boxMax.z * 0.72));
 
     pSurf dessinCocoSurf = BoxTexture::boxPosDims(glm::dvec3(),
-        glm::dvec3(posterLength, posterEpsilon, posterLength),
-        glm::dvec3(posterLength/2.0, 0, -posterLength/2.0),
-        glm::dvec3(-posterLength, 0, 0),
-        glm::dvec3(0, 0, posterLength),
+        glm::dvec3(posterLength*7.0/4, posterEpsilon, posterLength*3.0/4),
+        glm::dvec3(posterLength/2.0, 0, -posterLength*3/8.0),
+        glm::dvec3(-posterLength*3/4.0, 0, 0),
+        glm::dvec3(0, 0, posterLength*3/4.0),
         true);
     Surface::translate(dessinCocoSurf, glm::dvec3(
         boxMin.x / 2.0,  boxMin.y + wallThickness.y + posterEpsilon * 10.0,  boxMax.z * 0.72));
