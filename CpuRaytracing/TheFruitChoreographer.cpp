@@ -217,7 +217,7 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
     //////////
     double roofSide = 0.2;
     glm::dvec3 roofMin(boxMin.x * 1.80, boxMin.y * 1.80, boxMax.z);
-    glm::dvec3 roofMax(boxMax.x * 1.30, boxMax.y * 1.80, boxMax.z + roofSide);
+    glm::dvec3 roofMax(boxMax.x * 1.30, boxMax.y * 1.30, boxMax.z + roofSide);
     pSurf roofSurf = Box::boxCorners(roofMin, roofMax);
 
     double roofPillarSide = wallThickness.x * 2.0;
