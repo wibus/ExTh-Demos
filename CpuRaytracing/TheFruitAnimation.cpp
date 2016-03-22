@@ -12,6 +12,7 @@
 #include <PropRoom3D/Node/Prop/Prop.h>
 #include <PropRoom3D/Node/Prop/Surface/Surface.h>
 #include <PropRoom3D/Node/Debug/DebugLineStrip.h>
+#include <PropRoom3D/Node/Light/LightBulb/LightBulb.h>
 #include <PropRoom3D/Node/Light/Backdrop/ProceduralSun.h>
 #include <PropRoom3D/Team/ArtDirector/ArtDirectorServer.h>
 
@@ -87,6 +88,25 @@ void TheFruitChoreographer::update(double dt)
         double sunRot = (_pathModel->dayTime->value(t) - lastHour) * glm::pi<double>() / 12.0;
         glm::dvec3 sunDir = glm::dvec3(glm::rotate(glm::dmat4(), sunRot, sunAxis) * lastDir);
         _backdrop->setSunDirection( -sunDir );
+
+
+        // Lights
+        double hallIntensity= _pathModel->hallLight->value(t);
+        _hallLight->setRadiantFlux(_fixtureRadiantFlux * hallIntensity);
+        _hallLight->setIsOn(hallIntensity > 0.0);
+
+        double backIntensity= _pathModel->backLight->value(t);
+        _roomLightBack->setRadiantFlux(_fixtureRadiantFlux * backIntensity);
+        _roomLightBack->setIsOn(backIntensity > 0.0);
+
+        double frontIntensity= _pathModel->frontLight->value(t);
+        _roomLightFront->setRadiantFlux(_fixtureRadiantFlux * frontIntensity);
+        _roomLightFront->setIsOn(frontIntensity > 0.0);
+
+        double lampIntensity= _pathModel->lampLight->value(t);
+        _lampLight->setRadiantFlux(_lampRadiantFlux * lampIntensity);
+        _lampLight->setIsOn(lampIntensity > 0.0);
+
 
 
         if(!forcedUpdate)

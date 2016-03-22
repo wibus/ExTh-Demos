@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>2000</width>
-    <height>862</height>
+    <width>2100</width>
+    <height>960</height>
    </rect>
   </property>
   <property name="mouseTracking">
@@ -749,8 +749,8 @@
       <widget class="QWidget" name="raytracedScollViewContents">
        <property name="geometry">
         <rect>
-         <x>161</x>
-         <y>64</y>
+         <x>211</x>
+         <y>113</y>
          <width>978</width>
          <height>660</height>
         </rect>
@@ -1324,7 +1324,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>2000</width>
+     <width>2100</width>
      <height>27</height>
     </rect>
    </property>

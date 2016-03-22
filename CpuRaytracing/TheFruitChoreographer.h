@@ -14,6 +14,7 @@ namespace prop3
     class Prop;
     class Surface;
     class ProceduralSun;
+    class LightBulb;
     class StageZone;
 }
 
@@ -80,6 +81,13 @@ private:
     std::shared_ptr<prop3::Surface> _theFruitSurf;
     std::shared_ptr<prop3::StageZone> _theFruitZone;
     std::shared_ptr<prop3::ProceduralSun> _backdrop;
+
+    glm::dvec3 _fixtureRadiantFlux;
+    std::shared_ptr<prop3::LightBulb> _hallLight;
+    std::shared_ptr<prop3::LightBulb> _roomLightBack;
+    std::shared_ptr<prop3::LightBulb> _roomLightFront;
+    glm::dvec3 _lampRadiantFlux;
+    std::shared_ptr<prop3::LightBulb> _lampLight;
 
     std::shared_ptr<prop3::RaytracerState> _raytracerState;
     std::shared_ptr<PathModel> _pathModel;

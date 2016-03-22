@@ -29,7 +29,9 @@ const std::string PathModel::THE_FRUIT_HEIGHT_PATH_NAME     = "The Fruit Height"
 const std::string PathModel::CLOUDS_PATH_NAME               = "Clouds";
 const std::string PathModel::DAY_TIME_PATH_NAME             = "Day Time";
 const std::string PathModel::HALL_LIGHT_PATH_NAME           = "Hall Light";
-const std::string PathModel::ROOM_LIGHT_PATH_NAME           = "Room Light";
+const std::string PathModel::BACK_LIGHT_PATH_NAME           = "Back Light";
+const std::string PathModel::FRONT_LIGHT_PATH_NAME          = "Front Light";
+const std::string PathModel::LAMP_LIGHT_PATH_NAME           = "Lamp Light";
 
 
 class CtrlPtDrawer : public PathVisitor<glm::dvec3>
@@ -208,7 +210,9 @@ void PathModel::init(const std::shared_ptr<StageSet>& stageSet)
     clouds.reset(new CompositePath<glm::dvec3>());
     dayTime.reset(new CompositePath<double>());
     hallLight.reset(new CompositePath<double>());
-    roomLight.reset(new CompositePath<double>());
+    backLight.reset(new CompositePath<double>());
+    frontLight.reset(new CompositePath<double>());
+    lampLight.reset(new CompositePath<double>());
 }
 
 double PathModel::animationLength() const
@@ -222,7 +226,9 @@ double PathModel::animationLength() const
     maxLength = glm::max(maxLength, clouds->duration());
     maxLength = glm::max(maxLength, dayTime->duration());
     maxLength = glm::max(maxLength, hallLight->duration());
-    maxLength = glm::max(maxLength, roomLight->duration());
+    maxLength = glm::max(maxLength, backLight->duration());
+    maxLength = glm::max(maxLength, frontLight->duration());
+    maxLength = glm::max(maxLength, lampLight->duration());
 
     return maxLength;
 }
@@ -314,7 +320,10 @@ std::string PathModel::serialize() const
     pathArray.append( dvec3Writer.write( CLOUDS_PATH_NAME,              *clouds) );
     pathArray.append( doubleWriter.write(DAY_TIME_PATH_NAME,            *dayTime) );
     pathArray.append( doubleWriter.write(HALL_LIGHT_PATH_NAME,          *hallLight) );
-    pathArray.append( doubleWriter.write(ROOM_LIGHT_PATH_NAME,          *roomLight) );
+    pathArray.append( doubleWriter.write(BACK_LIGHT_PATH_NAME,          *backLight) );
+    pathArray.append( doubleWriter.write(FRONT_LIGHT_PATH_NAME,         *frontLight) );
+    pathArray.append( doubleWriter.write(LAMP_LIGHT_PATH_NAME,          *lampLight) );
+
 
     QJsonDocument jsonDoc(pathArray);
     return jsonDoc.toJson(QJsonDocument::Indented).toStdString();
@@ -333,7 +342,9 @@ bool PathModel::deserialize(const std::string& stream)
            reader.dvec3Path( CLOUDS_PATH_NAME).get()            != nullptr &&
            reader.doublePath(DAY_TIME_PATH_NAME).get()          != nullptr &&
            reader.doublePath(HALL_LIGHT_PATH_NAME).get()        != nullptr &&
-           reader.doublePath(ROOM_LIGHT_PATH_NAME).get()        != nullptr)
+           reader.doublePath(BACK_LIGHT_PATH_NAME).get()        != nullptr &&
+           reader.doublePath(FRONT_LIGHT_PATH_NAME).get()       != nullptr &&
+           reader.doublePath(LAMP_LIGHT_PATH_NAME).get()        != nullptr)
         {
 
             cameraEye = reader.dvec3Path(CAMERA_EYE_PATH_NAME);
@@ -344,7 +355,9 @@ bool PathModel::deserialize(const std::string& stream)
             clouds = reader.dvec3Path(CLOUDS_PATH_NAME);
             dayTime = reader.doublePath(DAY_TIME_PATH_NAME);
             hallLight = reader.doublePath(HALL_LIGHT_PATH_NAME);
-            roomLight = reader.doublePath(ROOM_LIGHT_PATH_NAME);
+            backLight = reader.doublePath(BACK_LIGHT_PATH_NAME);
+            frontLight = reader.doublePath(FRONT_LIGHT_PATH_NAME);
+            lampLight = reader.doublePath(LAMP_LIGHT_PATH_NAME);
 
             refreshDebugLines();
 

@@ -1160,7 +1160,21 @@
                 "CtrlPts": [
                     0
                 ],
-                "Duration": 40,
+                "Duration": 52.32,
+                "Type": "PointPath"
+            },
+            {
+                "CtrlPts": [
+                    1
+                ],
+                "Duration": 20,
+                "Type": "PointPath"
+            },
+            {
+                "CtrlPts": [
+                    0
+                ],
+                "Duration": 1,
                 "Type": "PointPath"
             }
         ],
@@ -1168,13 +1182,62 @@
     },
     {
         "Data": "double",
-        "Name": "Room Light",
+        "Name": "Back Light",
         "Paths": [
             {
                 "CtrlPts": [
                     0
                 ],
-                "Duration": 40,
+                "Duration": 75.0,
+                "Type": "PointPath"
+            },
+            {
+                "CtrlPts": [
+                    0, 1
+                ],
+                "Duration": 10.0,
+                "Type": "LinearPath"
+            }
+        ],
+        "Type": "CompositePath"
+    },
+    {
+        "Data": "double",
+        "Name": "Front Light",
+        "Paths": [
+            {
+                "CtrlPts": [
+                    0
+                ],
+                "Duration": 85.0,
+                "Type": "PointPath"
+            },
+            {
+                "CtrlPts": [
+                    0, 1
+                ],
+                "Duration": 2.0,
+                "Type": "LinearPath"
+            }
+        ],
+        "Type": "CompositePath"
+    },
+    {
+        "Data": "double",
+        "Name": "Lamp Light",
+        "Paths": [
+            {
+                "CtrlPts": [
+                    0
+                ],
+                "Duration": 68.290000000000006,
+                "Type": "PointPath"
+            },
+            {
+                "CtrlPts": [
+                    1
+                ],
+                "Duration": 1,
                 "Type": "PointPath"
             }
         ],

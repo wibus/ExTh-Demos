@@ -686,23 +686,24 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
 
 
     // Lamp bulb
+    _lampRadiantFlux = color::tungsten40W * 40.0;
     double lamLightRad = headRad * 0.5;
-    pLight lampLight(new SphericalLight("Lamp Light",
+    _lampLight.reset(new SphericalLight("Lamp Light",
         glm::dvec3(0, 0, headLen/3.0), lamLightRad));
-    lampLight->setRadiantFlux(color::tungsten40W * 40.0);
-    lampLight->rotate(glm::pi<double>(), glm::dvec3(0, 1, 0));
-    lampLight->rotate(headTwist, glm::dvec3(1, 0, 0));
-    lampLight->rotate(headRot, glm::dvec3(0, 1, 0));
-    lampLight->translate(glm::dvec3(forearmLen, 0, 0));
-    lampLight->rotate(elbowRot, glm::dvec3(0, 1, 0));
-    lampLight->translate(glm::dvec3(armLen, 0, 0));
-    lampLight->rotate(shoulderRot, glm::dvec3(0, 1, 0));
-    lampLight->translate(glm::dvec3(0, 0, shoulderRad));
-    lampLight->translate(glm::dvec3(shoulderOffset, 0, 0));
-    lampLight->translate(glm::dvec3(0, 0, bodyHeight));
-    lampLight->translate(lampPos);
-    lampZone->addLight(lampLight);
-    lampLight->setIsOn(false);
+    _lampLight->setRadiantFlux(_lampRadiantFlux);
+    _lampLight->rotate(glm::pi<double>(), glm::dvec3(0, 1, 0));
+    _lampLight->rotate(headTwist, glm::dvec3(1, 0, 0));
+    _lampLight->rotate(headRot, glm::dvec3(0, 1, 0));
+    _lampLight->translate(glm::dvec3(forearmLen, 0, 0));
+    _lampLight->rotate(elbowRot, glm::dvec3(0, 1, 0));
+    _lampLight->translate(glm::dvec3(armLen, 0, 0));
+    _lampLight->rotate(shoulderRot, glm::dvec3(0, 1, 0));
+    _lampLight->translate(glm::dvec3(0, 0, shoulderRad));
+    _lampLight->translate(glm::dvec3(shoulderOffset, 0, 0));
+    _lampLight->translate(glm::dvec3(0, 0, bodyHeight));
+    _lampLight->translate(lampPos);
+    lampZone->addLight(_lampLight);
+    _lampLight->setIsOn(false);
 
 
     //Work zone bounds
@@ -826,13 +827,14 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
         glm::dvec3(boxMin.x*3/ 4.0, boxMin.y / 2.0, boxMax.z * 0.75 - (lightFixtureHeight/2.0 + wallThickness.z) - 0.01), // Show room
     };
 
+    _fixtureRadiantFlux = color::tungsten100W * 60.0;
     pMat cordMat = material::createInsulator(glm::dvec3(0.1), 1.44, 1.0, 1.0);
     for(const glm::dvec3& pos : fixturePositions)
     {
         const glm::dvec3 down(0, 0, -1);
         pLight fixtureBulb(new CircularLight("Fixture bulb",
             pos, down, lightFixtureInRad));
-        fixtureBulb->setRadiantFlux(color::tungsten100W * 60.0);
+        fixtureBulb->setRadiantFlux(_fixtureRadiantFlux);
 
         pSurf surf = Surface::shell(lightFixtureSurf);
         Surface::translate(surf, pos);
@@ -861,9 +863,13 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
         fixtureZone->addLight(fixtureBulb);
         fixtureBulb->setIsOn(false);
 
-        //if(pos == fixturePositions[4] ||
-        //   pos == fixturePositions[1])
-        //    fixtureBulb->setIsOn(true);
+
+        if(pos == fixturePositions[0])
+            _hallLight = fixtureBulb;
+        else if(pos == fixturePositions[1])
+            _roomLightFront = fixtureBulb;
+        else if(pos == fixturePositions[4])
+            _roomLightBack = fixtureBulb;
     }
 
 

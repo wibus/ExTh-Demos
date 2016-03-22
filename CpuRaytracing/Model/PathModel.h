@@ -43,7 +43,9 @@ public:
     std::shared_ptr<cellar::AbstractPath<glm::dvec3>> clouds;
     std::shared_ptr<cellar::AbstractPath<double>> dayTime;
     std::shared_ptr<cellar::AbstractPath<double>> hallLight;
-    std::shared_ptr<cellar::AbstractPath<double>> roomLight;
+    std::shared_ptr<cellar::AbstractPath<double>> backLight;
+    std::shared_ptr<cellar::AbstractPath<double>> frontLight;
+    std::shared_ptr<cellar::AbstractPath<double>> lampLight;
 
 
     static const std::string CAMERA_EYE_PATH_NAME;
@@ -54,7 +56,9 @@ public:
     static const std::string CLOUDS_PATH_NAME;
     static const std::string DAY_TIME_PATH_NAME;
     static const std::string HALL_LIGHT_PATH_NAME;
-    static const std::string ROOM_LIGHT_PATH_NAME;
+    static const std::string BACK_LIGHT_PATH_NAME;
+    static const std::string FRONT_LIGHT_PATH_NAME;
+    static const std::string LAMP_LIGHT_PATH_NAME;
 
 private:
     std::shared_ptr<prop3::StageSet> _stageSet;

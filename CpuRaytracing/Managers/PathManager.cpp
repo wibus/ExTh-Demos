@@ -412,7 +412,9 @@ void PathManager::displayPaths()
     appendPath(pathModel.clouds,            PathModel::CLOUDS_PATH_NAME);
     appendPath(pathModel.dayTime,           PathModel::DAY_TIME_PATH_NAME);
     appendPath(pathModel.hallLight,         PathModel::HALL_LIGHT_PATH_NAME);
-    appendPath(pathModel.roomLight,         PathModel::ROOM_LIGHT_PATH_NAME);
+    appendPath(pathModel.backLight,         PathModel::BACK_LIGHT_PATH_NAME);
+    appendPath(pathModel.frontLight,        PathModel::FRONT_LIGHT_PATH_NAME);
+    appendPath(pathModel.lampLight,         PathModel::LAMP_LIGHT_PATH_NAME);
     _ui->pathsTree->expandAll();
 
     emit pathChanged();
