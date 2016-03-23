@@ -33,7 +33,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="cameraTab">
        <attribute name="title">
@@ -66,7 +66,7 @@
                    <number>3840</number>
                   </property>
                   <property name="value">
-                   <number>940</number>
+                   <number>960</number>
                   </property>
                  </widget>
                 </item>
@@ -82,7 +82,7 @@
                    <number>2160</number>
                   </property>
                   <property name="value">
-                   <number>480</number>
+                   <number>540</number>
                   </property>
                  </widget>
                 </item>
@@ -282,7 +282,7 @@
               <string>Update each tile</string>
              </property>
              <property name="checked">
-              <bool>true</bool>
+              <bool>false</bool>
              </property>
             </widget>
            </item>
@@ -341,7 +341,7 @@
               <number>65536</number>
              </property>
              <property name="value">
-              <number>1</number>
+              <number>500</number>
              </property>
             </widget>
            </item>
@@ -1215,7 +1215,7 @@
            <string>Bind Camera to Path</string>
           </property>
           <property name="checked">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
          </widget>
         </item>
