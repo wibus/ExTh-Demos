@@ -885,16 +885,34 @@
                 "CtrlPts": [
                     80
                 ],
-                "Duration": 17,
+                "Duration": 10.5,
                 "Type": "PointPath"
             },
             {
                 "CtrlPts": [
-                    60,
                     80,
-                    120,
+                    80,
+                    60,
+                    43,
+                    30
+                ],
+                "Duration": 6.5,
+                "Type": "CubicSplinePath",
+                "Weights": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                ]
+            },
+            {
+                "CtrlPts": [
+                    30,
+                    43,
+                    100,
                     140,
-                    125
+                    140
                 ],
                 "Duration": 6.6399999999999997,
                 "Type": "CubicSplinePath",
@@ -902,7 +920,7 @@
                     1,
                     1,
                     1,
-                    0,
+                    1,
                     1
                 ]
             }
@@ -1293,8 +1311,16 @@
                 "CtrlPts": [
                     1
                 ],
-                "Duration": 1,
+                "Duration": 13,
                 "Type": "PointPath"
+            },
+            {
+                "CtrlPts": [
+                    1,
+                    0
+                ],
+                "Duration": 0.5,
+                "Type": "LinearPath"
             }
         ],
         "Type": "CompositePath"

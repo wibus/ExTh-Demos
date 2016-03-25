@@ -37,6 +37,8 @@ private slots:
     virtual void temperatureDefaultClicked();
     virtual void contrastChanged(int contrast);
     virtual void luminosityChanged(int luminosity);
+    virtual void equalizeHistogram();
+    virtual void resetHistogram();
     virtual void saveOutputImage();
 
 private:

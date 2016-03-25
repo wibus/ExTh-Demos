@@ -49,6 +49,12 @@ PostProdManager::PostProdManager(Ui::RaytracerGui* ui) :
     connect(_ui->luminositySlider, &QSlider::valueChanged,
             this,                  &PostProdManager::luminosityChanged);
 
+    connect(_ui->equalizeHistogramButton, &QPushButton::clicked,
+            this,            &PostProdManager::equalizeHistogram);
+
+    connect(_ui->resetHistogramButton, &QPushButton::clicked,
+            this,            &PostProdManager::resetHistogram);
+
     connect(_ui->saveButton, &QPushButton::clicked,
             this,            &PostProdManager::saveOutputImage);
 }
@@ -145,6 +151,30 @@ void PostProdManager::luminosityChanged(int luminosity)
     _ui->luminosityLabel->setText(
         QString::number((double)zeroToOne, 'g', 2));
     _unitBackend->setImageLuminosity(zeroToOne);
+}
+
+void PostProdManager::equalizeHistogram()
+{
+    glm::dvec3 minComp;
+    glm::dvec3 maxComp;
+    _unitBackend->fetchImageMinAndMax(
+        minComp, maxComp);
+
+    double minVal = glm::max(glm::max(minComp.r, minComp.g), minComp.b);
+    double maxVal = glm::min(glm::min(maxComp.r, maxComp.g), maxComp.b);
+    maxVal = glm::min(maxVal, 2.0);
+
+    double lumi =  0.5 - (minVal + maxVal)*0.5;
+    double cont = 1.0 / (maxVal - minVal);
+
+    _ui->luminositySlider->setValue(lumi * 50 + 50);
+    _ui->contrastSlider->setValue(cont * 50);
+}
+
+void PostProdManager::resetHistogram()
+{
+    _ui->luminositySlider->setValue(50);
+    _ui->contrastSlider->setValue(50);
 }
 
 void PostProdManager::saveOutputImage()
