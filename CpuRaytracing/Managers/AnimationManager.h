@@ -62,6 +62,9 @@ private slots:
     virtual void includeRenderTime(bool include);
     virtual void includeDivergence(bool include);
 
+    virtual void saveReferenceShot();
+    virtual void loadReferenceShot();
+
 protected:
     virtual void startSoundtrack();
     virtual void updateTimeMeter();

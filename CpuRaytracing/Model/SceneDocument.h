@@ -26,6 +26,9 @@ public:
     std::string soundtrackName() const;
     void setSoundtrackName(const std::string& name);
 
+    std::string outputFilmDirectory() const;
+    void setOutputFilmDirectory(const std::string& directory);
+
     std::string outputFrameDirectory() const;
     void setOutputFrameDirectory(const std::string& directory);
 
@@ -48,6 +51,7 @@ public:
     std::string getAnimationPathsFilePath() const;
     std::string getSoundtrackFilePath() const;
     std::string getTextureRootDirectory() const;
+    std::string getAnimationFilmsDirectory() const;
     std::string getAnimationFramesDirectory() const;
 
     static std::string timeToString(double time);
@@ -57,6 +61,7 @@ private:
     std::string _sceneName;
     std::string _stageSetName;
     std::string _soundtrackName;
+    std::string _outputFilmDirectory;
     std::string _outputFrameDirectory;
     std::string _outputFrameFormat;
     bool _includeSampleCountInFrame;
@@ -87,6 +92,11 @@ inline std::string SceneDocument::stageSetName() const
 inline std::string SceneDocument::soundtrackName() const
 {
     return _soundtrackName;
+}
+
+inline std::string SceneDocument::outputFilmDirectory() const
+{
+    return _outputFilmDirectory;
 }
 
 inline std::string SceneDocument::outputFrameDirectory() const

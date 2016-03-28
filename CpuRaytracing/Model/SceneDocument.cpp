@@ -12,6 +12,7 @@ SceneDocument::SceneDocument() :
     _rootDir("CpuRaytracing/Animations/"),
     _sceneName("Scene"),
     _stageSetName("StageSet"),
+    _outputFilmDirectory("films"),
     _outputFrameDirectory("frames"),
     _outputFrameFormat(".png"),
     _includeSampleCountInFrame(true),
@@ -45,6 +46,11 @@ void SceneDocument::setStageSetName(const std::string& name)
 void SceneDocument::setSoundtrackName(const std::string& name)
 {
     _soundtrackName = name;
+}
+
+void SceneDocument::setOutputFilmDirectory(const std::string& directory)
+{
+    _outputFilmDirectory = directory;
 }
 
 void SceneDocument::setOutputFrameDirectory(const std::string& directory)
@@ -95,6 +101,11 @@ std::string SceneDocument::getSoundtrackFilePath() const
 std::string SceneDocument::getTextureRootDirectory() const
 {
     return _rootDir + _sceneName + "/textures/";
+}
+
+std::string SceneDocument::getAnimationFilmsDirectory() const
+{
+    return _rootDir + _sceneName + "/" + _outputFilmDirectory + "/";
 }
 
 std::string SceneDocument::getAnimationFramesDirectory() const

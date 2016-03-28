@@ -175,12 +175,17 @@ void TheFruitChoreographer::startRecording()
 {
     _isRecording = true;
 
-    QString outputDir((RECORD_OUPUT_PREFIX +
+    QString outputFilmsDir((RECORD_OUPUT_PREFIX +
+       getSceneDocument().sceneName() + "/" +
+       getSceneDocument().outputFilmDirectory()).c_str());
+
+    QString outputFramesDir((RECORD_OUPUT_PREFIX +
        getSceneDocument().sceneName() + "/" +
        getSceneDocument().outputFrameDirectory()).c_str());
 
     QDir dir = QDir::current();
-    dir.mkpath(outputDir);
+    dir.mkpath(outputFilmsDir);
+    dir.mkpath(outputFramesDir);
 }
 
 void TheFruitChoreographer::stopRecording()

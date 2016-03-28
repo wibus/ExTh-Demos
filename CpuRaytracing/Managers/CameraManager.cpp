@@ -43,6 +43,8 @@ void CameraManager::setView(QWidget* view)
     _ui->colorOutputCombo->addItem(prop3::RaytracerState::COLOROUTPUT_DIVERGENCE.c_str());
     _ui->colorOutputCombo->addItem(prop3::RaytracerState::COLOROUTPUT_VARIANCE.c_str());
     _ui->colorOutputCombo->addItem(prop3::RaytracerState::COLOROUTPUT_PRIORITY.c_str());
+    _ui->colorOutputCombo->addItem(prop3::RaytracerState::COLOROUTPUT_REFERENCE.c_str());
+    _ui->colorOutputCombo->addItem(prop3::RaytracerState::COLOROUTPUT_COMPATIBILITY.c_str());
 
     connect(_ui->customOutputDimensionsRadioBtn, &QRadioButton::toggled,
             _ui->customOutputDimensionsWidget,   &QWidget::setEnabled);

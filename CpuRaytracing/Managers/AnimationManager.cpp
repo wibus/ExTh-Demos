@@ -3,6 +3,7 @@
 #include <QFileInfo>
 
 #include <PropRoom3D/Team/ArtDirector/RaytracerState.h>
+#include <PropRoom3D/Team/ArtDirector/Film/Film.h>
 
 #include "PathManager.h"
 #include "../Model/PathModel.h"
@@ -77,6 +78,14 @@ AnimationManager::AnimationManager(Ui::RaytracerGui* ui) :
 
     connect(_ui->animNameDivergenceCheck, &QCheckBox::toggled,
             this, &AnimationManager::includeDivergence);
+
+
+    connect(_ui->saveReferenceShotButton, &QPushButton::clicked,
+            this, &AnimationManager::saveReferenceShot);
+
+    connect(_ui->loadReferenceShotButton, &QPushButton::clicked,
+            this, &AnimationManager::loadReferenceShot);
+
 }
 
 AnimationManager::~AnimationManager()
@@ -260,6 +269,18 @@ void AnimationManager::includeRenderTime(bool include)
 void AnimationManager::includeDivergence(bool include)
 {
     getSceneDocument().setIncludeDivergenceInFrame(include);
+}
+
+void AnimationManager::saveReferenceShot()
+{
+    _raytracer->film()->saveReferenceShot(
+        getSceneDocument().getAnimationFilmsDirectory() + "/reference.film");
+}
+
+void AnimationManager::loadReferenceShot()
+{
+    _raytracer->film()->loadReferenceShot(
+        getSceneDocument().getAnimationFilmsDirectory() + "/reference.film");
 }
 
 void AnimationManager::startSoundtrack()
