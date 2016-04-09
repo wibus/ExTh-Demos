@@ -146,17 +146,18 @@ int main(int argc, char* argv[])
     demos.push_back(Demo("Fractal",          &buildFractal));
     demos.push_back(Demo("Physics 2D",       &buildPhysics2D));
 
-    // Launch demo chooser dialog
-    DemoChooserDialog dialog(demos);
-    dialog.exec();
+//    // Launch demo chooser dialog
+//    DemoChooserDialog dialog(demos);
+//    dialog.exec();
 
-    if(dialog.userQuit())
-    {
-        return 0;
-    }
+//    if(dialog.userQuit())
+//    {
+//        return 0;
+//    }
 
-    // Retreive and setup selected demo
-    app.setPlay(dialog.selectedDemo().second());
+//    // Retreive and setup selected demo
+//    app.setPlay(dialog.selectedDemo().second());
+    app.setPlay(demos[0].second());
     int exitCode = app.execute();
     return exitCode;
 }

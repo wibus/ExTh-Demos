@@ -761,6 +761,15 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
     sculptTableZone->addProp(sculptTableProp);
 
 
+
+    pCoat theFruitCoat = coating::createClearCoat(0.01);
+    pMat theFruitMat = material::createInsulator(
+        glm::dvec3(1.0, 0.6, 0.48), 1.3, 0.5, 0.1);
+
+    pMat babyMat = material::SILVER;
+    pCoat babyCoat = coating::createClearPaint(
+        glm::dvec3(1.0), 0.0, 0.8);
+
     ///////////////
     // Sculpture //
     ///////////////
@@ -781,12 +790,14 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
 
     flowerSurf = flowerSurf & !Sphere::sphere(glm::dvec3(0.0, 0.0, 0.9), 0.65);
     flowerSurf = flowerSurf & Plane::plane(glm::dvec3(0, 0, -1), glm::dvec3(0, 0, 0.001));
-    flowerSurf->setInnerMaterial(material::createInsulator(glm::dvec3(0.95, 0.60, 0.55), 1.2, 0.93, 1.0));
+    flowerSurf->setInnerMaterial(material::createInsulator(glm::dvec3(0.95, 0.60, 0.55), 1.2, 0.95, 1.0));
     flowerSurf->setCoating(coating::createClearCoat(1.0));
 
+
+
     pSurf pearlSurf = Sphere::sphere(glm::dvec3(0.0, 0.0, 0.9), 0.63);
-    pearlSurf->setCoating(coating::createClearPaint(glm::dvec3(1.0), 0.0, 0.8));
-    pearlSurf->setInnerMaterial(material::SILVER);
+    pearlSurf->setInnerMaterial(babyMat);
+    pearlSurf->setCoating(babyCoat);
 
     pProp sculptProp(new Prop("Sculpture"));
     sculptProp->addSurface(flowerSurf);
@@ -910,16 +921,21 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
     ///////////////
     // The Fruit //
     ///////////////
+
     _theFruitHeight = 1.6;
     _theFruitPosition = glm::dvec3(-6.0, -7.0, 0.0);
     pSurf theFruitSurf = Sphere::sphere(glm::dvec3(0, 0, 0.5), 0.5);
-    theFruitSurf->setCoating(coating::createClearCoat(0.01));
-    theFruitSurf->setInnerMaterial(material::createInsulator(
-        glm::dvec3(1.0, 0.6, 0.48), 1.3, 0.5, 0.1));
+    theFruitSurf->setInnerMaterial(theFruitMat);
+    theFruitSurf->setCoating(theFruitCoat);
+
+    pSurf theFruitBaby = Sphere::sphere(glm::dvec3(0, 0, 0.4), 0.10);
+    theFruitBaby->setOuterMaterial(babyMat);
+    theFruitBaby->setInnerMaterial(theFruitMat);
+    theFruitBaby->setCoating(babyCoat);
 
     _theFruitSurf = Surface::shell(theFruitSurf);
     pProp theFruiProp(new Prop("The Fruit"));
-    theFruiProp->addSurface(Surface::shell(_theFruitSurf));
+    theFruiProp->addSurface(Surface::shell(_theFruitSurf) & !theFruitBaby);
     theFruiProp->transform(glm::scale(glm::dmat4(), glm::dvec3(0.7, 0.7, _theFruitHeight)));
     _theFruitZone.reset(new StageZone("The Fruit Zone"));
     _theFruitZone->addProp(theFruiProp);
