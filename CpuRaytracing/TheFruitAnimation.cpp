@@ -32,8 +32,30 @@ void TheFruitChoreographer::update(double dt)
     if(forcedUpdate || (_animPlaying && (
        _animFastPlay || !_raytracerState->isRendering())))
     {
-        if(_isRecording && !forcedUpdate && !_animFastPlay)
+        if(_isRecording && !forcedUpdate && !_animFastPlay && !_cameraIsFree)
             saveCurrentFrame();
+
+        if(!forcedUpdate)
+        {
+            if(!_animFastPlay)
+            {
+                ++_animFrame;
+                _animTime = _animFrame / double(_animFps);
+            }
+            else
+            {
+                _animTime += dt;
+                _animFrame = _animTime * _animFps;
+            }
+
+            emit animFrameChanged(_animFrame);
+            if(_animFrame > animFrameCount())
+            {
+                _animPlaying = false;
+                playStateChanged(_animPlaying);
+                return;
+            }
+        }
 
         double t = _animTime;
 
@@ -110,30 +132,6 @@ void TheFruitChoreographer::update(double dt)
         double lampIntensity= _pathModel->lampLight->value(t);
         _lampLight->setRadiantFlux(_lampRadiantFlux * lampIntensity);
         _lampLight->setIsOn(lampIntensity > 0.0);
-
-
-
-        if(!forcedUpdate)
-        {
-            if(!_animFastPlay)
-            {
-                ++_animFrame;
-                _animTime = _animFrame / double(_animFps);
-                forceUpdate();
-            }
-            else
-            {
-                _animTime += dt;
-                _animFrame = _animTime * _animFps;
-            }
-
-            emit animFrameChanged(_animFrame);
-            if(_animFrame > animFrameCount())
-            {
-                _animPlaying = false;
-                playStateChanged(_animPlaying);
-            }
-        }
     }
 }
 
@@ -142,9 +140,20 @@ void TheFruitChoreographer::forceUpdate()
     update(0.0);
 }
 
-int TheFruitChoreographer::animFrameCount()
+int TheFruitChoreographer::animFrameCount() const
 {
     return glm::ceil(_pathModel->animationLength() * _animFps);
+}
+
+std::string TheFruitChoreographer::currentFilm() const
+{
+    std::string filmsDir =
+            getSceneDocument().sceneName() + "/" +
+            getSceneDocument().outputFilmDirectory() + "/";
+    QString fileName = (RECORD_OUPUT_PREFIX + filmsDir).c_str();
+    fileName += QString("%1").arg(_animFrame, 4, 10, QChar('0'));
+
+    return fileName.toStdString();
 }
 
 void TheFruitChoreographer::setAnimTimeOffset(double offset)
@@ -234,10 +243,10 @@ std::shared_ptr<PathModel> TheFruitChoreographer::pathModel() const
 
 void TheFruitChoreographer::saveCurrentFrame()
 {
-    std::string animDir =
+    std::string framesDir =
             getSceneDocument().sceneName() + "/" +
             getSceneDocument().outputFrameDirectory() + "/";
-    QString fileName = (RECORD_OUPUT_PREFIX + animDir).c_str();
+    QString fileName = (RECORD_OUPUT_PREFIX + framesDir).c_str();
 
     fileName += QString("%1").arg(_animFrame, 4, 10, QChar('0'));
     if(getSceneDocument().includeSampleCountInFrame())
@@ -251,8 +260,16 @@ void TheFruitChoreographer::saveCurrentFrame()
 
     cellar::Image screenshot;
     cellar::GlToolkit::takeFramebufferShot(screenshot);
-    screenshot.save(stdFileName);
+    if(screenshot.save(stdFileName))
+    {
+        getLog().postMessage(new Message('I', false,
+            stdFileName + " successfully recorded", "TheFruitChoreographer"));
+    }
+    else
+    {
+        getLog().postMessage(new Message('E', false,
+            stdFileName + " couldn't be saved", "TheFruitChoreographer"));
+    }
 
-    getLog().postMessage(new Message('I', false,
-        stdFileName + " successfully recorded", "TheFruitChoreographer"));
+    emit saveFilm();
 }

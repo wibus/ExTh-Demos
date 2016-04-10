@@ -111,6 +111,12 @@ void AnimationManager::setChoreographer(
 
     connect(_choreographer.get(), &TheFruitChoreographer::playStateChanged,
             this, &AnimationManager::animPlayFromChoreographer);
+
+    connect(_choreographer.get(), &TheFruitChoreographer::saveFilm,
+            this, &AnimationManager::saveFilm);
+
+    connect(_choreographer.get(), &TheFruitChoreographer::loadFilm,
+            this, &AnimationManager::loadFilm);
 }
 
 void AnimationManager::setRaytracer(
@@ -281,6 +287,18 @@ void AnimationManager::loadReferenceShot()
 {
     _raytracer->film()->loadReferenceShot(
         getSceneDocument().getAnimationFilmsDirectory() + "/reference.film");
+}
+
+void AnimationManager::saveFilm()
+{
+    _raytracer->film()->saveFilm(
+        _choreographer->currentFilm());
+}
+
+void AnimationManager::loadFilm()
+{
+    _raytracer->film()->loadFilm(
+        _choreographer->currentFilm());
 }
 
 void AnimationManager::startSoundtrack()

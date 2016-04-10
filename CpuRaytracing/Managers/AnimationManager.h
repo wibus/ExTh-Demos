@@ -64,6 +64,8 @@ private slots:
 
     virtual void saveReferenceShot();
     virtual void loadReferenceShot();
+    virtual void saveFilm();
+    virtual void loadFilm();
 
 protected:
     virtual void startSoundtrack();

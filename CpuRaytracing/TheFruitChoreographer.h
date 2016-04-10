@@ -37,8 +37,8 @@ public:
     virtual void terminate() override;
 
     virtual void forceUpdate();
-
-    virtual int animFrameCount();
+    virtual int animFrameCount() const;
+    virtual std::string currentFilm() const;
     virtual void setAnimTimeOffset(double offset);
     virtual void setAnimFps(int fps);
     virtual void setAnimFrame(int frame);
@@ -56,9 +56,12 @@ public:
 
     virtual void saveCurrentFrame();
 
+
 signals:
     void animFrameChanged(int frameId);
     void playStateChanged(bool isPlaying);
+    void saveFilm();
+    void loadFilm();
 
 
 protected:
