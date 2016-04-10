@@ -37,6 +37,10 @@ void TheFruitChoreographer::update(double dt)
 
         double t = _animTime;
 
+        double divThreshold = _pathModel->divThreshold->value(t) * 1.0e-3;
+        _raytracerState->setDivergenceThreshold(divThreshold);
+
+
         if(!_cameraIsFree)
         {
             // Camera position
@@ -124,7 +128,7 @@ void TheFruitChoreographer::update(double dt)
             }
 
             emit animFrameChanged(_animFrame);
-            if(_animTime >= _pathModel->animationLength())
+            if(_animFrame > animFrameCount())
             {
                 _animPlaying = false;
                 playStateChanged(_animPlaying);

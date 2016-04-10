@@ -415,6 +415,7 @@ void PathManager::displayPaths()
     appendPath(pathModel.backLight,         PathModel::BACK_LIGHT_PATH_NAME);
     appendPath(pathModel.frontLight,        PathModel::FRONT_LIGHT_PATH_NAME);
     appendPath(pathModel.lampLight,         PathModel::LAMP_LIGHT_PATH_NAME);
+    appendPath(pathModel.divThreshold,      PathModel::DIV_THRESHOLD_PATH_NAME);
     _ui->pathsTree->expandAll();
 
     emit pathChanged();

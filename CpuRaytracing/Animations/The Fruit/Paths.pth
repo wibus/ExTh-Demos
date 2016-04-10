@@ -1340,5 +1340,42 @@
             }
         ],
         "Type": "CompositePath"
+    },
+    {
+        "Data": "double",
+        "Name": "Div Threshold",
+        "Paths": [
+            {
+                "CtrlPts": [
+                    10
+                ],
+                "Duration": 29.329999999999998,
+                "Type": "PointPath"
+            },
+            {
+                "CtrlPts": [
+                    10,
+                    1
+                ],
+                "Duration": 0.13,
+                "Type": "LinearPath"
+            },
+            {
+                "CtrlPts": [
+                    1
+                ],
+                "Duration": 8.0800000000000001,
+                "Type": "PointPath"
+            },
+            {
+                "CtrlPts": [
+                    1,
+                    0
+                ],
+                "Duration": 0.17000000000000001,
+                "Type": "LinearPath"
+            }
+        ],
+        "Type": "CompositePath"
     }
 ]

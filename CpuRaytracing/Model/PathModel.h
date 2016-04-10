@@ -46,6 +46,7 @@ public:
     std::shared_ptr<cellar::AbstractPath<double>> backLight;
     std::shared_ptr<cellar::AbstractPath<double>> frontLight;
     std::shared_ptr<cellar::AbstractPath<double>> lampLight;
+    std::shared_ptr<cellar::AbstractPath<double>> divThreshold;
 
 
     static const std::string CAMERA_EYE_PATH_NAME;
@@ -59,6 +60,7 @@ public:
     static const std::string BACK_LIGHT_PATH_NAME;
     static const std::string FRONT_LIGHT_PATH_NAME;
     static const std::string LAMP_LIGHT_PATH_NAME;
+    static const std::string DIV_THRESHOLD_PATH_NAME;
 
 private:
     std::shared_ptr<prop3::StageSet> _stageSet;

@@ -32,6 +32,7 @@ const std::string PathModel::HALL_LIGHT_PATH_NAME           = "Hall Light";
 const std::string PathModel::BACK_LIGHT_PATH_NAME           = "Back Light";
 const std::string PathModel::FRONT_LIGHT_PATH_NAME          = "Front Light";
 const std::string PathModel::LAMP_LIGHT_PATH_NAME           = "Lamp Light";
+const std::string PathModel::DIV_THRESHOLD_PATH_NAME        = "Div Threshold";
 
 
 class CtrlPtDrawer : public PathVisitor<glm::dvec3>
@@ -213,6 +214,7 @@ void PathModel::init(const std::shared_ptr<StageSet>& stageSet)
     backLight.reset(new CompositePath<double>());
     frontLight.reset(new CompositePath<double>());
     lampLight.reset(new CompositePath<double>());
+    divThreshold.reset(new CompositePath<double>());
 }
 
 double PathModel::animationLength() const
@@ -229,6 +231,7 @@ double PathModel::animationLength() const
     maxLength = glm::max(maxLength, backLight->duration());
     maxLength = glm::max(maxLength, frontLight->duration());
     maxLength = glm::max(maxLength, lampLight->duration());
+    maxLength = glm::max(maxLength, divThreshold->duration());
 
     return maxLength;
 }
@@ -323,6 +326,7 @@ std::string PathModel::serialize() const
     pathArray.append( doubleWriter.write(BACK_LIGHT_PATH_NAME,          *backLight) );
     pathArray.append( doubleWriter.write(FRONT_LIGHT_PATH_NAME,         *frontLight) );
     pathArray.append( doubleWriter.write(LAMP_LIGHT_PATH_NAME,          *lampLight) );
+    pathArray.append( doubleWriter.write(DIV_THRESHOLD_PATH_NAME,       *divThreshold) );
 
 
     QJsonDocument jsonDoc(pathArray);
@@ -344,7 +348,8 @@ bool PathModel::deserialize(const std::string& stream)
            reader.doublePath(HALL_LIGHT_PATH_NAME).get()        != nullptr &&
            reader.doublePath(BACK_LIGHT_PATH_NAME).get()        != nullptr &&
            reader.doublePath(FRONT_LIGHT_PATH_NAME).get()       != nullptr &&
-           reader.doublePath(LAMP_LIGHT_PATH_NAME).get()        != nullptr)
+           reader.doublePath(LAMP_LIGHT_PATH_NAME).get()        != nullptr &&
+           reader.doublePath(DIV_THRESHOLD_PATH_NAME).get()     != nullptr)
         {
 
             cameraEye = reader.dvec3Path(CAMERA_EYE_PATH_NAME);
@@ -358,6 +363,7 @@ bool PathModel::deserialize(const std::string& stream)
             backLight = reader.doublePath(BACK_LIGHT_PATH_NAME);
             frontLight = reader.doublePath(FRONT_LIGHT_PATH_NAME);
             lampLight = reader.doublePath(LAMP_LIGHT_PATH_NAME);
+            divThreshold = reader.doublePath(DIV_THRESHOLD_PATH_NAME);
 
             refreshDebugLines();
 
