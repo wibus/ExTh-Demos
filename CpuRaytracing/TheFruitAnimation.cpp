@@ -53,7 +53,12 @@ void TheFruitChoreographer::update(double dt)
             {
                 _animPlaying = false;
                 playStateChanged(_animPlaying);
+
                 return;
+            }
+            else
+            {
+                emit rawFilmSourceChanged();
             }
         }
 
@@ -147,13 +152,20 @@ int TheFruitChoreographer::animFrameCount() const
 
 std::string TheFruitChoreographer::currentFilm() const
 {
-    std::string filmsDir =
-            getSceneDocument().sceneName() + "/" +
-            getSceneDocument().outputFilmDirectory() + "/";
-    QString fileName = (RECORD_OUPUT_PREFIX + filmsDir).c_str();
-    fileName += QString("%1").arg(_animFrame, 4, 10, QChar('0'));
+    if(!_cameraIsFree)
+    {
+        std::string filmsDir =
+                getSceneDocument().sceneName() + "/" +
+                getSceneDocument().outputFilmDirectory() + "/";
+        QString fileName = (RECORD_OUPUT_PREFIX + filmsDir).c_str();
+        fileName += QString("%1").arg(_animFrame, 4, 10, QChar('0'));
 
-    return fileName.toStdString();
+        return fileName.toStdString();
+    }
+    else
+    {
+        return std::string();
+    }
 }
 
 void TheFruitChoreographer::setAnimTimeOffset(double offset)
@@ -174,6 +186,7 @@ void TheFruitChoreographer::setAnimFrame(int frame)
         _animTime = frame / double(_animFps);
 
         emit animFrameChanged(_animFrame);
+        emit rawFilmSourceChanged();
 
         forceUpdate();
     }
@@ -228,12 +241,15 @@ void TheFruitChoreographer::setFastPlay(bool playFast)
 void TheFruitChoreographer::bindCameraToPath()
 {
     _cameraIsFree = false;
+    emit rawFilmSourceChanged();
     forceUpdate();
 }
 
 void TheFruitChoreographer::freeCameraFromPath()
 {
     _cameraIsFree = true;
+    emit rawFilmSourceChanged();
+    forceUpdate();
 }
 
 std::shared_ptr<PathModel> TheFruitChoreographer::pathModel() const
@@ -271,5 +287,5 @@ void TheFruitChoreographer::saveCurrentFrame()
             stdFileName + " couldn't be saved", "TheFruitChoreographer"));
     }
 
-    emit saveFilm();
+    emit saveRawFilm();
 }

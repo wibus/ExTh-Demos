@@ -60,9 +60,8 @@ public:
 signals:
     void animFrameChanged(int frameId);
     void playStateChanged(bool isPlaying);
-    void saveFilm();
-    void loadFilm();
-
+    void rawFilmSourceChanged();
+    void saveRawFilm();
 
 protected:
     virtual std::shared_ptr<prop3::Surface> createHoleStrippedWall(
