@@ -42,9 +42,7 @@ void RaytracedView::installArtDirectors(scaena::Play& play)
     play.propTeam3D()->addArtDirector(_raytracerServer);
     _artDirector3D = _raytracerServer;
 
-    _choreographer.reset(new TheFruitChoreographer(
-                _raytracerServer->camera(),
-                _raytracerServer->raytracerState()));
+    _choreographer.reset(new TheFruitChoreographer(_raytracerServer));
     //*
     play.propTeam3D()->switchChoreographer( _choreographer );
     //*/
@@ -67,5 +65,4 @@ void RaytracedView::setup()
 
     _pathManager->setStageSet(_stageSet);
     _pathManager->setChoreographer(_choreographer);
-
 }

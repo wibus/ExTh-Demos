@@ -16,6 +16,8 @@ namespace prop3
     class ProceduralSun;
     class LightBulb;
     class StageZone;
+
+    class ArtDirectorServer;
 }
 
 class PathModel;
@@ -27,10 +29,9 @@ class TheFruitChoreographer : public QObject, public prop3::AbstractChoreographe
     Q_OBJECT
 
 public:
-    TheFruitChoreographer(const std::shared_ptr<cellar::Camera>& camera,
-                          const std::shared_ptr<prop3::RaytracerState>& raytracerState);
+    TheFruitChoreographer(
+            const std::shared_ptr<prop3::ArtDirectorServer>& raytracer);
     virtual ~TheFruitChoreographer();
-
 
     virtual void setup(const std::shared_ptr<prop3::StageSet>& stageSet) override;
     virtual void update(double dt) override;
@@ -60,8 +61,7 @@ public:
 signals:
     void animFrameChanged(int frameId);
     void playStateChanged(bool isPlaying);
-    void rawFilmSourceChanged();
-    void saveRawFilm();
+
 
 protected:
     virtual std::shared_ptr<prop3::Surface> createHoleStrippedWall(
@@ -71,9 +71,6 @@ protected:
             double border);
 
 private:
-    std::shared_ptr<cellar::Camera> _camera;
-    std::shared_ptr<cellar::CameraManFree> _camMan;
-    double _camAperture;
 
     glm::dvec3 _cloudsPosition;
     std::shared_ptr<prop3::StageZone> _cloudsZone;
@@ -91,8 +88,12 @@ private:
     glm::dvec3 _lampRadiantFlux;
     std::shared_ptr<prop3::LightBulb> _lampLight;
 
-    std::shared_ptr<prop3::RaytracerState> _raytracerState;
     std::shared_ptr<PathModel> _pathModel;
+    std::shared_ptr<prop3::ArtDirectorServer> _raytracer;
+    std::shared_ptr<prop3::RaytracerState> _raytracerState;
+    std::shared_ptr<cellar::CameraManFree> _camMan;
+    std::shared_ptr<cellar::Camera> _camera;
+    double _camAperture;
 
     int _animFps;
     int _animFrame;

@@ -86,6 +86,8 @@ AnimationManager::AnimationManager(Ui::RaytracerGui* ui) :
     connect(_ui->loadReferenceShotButton, &QPushButton::clicked,
             this, &AnimationManager::loadReferenceShot);
 
+    connect(_ui->clearReferenceShotButton, &QPushButton::clicked,
+            this, &AnimationManager::clearReferenceShot);
 }
 
 AnimationManager::~AnimationManager()
@@ -111,12 +113,6 @@ void AnimationManager::setChoreographer(
 
     connect(_choreographer.get(), &TheFruitChoreographer::playStateChanged,
             this, &AnimationManager::animPlayFromChoreographer);
-
-    connect(_choreographer.get(), &TheFruitChoreographer::rawFilmSourceChanged,
-            this, &AnimationManager::rawFilmSourceChanged);
-
-    connect(_choreographer.get(), &TheFruitChoreographer::saveRawFilm,
-            this, &AnimationManager::saveRawFilm);
 }
 
 void AnimationManager::setRaytracer(
@@ -289,16 +285,9 @@ void AnimationManager::loadReferenceShot()
         getSceneDocument().getAnimationFilmsDirectory() + "/reference.film");
 }
 
-void AnimationManager::rawFilmSourceChanged()
+void AnimationManager::clearReferenceShot()
 {
-    _raytracer->film()->setRawFilmSource(
-        _choreographer->currentFilm());
-}
-
-void AnimationManager::saveRawFilm()
-{
-    _raytracer->film()->saveRawFilm(
-        _choreographer->currentFilm());
+    _raytracer->film()->clearReferenceShot();
 }
 
 void AnimationManager::startSoundtrack()

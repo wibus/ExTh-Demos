@@ -15,6 +15,7 @@
 #include <PropRoom3D/Node/Light/LightBulb/LightBulb.h>
 #include <PropRoom3D/Node/Light/Backdrop/ProceduralSun.h>
 #include <PropRoom3D/Team/ArtDirector/ArtDirectorServer.h>
+#include <PropRoom3D/Team/ArtDirector/Film/Film.h>
 
 #include "Model/PathModel.h"
 #include "Model/SceneDocument.h"
@@ -58,7 +59,7 @@ void TheFruitChoreographer::update(double dt)
             }
             else
             {
-                emit rawFilmSourceChanged();
+                _raytracerState->setFilmRawFilePath(currentFilm());
             }
         }
 
@@ -164,7 +165,7 @@ std::string TheFruitChoreographer::currentFilm() const
     }
     else
     {
-        return std::string();
+        return RaytracerState::UNSPECIFIED_RAW_FILE;
     }
 }
 
@@ -185,9 +186,8 @@ void TheFruitChoreographer::setAnimFrame(int frame)
         _animFrame = frame;
         _animTime = frame / double(_animFps);
 
+        _raytracerState->setFilmRawFilePath(currentFilm());
         emit animFrameChanged(_animFrame);
-        emit rawFilmSourceChanged();
-
         forceUpdate();
     }
 }
@@ -222,7 +222,6 @@ void TheFruitChoreographer::stopRecording()
 void TheFruitChoreographer::playAnimation()
 {
     _animPlaying = true;
-    forceUpdate();
 }
 
 void TheFruitChoreographer::pauseAnimation()
@@ -241,14 +240,16 @@ void TheFruitChoreographer::setFastPlay(bool playFast)
 void TheFruitChoreographer::bindCameraToPath()
 {
     _cameraIsFree = false;
-    emit rawFilmSourceChanged();
+    _raytracerState->setFilmRawFilePath(currentFilm());
+    _raytracer->film()->clearReferenceShot();
     forceUpdate();
 }
 
 void TheFruitChoreographer::freeCameraFromPath()
 {
     _cameraIsFree = true;
-    emit rawFilmSourceChanged();
+    _raytracerState->setFilmRawFilePath(currentFilm());
+    _raytracer->film()->clearReferenceShot();
     forceUpdate();
 }
 
@@ -287,5 +288,15 @@ void TheFruitChoreographer::saveCurrentFrame()
             stdFileName + " couldn't be saved", "TheFruitChoreographer"));
     }
 
-    emit saveRawFilm();
+    std::string filmName = currentFilm();
+    if(_raytracer->film()->saveRawFilm(filmName))
+    {
+        getLog().postMessage(new Message('I', false,
+            filmName + " successfully recorded", "TheFruitChoreographer"));
+    }
+    else
+    {
+        getLog().postMessage(new Message('E', false,
+            filmName + " couldn't be saved", "TheFruitChoreographer"));
+    }
 }

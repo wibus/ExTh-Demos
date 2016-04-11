@@ -15,6 +15,7 @@
 #include <PropRoom3D/Node/Light/Backdrop/ProceduralSun.h>
 #include <PropRoom3D/Node/Light/LightBulb/CircularLight.h>
 #include <PropRoom3D/Node/Light/LightBulb/SphericalLight.h>
+#include <PropRoom3D/Team/ArtDirector/ArtDirectorServer.h>
 
 #include "Model/PathModel.h"
 #include "Model/SceneDocument.h"
@@ -32,13 +33,13 @@ typedef std::shared_ptr<Prop> pProp;
 
 
 TheFruitChoreographer::TheFruitChoreographer(
-        const std::shared_ptr<Camera>& camera,
-        const std::shared_ptr<RaytracerState>& raytracerState) :
-    _camera(camera),
-    _camMan(new CameraManFree(camera, false)),
+        const std::shared_ptr<prop3::ArtDirectorServer>& raytracer) :
     _camAperture(0.8),
-    _raytracerState(raytracerState),
     _pathModel(new PathModel()),
+    _raytracer(raytracer),
+    _raytracerState(_raytracer->raytracerState()),
+    _camMan(new CameraManFree(raytracer->camera(), false)),
+    _camera(raytracer->camera()),
     _animFps(24),
     _animFrame(0),
     _animTime(0.0),
@@ -928,7 +929,7 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
     theFruitSurf->setInnerMaterial(theFruitMat);
     theFruitSurf->setCoating(theFruitCoat);
 
-    pSurf theFruitBaby = Sphere::sphere(glm::dvec3(0, 0, 0.4), 0.10);
+    pSurf theFruitBaby = Sphere::sphere(glm::dvec3(0, 0, 0.4), 0.075);
     theFruitBaby->setOuterMaterial(babyMat);
     theFruitBaby->setInnerMaterial(theFruitMat);
     theFruitBaby->setCoating(babyCoat);
