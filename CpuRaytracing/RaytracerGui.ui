@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>2100</width>
-    <height>960</height>
+    <height>973</height>
    </rect>
   </property>
   <property name="mouseTracking">
@@ -33,7 +33,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="cameraTab">
        <attribute name="title">
@@ -771,7 +771,7 @@
        <property name="geometry">
         <rect>
          <x>211</x>
-         <y>113</y>
+         <y>120</y>
          <width>978</width>
          <height>660</height>
         </rect>

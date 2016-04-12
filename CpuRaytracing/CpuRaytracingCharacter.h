@@ -51,9 +51,6 @@ private:
     double _camVelocity;
     std::shared_ptr<cellar::CameraManFree> _camMan;
 
-    std::shared_ptr<prop2::TextHud> _fps;
-    std::shared_ptr<prop2::TextHud> _ups;
-
     std::shared_ptr<prop3::Material> _glassMat;
     std::shared_ptr<prop3::Material> _fixtureMat;
     std::shared_ptr<prop3::Surface> _fixtureSurf;

@@ -56,22 +56,6 @@ CpuRaytracingCharacter::CpuRaytracingCharacter() :
 
 void CpuRaytracingCharacter::enterStage()
 {
-    _fps = play().propTeam2D()->createTextHud();
-    _fps->setText("FPS: ");
-    _fps->setHandlePosition(glm::dvec2(18.0, -30.0));
-    _fps->setHorizontalAnchor(EHorizontalAnchor::LEFT);
-    _fps->setVerticalAnchor(EVerticalAnchor::TOP);
-    _fps->setHeight(20);
-    _fps->setIsVisible(false);
-
-    _ups = play().propTeam2D()->createTextHud();
-    _ups->setText("UPS: ");
-    _ups->setHandlePosition(glm::dvec2(18.0, -50.0));
-    _ups->setHorizontalAnchor(EHorizontalAnchor::LEFT);
-    _ups->setVerticalAnchor(EVerticalAnchor::TOP);
-    _ups->setHeight(20);
-    _ups->setIsVisible(false);
-
     //* Choose and setup stageSet
     setupTheFruitStageSet();
     //setupManufacturingStageSet();
@@ -84,8 +68,6 @@ void CpuRaytracingCharacter::enterStage()
 void CpuRaytracingCharacter::beginStep(const StageTime &time)
 {
     float elapsedtime = time.elapsedTime();
-    _ups->setText("UPS: " + toString(floor(1.0 / elapsedtime)));
-
     float velocity = _camVelocity * elapsedtime;
     const float turnSpeed = 0.3f * elapsedtime;
 
@@ -153,13 +135,10 @@ void CpuRaytracingCharacter::beginStep(const StageTime &time)
 void CpuRaytracingCharacter::draw(const std::shared_ptr<scaena::View> &,
                                   const scaena::StageTime&time)
 {
-    _fps->setText("FPS: " + toString(floor(1.0 / time.elapsedTime())));
 }
 
 void CpuRaytracingCharacter::exitStage()
 {
-    play().propTeam2D()->deleteTextHud(_fps);
-    play().propTeam2D()->deleteTextHud(_ups);
     play().propTeam3D()->terminate();
 }
 
