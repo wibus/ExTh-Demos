@@ -11,6 +11,7 @@
 #include "TheFruitChoreographer.h"
 #include "Managers/CameraManager.h"
 #include "Managers/AnimationManager.h"
+#include "Managers/TimelineManager.h"
 #include "Managers/PostProdManager.h"
 #include "Managers/PathManager.h"
 
@@ -18,11 +19,13 @@
 RaytracedView::RaytracedView(
         const std::shared_ptr<CameraManager>& cameraManager,
         const std::shared_ptr<AnimationManager>& animationManager,
+        const std::shared_ptr<TimelineManager>& timelineManager,
         const std::shared_ptr<PostProdManager>& postProdManager,
         const std::shared_ptr<PathManager>& pathManager) :
     scaena::QGlWidgetView("Raytraced View"),
     _cameraManager(cameraManager),
     _animationManager(animationManager),
+    _timelineManager(timelineManager),
     _postProdManager(postProdManager),
     _pathManager(pathManager)
 {
@@ -56,13 +59,21 @@ void RaytracedView::setup()
     _cameraManager->setRaytracer(_raytracerServer);
     _postProdManager->setPostProdUnit(_raytracerServer->postProdUnit());
 
-    connect(_pathManager.get(), &PathManager::pathChanged,
-            _animationManager.get(), &AnimationManager::onPathChanged);
-    connect(_pathManager.get(), &PathManager::freeCamera,
-            _cameraManager.get(), &CameraManager::onFreeCamera);
     _animationManager->setChoreographer(_choreographer);
     _animationManager->setRaytracer(_raytracerServer);
 
+
+    connect(_timelineManager.get(), &TimelineManager::startSoundtrack,
+            _animationManager.get(), &AnimationManager::startSoundtrack);
+    connect(_timelineManager.get(), &TimelineManager::stopSoundtrack,
+            _animationManager.get(), &AnimationManager::stopSoundtrack);
+    connect(_pathManager.get(), &PathManager::pathChanged,
+            _timelineManager.get(), &TimelineManager::onPathChanged);
+    _timelineManager->setChoreographer(_choreographer);
+
+
+    connect(_pathManager.get(), &PathManager::freeCamera,
+            _cameraManager.get(), &CameraManager::onFreeCamera);
     _pathManager->setStageSet(_stageSet);
     _pathManager->setChoreographer(_choreographer);
 }

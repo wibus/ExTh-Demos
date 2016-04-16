@@ -13,6 +13,7 @@ namespace Ui
 class RaytracedView;
 class CameraManager;
 class AnimationManager;
+class TimelineManager;
 class PostProdManager;
 class PathManager;
 
@@ -32,6 +33,7 @@ private:
     std::shared_ptr<RaytracedView> _raytracedView;
     std::shared_ptr<CameraManager> _cameraManager;
     std::shared_ptr<AnimationManager> _animationManager;
+    std::shared_ptr<TimelineManager> _timelineManager;
     std::shared_ptr<PostProdManager> _postProdManager;
     std::shared_ptr<PathManager> _pathManager;
 };

@@ -34,24 +34,14 @@ public:
 
 
 public slots:
-    virtual void onPathChanged();
+    virtual void startSoundtrack(double time);
+    virtual void stopSoundtrack();
 
 
 private slots:
     virtual void divThreshold(double div);
     virtual void maxSampleThreshold(int sampleCount);
     virtual void maxRenderTimeThreshold(int maxSeconds);
-
-    virtual void animTimeOffset(double offset);
-    virtual void animFps(int fps);
-    virtual void animFrame(int frame);
-    virtual void resetAnim(bool unsused);
-    virtual void recordAnim(bool record);
-    virtual void playAnim(bool play);
-    virtual void fastPlay(bool fast);
-
-    virtual void animFrameFromChoreographer(int frame);
-    virtual void animPlayFromChoreographer(bool play);
 
     virtual void soundtrackName(QString name);
     virtual void soundtrackVolume(int volume);
@@ -66,17 +56,11 @@ private slots:
     virtual void loadReferenceShot();
     virtual void clearReferenceShot();
 
-protected:
-    virtual void startSoundtrack();
-    virtual void updateTimeMeter();
-    virtual double computeTimeOffset();
-    virtual double computeCurrentTime();
-
 private:
     Ui::RaytracerGui* _ui;
+    QMediaPlayer _mediaPlayer;
     std::shared_ptr<prop3::ArtDirectorServer> _raytracer;
     std::shared_ptr<TheFruitChoreographer> _choreographer;
-    QMediaPlayer _mediaPlayer;
 
 };
 

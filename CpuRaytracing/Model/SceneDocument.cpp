@@ -124,7 +124,7 @@ std::string SceneDocument::timeToString(double time)
     seconds += centisec / int(CEN_IN_SEC);
     centisec -= (centisec / int(CEN_IN_SEC)) * CEN_IN_SEC;
 
-    QString str = QString("%1m%2s%3l")
+    QString str = QString("%1m%2s%3c")
         .arg(minutes, 2, 10, QChar('0'))
         .arg(seconds, 2, 10, QChar('0'))
         .arg(centisec, 2, 10, QChar('0'));

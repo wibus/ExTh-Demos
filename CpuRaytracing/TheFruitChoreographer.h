@@ -41,6 +41,7 @@ public:
     virtual int animFrameCount() const;
     virtual std::string currentFilm() const;
     virtual void setAnimTimeOffset(double offset);
+    virtual void setAnimFrameCount(int frame);
     virtual void setAnimFps(int fps);
     virtual void setAnimFrame(int frame);
     virtual void resetAnimation();
@@ -96,7 +97,8 @@ private:
     double _camAperture;
 
     int _animFps;
-    int _animFrame;
+    int _animFrameCount;
+    int _animCurrFrame;
     double _animTime;
     bool _isRecording;
     bool _animPlaying;

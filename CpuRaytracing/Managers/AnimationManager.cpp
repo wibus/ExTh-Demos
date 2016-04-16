@@ -26,35 +26,6 @@ AnimationManager::AnimationManager(Ui::RaytracerGui* ui) :
             this, &AnimationManager::divThreshold);
 
 
-    connect(_ui->animTimeOffsetMinSpin, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-            this, &AnimationManager::animTimeOffset);
-    connect(_ui->animTimeOffsetSecSpin, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-            this, &AnimationManager::animTimeOffset);
-
-    connect(_ui->animFpsSpin, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-            this, &AnimationManager::animFps);
-
-    connect(_ui->animFrameSpin, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-            this, &AnimationManager::animFrame);
-
-    connect(_ui->animFrameSlider, &QSlider::valueChanged,
-            this, &AnimationManager::animFrame);
-
-    connect(_ui->resetAnimButton, &QPushButton::clicked,
-            this, &AnimationManager::resetAnim);
-
-    connect(_ui->recordAnimButton, &QPushButton::toggled,
-            this, &AnimationManager::recordAnim);
-
-    connect(_ui->playAnimButton, &QPushButton::toggled,
-            this, &AnimationManager::playAnim);
-
-    connect(_ui->fastAnimButton, &QPushButton::toggled,
-            this, &AnimationManager::fastPlay);
-
-    _ui->animFrameSlider->setValue(
-        _ui->animFrameSpin->value());
-
     connect(_ui->soundtrackNameEdit, &QLineEdit::textChanged,
             this, &AnimationManager::soundtrackName);
 
@@ -100,19 +71,8 @@ void AnimationManager::setChoreographer(
 {
     _choreographer = choreographer;
 
-    animTimeOffset(0 /*unused*/);
-    animFps(_ui->animFpsSpin->value());
-    animFrame(_ui->animFrameSpin->value());
-    fastPlay(_ui->fastAnimButton->isChecked());
-    playAnim(_ui->playAnimButton->isChecked());
     soundtrackName(_ui->soundtrackNameEdit->text());
     soundtrackVolume(_ui->soundtrackVolumeSlider->value());
-
-    connect(_choreographer.get(), &TheFruitChoreographer::animFrameChanged,
-            this, &AnimationManager::animFrameFromChoreographer);
-
-    connect(_choreographer.get(), &TheFruitChoreographer::playStateChanged,
-            this, &AnimationManager::animPlayFromChoreographer);
 }
 
 void AnimationManager::setRaytracer(
@@ -144,95 +104,6 @@ void AnimationManager::maxRenderTimeThreshold(int maxSeconds)
 void AnimationManager::divThreshold(double div)
 {
     _raytracer->raytracerState()->setDivergenceThreshold(div);
-}
-
-void AnimationManager::animTimeOffset(double)
-{
-    double offset = computeTimeOffset();
-    getSceneDocument().setAnimationTimeOffset(offset);
-    _choreographer->setAnimTimeOffset(offset);
-    updateTimeMeter();
-}
-
-void AnimationManager::animFps(int fps)
-{
-    _choreographer->setAnimFps(fps);
-
-    int frameCount = _choreographer->animFrameCount();
-    _ui->animFrameSpin->setMaximum(frameCount);
-    _ui->animFrameSlider->setMaximum(frameCount);
-}
-
-void AnimationManager::animFrame(int frame)
-{
-    _choreographer->setAnimFrame(frame);
-    _ui->animFrameSpin->setValue(frame);
-    _ui->animFrameSlider->setValue(frame);
-    updateTimeMeter();
-}
-
-void AnimationManager::resetAnim(bool unsused)
-{
-    _choreographer->resetAnimation();
-
-    if(_ui->playAnimButton->isChecked() &&
-       _ui->fastAnimButton->isChecked())
-    {
-        startSoundtrack();
-    }
-}
-
-void AnimationManager::recordAnim(bool record)
-{
-    if(record)
-        _choreographer->startRecording();
-    else
-        _choreographer->stopRecording();
-
-    _ui->playAnimButton->setChecked(record);
-    _ui->animOutputGroup->setEnabled(!record);
-}
-
-void AnimationManager::playAnim(bool play)
-{
-    if(play)
-    {
-        _choreographer->playAnimation();
-        if(_ui->fastAnimButton->isChecked())
-            startSoundtrack();
-    }
-    else
-    {
-        _choreographer->pauseAnimation();
-        _ui->recordAnimButton->setChecked(false);
-        _ui->fastAnimButton->setChecked(false);
-    }
-}
-
-void AnimationManager::fastPlay(bool fast)
-{
-    _choreographer->setFastPlay(fast);
-
-    _ui->animFrameSpin->setEnabled(!fast);
-    _ui->animFrameSlider->setEnabled(!fast);
-    _ui->soundtrackNameEdit->setEnabled(!fast);
-
-    if(fast && _ui->playAnimButton->isChecked())
-        startSoundtrack();
-    else
-        _mediaPlayer.pause();
-}
-
-void AnimationManager::animFrameFromChoreographer(int frame)
-{
-    _ui->animFrameSpin->setValue(frame);
-    _ui->animFrameSlider->setValue(frame);
-    updateTimeMeter();
-}
-
-void AnimationManager::animPlayFromChoreographer(bool play)
-{
-    _ui->playAnimButton->setChecked(play);
 }
 
 void AnimationManager::soundtrackName(QString name)
@@ -290,47 +161,14 @@ void AnimationManager::clearReferenceShot()
     _raytracer->film()->clearReferenceShot();
 }
 
-void AnimationManager::startSoundtrack()
+void AnimationManager::startSoundtrack(double time)
 {
-    double time = computeCurrentTime();
     qint64 pos = time * 1000.0;
     _mediaPlayer.setPosition(pos);
     _mediaPlayer.play();
 }
 
-void AnimationManager::updateTimeMeter()
+void AnimationManager::stopSoundtrack()
 {
-    double current = computeCurrentTime();
-    double offset = computeTimeOffset();
-    double endTime = offset + _choreographer->pathModel()->animationLength();
-
-    _ui->animTimeValue->setText(
-        SceneDocument::timeToString(current).c_str());
-    _ui->animTimeSuffix->setText(QString(" / %1")
-        .arg(SceneDocument::timeToString(endTime).c_str()));
-}
-
-double AnimationManager::computeTimeOffset()
-{
-    double offsetMin = _ui->animTimeOffsetMinSpin->value();
-    double offsetSec = _ui->animTimeOffsetSecSpin->value();
-    double offsetSecTot = offsetMin * 60.0 + offsetSec;
-    return offsetSecTot;
-}
-
-double AnimationManager::computeCurrentTime()
-{
-    double offset = computeTimeOffset();
-    double frame = _ui->animFrameSpin->value();
-    double fps = _ui->animFpsSpin->value();
-    return offset + frame/fps;
-}
-
-void AnimationManager::onPathChanged()
-{
-    int frameCount = _choreographer->animFrameCount();
-    _ui->animFrameSpin->setMaximum(frameCount);
-    _ui->animFrameSpin->setSuffix(QString("/ %1").arg(frameCount));
-    _ui->animFrameSlider->setMaximum(frameCount);
-    updateTimeMeter();
+    _mediaPlayer.pause();
 }

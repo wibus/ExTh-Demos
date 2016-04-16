@@ -12,6 +12,7 @@ namespace prop3
 
 class CameraManager;
 class AnimationManager;
+class TimelineManager;
 class PostProdManager;
 class PathManager;
 
@@ -25,6 +26,7 @@ public:
     RaytracedView(
         const std::shared_ptr<CameraManager>& cameraManager,
         const std::shared_ptr<AnimationManager>& animationManager,
+        const std::shared_ptr<TimelineManager>& timelineManager,
         const std::shared_ptr<PostProdManager>& postProdManager,
         const std::shared_ptr<PathManager>& pathManager);
     virtual ~RaytracedView();
@@ -38,6 +40,7 @@ protected:
 private:
     std::shared_ptr<CameraManager> _cameraManager;
     std::shared_ptr<AnimationManager> _animationManager;
+    std::shared_ptr<TimelineManager> _timelineManager;
     std::shared_ptr<PostProdManager> _postProdManager;
     std::shared_ptr<PathManager> _pathManager;
 

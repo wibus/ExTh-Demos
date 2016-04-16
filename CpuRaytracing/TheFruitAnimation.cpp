@@ -40,17 +40,17 @@ void TheFruitChoreographer::update(double dt)
         {
             if(!_animFastPlay)
             {
-                ++_animFrame;
-                _animTime = _animFrame / double(_animFps);
+                ++_animCurrFrame;
+                _animTime = _animCurrFrame / double(_animFps);
             }
             else
             {
                 _animTime += dt;
-                _animFrame = _animTime * _animFps;
+                _animCurrFrame = _animTime * _animFps;
             }
 
-            emit animFrameChanged(_animFrame);
-            if(_animFrame > animFrameCount())
+            emit animFrameChanged(_animCurrFrame);
+            if(_animCurrFrame > _animFrameCount)
             {
                 _animPlaying = false;
                 playStateChanged(_animPlaying);
@@ -148,7 +148,7 @@ void TheFruitChoreographer::forceUpdate()
 
 int TheFruitChoreographer::animFrameCount() const
 {
-    return glm::ceil(_pathModel->animationLength() * _animFps);
+    return _animFrameCount;
 }
 
 std::string TheFruitChoreographer::currentFilm() const
@@ -159,7 +159,7 @@ std::string TheFruitChoreographer::currentFilm() const
                 getSceneDocument().sceneName() + "/" +
                 getSceneDocument().outputFilmDirectory() + "/";
         QString fileName = (RECORD_OUPUT_PREFIX + filmsDir).c_str();
-        fileName += QString("%1").arg(_animFrame, 4, 10, QChar('0'));
+        fileName += QString("%1").arg(_animCurrFrame, 4, 10, QChar('0'));
 
         return fileName.toStdString();
     }
@@ -174,6 +174,12 @@ void TheFruitChoreographer::setAnimTimeOffset(double offset)
     // Anim time offset doesn't affect frame timings
 }
 
+void TheFruitChoreographer::setAnimFrameCount(int frame)
+{
+    _animFrameCount = frame;
+    setAnimFrame(glm::min(_animCurrFrame, frame));
+}
+
 void TheFruitChoreographer::setAnimFps(int fps)
 {
     _animFps = fps;
@@ -181,13 +187,13 @@ void TheFruitChoreographer::setAnimFps(int fps)
 
 void TheFruitChoreographer::setAnimFrame(int frame)
 {
-    if(_animFrame != frame)
+    if(_animCurrFrame != frame)
     {
-        _animFrame = frame;
+        _animCurrFrame = frame;
         _animTime = frame / double(_animFps);
 
         _raytracerState->setFilmRawFilePath(currentFilm());
-        emit animFrameChanged(_animFrame);
+        emit animFrameChanged(_animCurrFrame);
         forceUpdate();
     }
 }
@@ -265,7 +271,7 @@ void TheFruitChoreographer::saveCurrentFrame()
             getSceneDocument().outputFrameDirectory() + "/";
     QString fileName = (RECORD_OUPUT_PREFIX + framesDir).c_str();
 
-    fileName += QString("%1").arg(_animFrame, 4, 10, QChar('0'));
+    fileName += QString("%1").arg(_animCurrFrame, 4, 10, QChar('0'));
     if(getSceneDocument().includeSampleCountInFrame())
         fileName += QString("_%1f").arg(_raytracerState->sampleCount());
     if(getSceneDocument().includeRenderTimeInFrame())

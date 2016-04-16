@@ -7,6 +7,7 @@
 
 #include "Managers/CameraManager.h"
 #include "Managers/AnimationManager.h"
+#include "Managers/TimelineManager.h"
 #include "Managers/PostProdManager.h"
 #include "Managers/PathManager.h"
 #include "RaytracedView.h"
@@ -25,10 +26,12 @@ RaytracerGui::RaytracerGui(const std::shared_ptr<Play>& play) :
     _cameraManager.reset(new CameraManager(_ui));
     _postProdManager.reset(new PostProdManager(_ui));
     _animationManager.reset(new AnimationManager(_ui));
+    _timelineManager.reset(new TimelineManager(_ui));
     _pathManager.reset(new PathManager(_ui));
     _raytracedView.reset(new RaytracedView(
          _cameraManager,
          _animationManager,
+         _timelineManager,
          _postProdManager,
          _pathManager));
 
