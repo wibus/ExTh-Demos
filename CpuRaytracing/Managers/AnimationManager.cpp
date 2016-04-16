@@ -25,6 +25,9 @@ AnimationManager::AnimationManager(Ui::RaytracerGui* ui) :
     connect(_ui->divThresholdSpin, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
             this, &AnimationManager::divThreshold);
 
+    connect(_ui->visibilityThresholdSpin, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+            this, &AnimationManager::surfaceVisibilityThreshold);
+
 
     connect(_ui->soundtrackNameEdit, &QLineEdit::textChanged,
             this, &AnimationManager::soundtrackName);
@@ -83,6 +86,7 @@ void AnimationManager::setRaytracer(
     maxSampleThreshold(_ui->maxSampleSpin->value());
     maxRenderTimeThreshold(_ui->maxTimeSpin->value());
     divThreshold(_ui->divThresholdSpin->value());
+    surfaceVisibilityThreshold(_ui->visibilityThresholdSpin->value());
 
     outputName(_ui->animNameEdit->text());
     outputFormat(_ui->outputFormatCombo->currentText());
@@ -99,6 +103,11 @@ void AnimationManager::maxSampleThreshold(int sampleCount)
 void AnimationManager::maxRenderTimeThreshold(int maxSeconds)
 {
     _raytracer->raytracerState()->setRenderTimeThreshold(maxSeconds);
+}
+
+void AnimationManager::surfaceVisibilityThreshold(int visibility)
+{
+    _raytracer->raytracerState()->setSurfaceVisibilityThreshold(visibility);
 }
 
 void AnimationManager::divThreshold(double div)
