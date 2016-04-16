@@ -72,7 +72,6 @@ protected:
             double border);
 
 private:
-
     glm::dvec3 _cloudsPosition;
     std::shared_ptr<prop3::StageZone> _cloudsZone;
 

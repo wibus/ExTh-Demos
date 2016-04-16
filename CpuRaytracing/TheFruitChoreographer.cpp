@@ -246,22 +246,28 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
     pSurf pillarBootXpYp = Box::boxPosDims(
         glm::dvec3(pillarXpYp, pillarBootSide/2.0), glm::dvec3(pillarBootSide));
 
-    roofSurf = roofSurf |
-        roofPillardXnYn | roofPillardXpYn | roofPillardXnYp | roofPillardXpYp |
-        pillarBootXnYn  | pillarBootXpYn  | pillarBootXnYp  | pillarBootXpYp;
-
-    pCoat roofCoat = coating::createClearCoat(0.2);
-    roofSurf->setInnerMaterial(material::TITANIUM);
-    roofSurf->setCoating(roofCoat);
-
     pProp roofProp(new Prop("Roof"));
     roofProp->addSurface(roofSurf);
+    roofProp->addSurface(roofPillardXnYn);
+    roofProp->addSurface(roofPillardXpYn);
+    roofProp->addSurface(roofPillardXnYp);
+    roofProp->addSurface(roofPillardXpYp);
+    roofProp->addSurface(pillarBootXnYn);
+    roofProp->addSurface(pillarBootXpYn);
+    roofProp->addSurface(pillarBootXnYp);
+    roofProp->addSurface(pillarBootXpYp);
     stageSet->addProp(roofProp);
+
+    pCoat roofCoat = coating::createClearCoat(0.2);
+    roofProp->setInnerMaterial(material::TITANIUM);
+    roofProp->setCoating(roofCoat);
+
 
 
     ////////////////////////
     // Ceiling decoration //
     ////////////////////////
+    /*
     double ceilThickness = 0.2;
     glm::dvec3 ceilCenter(boxMax.x/2.0, boxMin.y/2.0, boxMax.z - wallThickness.z - ceilThickness/2.0);
     glm::dvec3 ceilDims((boxMax.x - wallThickness.x)*0.8, (boxMax.y - wallThickness.y)*0.8, ceilThickness);
@@ -283,6 +289,7 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
     stageZone->addSubzone(ceilZone);
     ceilZone->setBounds( ceilBase );
     ceilZone->addProp(ceilProp);
+    */
 
 
     /////////////
@@ -794,7 +801,6 @@ void TheFruitChoreographer::setup(const std::shared_ptr<StageSet>& stageSet)
     flowerSurf = flowerSurf & Plane::plane(glm::dvec3(0, 0, -1), glm::dvec3(0, 0, 0.001));
     flowerSurf->setInnerMaterial(material::createInsulator(glm::dvec3(0.95, 0.60, 0.55), 1.2, 0.95, 1.0));
     flowerSurf->setCoating(coating::createClearCoat(1.0));
-
 
 
     pSurf pearlSurf = Sphere::sphere(glm::dvec3(0.0, 0.0, 0.9), 0.63);
